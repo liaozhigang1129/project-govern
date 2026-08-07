@@ -1,0 +1,74 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//PMO//S7 Review+Demo//ZH
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VTIMEZONE
+TZID:Asia/Shanghai
+BEGIN:STANDARD
+DTSTART:19700101T000000
+TZOFFSETFROM:+0800
+TZOFFSETTO:+0800
+TZNAME:CST
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:p3-s7-review-demo-20250815T140000@pmo.pms
+DTSTAMP:20250610T120000Z
+DTSTART;TZID=Asia/Shanghai:20250815T140000
+DTEND;TZID=Asia/Shanghai:20250815T160000
+SUMMARY:P3 W8 全量发布评审 (8 周收官) 🏆
+LOCATION:总部 8F 会议室 A
+DESCRIPTION:【P3 W8 全量发布评审】8 周项目收官会议 🏆\n
+  时间: 2025-08-15 (周五) 14:00-16:00 (2h)\n
+  地点: 总部 8F 会议室 A + 飞书直播\n
+  主持: @王磊 + @陈昊\n
+  \n
+  议程:\n
+  14:00 开场 (王磊)\n
+  14:05 8 周项目总结 W1~W8 (陈昊, 30min)\n
+  14:35 100% 全量 48h 监控 (周阳+孙琪, 30min)\n
+  15:05 业务指标对比 P2.5 vs P3 (陈昊+孙琪, 15min)\n
+  15:20 客户反馈 + NPS (陈昊, 15min)\n
+  15:35 8 周度量回顾 (孙琪, 10min)\n
+  15:45 P3+ 后续规划 (陈昊, 5min)\n
+  15:50 拍板 (王磊, 5min)\n
+  15:55 8 周收官庆祝 (全体, 5min)\n  \n
+  范围: 8 周总结 + 100% 全量 + 业务对比 + 客户反馈 + P3+\n
+  评审人: 5 人 (王磊/Sponsor/陈昊/张博/周阳)\n
+  特殊性: 🎉 8 周项目正式收官会议, 全员参与\n
+  \n
+  链接: [飞书直播 https://meeting.feishu.cn/xxxxxxx]
+ORGANIZER;CN=王磊 (PMO总监):mailto:wanglei@pmo.com
+ATTENDEE;CN=王磊;ROLE=CHAIR:mailto:wanglei@pmo.com
+ATTENDEE;CN=陈昊;ROLE=REQ-PARTICIPANT:mailto:chenhao@pmo.com
+ATTENDEE;CN=张博;ROLE=REQ-PARTICIPANT:mailto:zhangbo@pmo.com
+ATTENDEE;CN=李伟;ROLE=OPT-PARTICIPANT:mailto:liwei@pmo.com
+ATTENDEE;CN=赵敏;ROLE=OPT-PARTICIPANT:mailto:zhaomin@pmo.com
+ATTENDEE;CN=刘畅;ROLE=OPT-PARTICIPANT:mailto:liuchang@pmo.com
+ATTENDEE;CN=孙琪;ROLE=REQ-PARTICIPANT:mailto:sunqi@pmo.com
+ATTENDEE;CN=周阳;ROLE=REQ-PARTICIPANT:mailto:zhouyang@pmo.com
+ATTENDEE;CN=李雪;ROLE=OPT-PARTICIPANT:mailto:lixue@pmo.com
+CATEGORIES:PMO,P3,Sprint7,Review,8周收官,全量发布
+STATUS:CONFIRMED
+SEQUENCE:0
+PRIORITY:1
+TRANSP:OPAQUE
+CLASS:PUBLIC
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:明天 14:00 P3 W8 全量发布评审 (8 周收官) 🏆
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:2h 后 W8 评审, 准备 8 周总结 + 100% 全量数据
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT30M
+ACTION:DISPLAY
+DESCRIPTION:30min 后 W8 评审, 准备飞书直播 + 庆祝海报
+END:VALARM
+END:VEVENT
+END:VCALENDAR

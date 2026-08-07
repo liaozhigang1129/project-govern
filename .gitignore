@@ -1,0 +1,65 @@
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Maven / Java
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+hs_err_pid*
+replay_pid*
+
+# Spring Boot
+application-local.yml
+application-local.properties
+
+# H2 / DB dumps
+*.mv.db
+*.trace.db
+*.h2.db
+
+# Logs
+logs/
+*.log
+/tmp/pmo-run.log
+/tmp/pmo-*.log
+
+# Frontend (Vue)
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.local
+.env.local
+.env.*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS temp
+*.tmp
+*.bak
+*.swp
+
+# PMO·PMS additions
+项目经营台账/

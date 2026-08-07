@@ -1,0 +1,71 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//PMO//S6 Review+Demo//ZH
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VTIMEZONE
+TZID:Asia/Shanghai
+BEGIN:STANDARD
+DTSTART:19700101T000000
+TZOFFSETFROM:+0800
+TZOFFSETTO:+0800
+TZNAME:CST
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:p3-s6-review-demo-20250801T140000@pmo.pms
+DTSTAMP:20250610T120000Z
+DTSTART;TZID=Asia/Shanghai:20250801T140000
+DTEND;TZID=Asia/Shanghai:20250801T160000
+SUMMARY:P3 W7 兼容 + Bug Bash 评审
+LOCATION:总部 8F 会议室 A
+DESCRIPTION:【P3 W7 兼容 + Bug Bash 评审】\n
+  时间: 2025-08-01 (周五) 14:00-16:00 (2h)\n
+  地点: 总部 8F 会议室 A + 飞书直播\n
+  主持: @王磊 + @陈昊\n
+  \n
+  议程:\n
+  14:00 开场 (王磊)\n
+  14:05 5 浏览器兼容性结果 (赵敏+孙琪, 25min)\n
+  14:30 🐛 Bug Bash 现场 (全员, 30min)\n
+  15:00 Bug 统计 + 修复计划 (孙琪, 30min)\n
+  15:30 W8 全量发布方案 (陈昊+周阳, 20min)\n
+  15:50 兼容性矩阵 + 发布就绪 (孙琪)\n
+  15:55 拍板 (王磊)\n
+  \n
+  范围: 5 浏览器 + Bug Bash + 兼容性矩阵 + 发布就绪\n
+  评审人: 5 人 (王磊/陈昊/张博/赵敏/孙琪)\n
+  链接: [飞书直播 https://meeting.feishu.cn/xxxxxxx]
+ORGANIZER;CN=王磊 (PMO总监):mailto:wanglei@pmo.com
+ATTENDEE;CN=王磊;ROLE=CHAIR:mailto:wanglei@pmo.com
+ATTENDEE;CN=陈昊;ROLE=REQ-PARTICIPANT:mailto:chenhao@pmo.com
+ATTENDEE;CN=张博;ROLE=REQ-PARTICIPANT:mailto:zhangbo@pmo.com
+ATTENDEE;CN=李伟;ROLE=OPT-PARTICIPANT:mailto:liwei@pmo.com
+ATTENDEE;CN=赵敏;ROLE=REQ-PARTICIPANT:mailto:zhaomin@pmo.com
+ATTENDEE;CN=刘畅;ROLE=OPT-PARTICIPANT:mailto:liuchang@pmo.com
+ATTENDEE;CN=孙琪;ROLE=REQ-PARTICIPANT:mailto:sunqi@pmo.com
+ATTENDEE;CN=周阳;ROLE=OPT-PARTICIPANT:mailto:zhouyang@pmo.com
+ATTENDEE;CN=李雪;ROLE=OPT-PARTICIPANT:mailto:lixue@pmo.com
+CATEGORIES:PMO,P3,Sprint6,Review,兼容,BugBash
+STATUS:CONFIRMED
+SEQUENCE:0
+PRIORITY:1
+TRANSP:OPAQUE
+CLASS:PUBLIC
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:明天 14:00 P3 W7 评审 (2h, 含 Bug Bash), 准备
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:2h 后 W7 评审, 准备兼容性矩阵 + 5 浏览器录屏
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT30M
+ACTION:DISPLAY
+DESCRIPTION:30min 后 W7 评审, 准备飞书直播 + Bug Bash 工具
+END:VALARM
+END:VEVENT
+END:VCALENDAR

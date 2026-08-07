@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:flowable="http://flowable.org/bpmn"
+             id="pmo-definitions"
+             targetNamespace="http://pmo.company.com/bpmn">
+
+    <!-- =========================================================
+         P2 #7 立项审批流程
+         StartEvent → usertask1 (DEPT_LEAD) → gateway1
+                                              ├─ approve → usertask2 (PMO_ADMIN) → gateway2
+                                              │                              ├─ approve → usertask3 (EXEC) → EndApproved
+                                              │                              ├─ reject  → EndRejected
+                                              │                              └─ supplement → EndSupplement
+                                              ├─ reject  → EndRejected
+                                              └─ supplement → EndSupplement
+         ========================================================= -->
+
+    <process id="initiation-approval" name="立项审批流程" isExecutable="true">
+
+        <!-- 变量文档(给前端/调用方参考) -->
+        <documentation>
+            流程变量:
+              initiationId    : Long  - 立项主键
+              applicantId     : Long  - 申请人 user_id
+              departmentId    : Long  - 部门(用于 DEPT_LEAD 节点解析)
+              code            : String - 立项编号
+              title           : String - 标题
+              approved        : Boolean - 是否已通过(网关用)
+              decision        : String - APPROVED / REJECTED / SUPPLEMENT(任务本地变量)
+            UserTask 的 assignee 在运行时通过 taskService.setAssignee 注入。
+        </documentation>
+
+        <startEvent id="startEvent" name="立项提交"/>
+
+        <!-- 节点 1:部门负责人 -->
+        <userTask id="usertask_dept" name="部门负责人审批"
+                  flowable:assignee="${deptLeadAssignee}">
+            <documentation>部门负责人初审。可选 APPROVED/REJECTED/SUPPLEMENT。</documentation>
+        </userTask>
+
+        <exclusiveGateway id="gateway_dept" name="部门决定"/>
+
+        <!-- 节点 2:PMO 复核 -->
+        <userTask id="usertask_pmo" name="PMO 管理员复核"
+                  flowable:assignee="${pmoAdminAssignee}">
+            <documentation>PMO 治理视角复核。</documentation>
+        </userTask>
+
+        <exclusiveGateway id="gateway_pmo" name="PMO 决定"/>
+
+        <!-- 节点 3:分管副总 -->
+        <userTask id="usertask_exec" name="分管副总审批"
+                  flowable:assignee="${execAssignee}">
+            <documentation>最终审批。</documentation>
+        </userTask>
+
+        <exclusiveGateway id="gateway_exec" name="高管决定"/>
+
+        <!-- 终态 -->
+        <endEvent id="end_approved" name="已批准">
+            <documentation>三关全过,创建项目。</documentation>
+        </endEvent>
+        <endEvent id="end_rejected" name="已驳回"/>
+        <endEvent id="end_supplement" name="需补充材料"/>
+
+        <!-- 流转:Start → DEPT -->
+        <sequenceFlow id="flow_start_dept" sourceRef="startEvent" targetRef="usertask_dept"/>
+
+        <!-- 部门网关 3 出口 -->
+        <sequenceFlow id="flow_dept_pmo" name="APPROVED" sourceRef="gateway_dept" targetRef="usertask_pmo">
+            <conditionExpression xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                ${decision == 'APPROVED'}
+            </conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow id="flow_dept_reject" name="REJECTED" sourceRef="gateway_dept" targetRef="end_rejected">
+            <conditionExpression xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                ${decision == 'REJECTED'}
+            </conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow id="flow_dept_supplement" name="SUPPLEMENT" sourceRef="gateway_dept" targetRef="end_supplement">
+            <conditionExpression xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                ${decision == 'SUPPLEMENT'}
+            </conditionExpression>
+        </sequenceFlow>
+
+        <!-- DEPT → 网关 -->
+        <sequenceFlow id="flow_depttask_gateway" sourceRef="usertask_dept" targetRef="gateway_dept"/>
+
+        <!-- PMO 网关 3 出口 -->
+        <sequenceFlow id="flow_pmo_exec" name="APPROVED" sourceRef="gateway_pmo" targetRef="usertask_exec">
+            <conditionExpression xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                ${decision == 'APPROVED'}
+            </conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow id="flow_pmo_reject" name="REJECTED" sourceRef="gateway_pmo" targetRef="end_rejected">
+            <conditionExpression xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                ${decision == 'REJECTED'}
+            </conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow id="flow_pmo_supplement" name="SUPPLEMENT" sourceRef="gateway_pmo" targetRef="end_supplement">
+            <conditionExpression xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                ${decision == 'SUPPLEMENT'}
+            </conditionExpression>
+        </sequenceFlow>
+
+        <sequenceFlow id="flow_pmotask_gateway" sourceRef="usertask_pmo" targetRef="gateway_pmo"/>
+
+        <!-- 高管网关 2 出口(无 supplement,只能批或驳) -->
+        <sequenceFlow id="flow_exec_approved" name="APPROVED" sourceRef="gateway_exec" targetRef="end_approved">
+            <conditionExpression xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                ${decision == 'APPROVED'}
+            </conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow id="flow_exec_reject" name="REJECTED" sourceRef="gateway_exec" targetRef="end_rejected">
+            <conditionExpression xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                ${decision == 'REJECTED'}
+            </conditionExpression>
+        </sequenceFlow>
+
+        <sequenceFlow id="flow_exectask_gateway" sourceRef="usertask_exec" targetRef="gateway_exec"/>
+
+    </process>
+</definitions>

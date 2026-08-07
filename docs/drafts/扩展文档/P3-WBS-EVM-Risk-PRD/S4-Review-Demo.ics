@@ -1,0 +1,71 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//PMO//S4 Review+Demo//ZH
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VTIMEZONE
+TZID:Asia/Shanghai
+BEGIN:STANDARD
+DTSTART:19700101T000000
+TZOFFSETFROM:+0800
+TZOFFSETTO:+0800
+TZNAME:CST
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:p3-s4-review-demo-20250718T140000@pmo.pms
+DTSTAMP:20250610T120000Z
+DTSTART;TZID=Asia/Shanghai:20250718T140000
+DTEND;TZID=Asia/Shanghai:20250718T160000
+SUMMARY:P3 W5 压测 + 安全扫描评审
+LOCATION:总部 8F 会议室 A
+DESCRIPTION:【P3 W5 压测 + 安全扫描评审】\n
+  时间: 2025-07-18 (周五) 14:00-16:00 (2h)\n
+  地点: 总部 8F 会议室 A + 飞书直播\n
+  主持: @王磊 + @陈昊\n
+  \n
+  议程:\n
+  14:00 开场 (王磊)\n
+  14:05 13 端点 p95 性能基线 (周阳, 45min)\n
+  14:50 OWASP ZAP 安全扫描 (孙琪, 30min)\n
+  15:20 慢 SQL 优化 top 5 (李伟+刘畅, 30min)\n
+  15:50 W6 灰度方案 (周阳+王磊)\n
+  15:55 拍板 (王磊)\n
+  \n
+  范围: 13 端点 p95 + ZAP + 慢 SQL + 灰度方案\n
+  评审人: @王磊 + @陈昊 + @张博 + @周阳 + @孙琪 (10分制, 通过线 7.5)\n
+  \n
+  链接: [飞书直播 https://meeting.feishu.cn/xxxxxxx]
+ORGANIZER;CN=王磊 (PMO总监):mailto:wanglei@pmo.com
+ATTENDEE;CN=王磊;ROLE=CHAIR:mailto:wanglei@pmo.com
+ATTENDEE;CN=陈昊;ROLE=REQ-PARTICIPANT:mailto:chenhao@pmo.com
+ATTENDEE;CN=张博;ROLE=REQ-PARTICIPANT:mailto:zhangbo@pmo.com
+ATTENDEE;CN=李伟;ROLE=REQ-PARTICIPANT:mailto:liwei@pmo.com
+ATTENDEE;CN=赵敏;ROLE=OPT-PARTICIPANT:mailto:zhaomin@pmo.com
+ATTENDEE;CN=刘畅;ROLE=REQ-PARTICIPANT:mailto:liuchang@pmo.com
+ATTENDEE;CN=孙琪;ROLE=REQ-PARTICIPANT:mailto:sunqi@pmo.com
+ATTENDEE;CN=周阳;ROLE=REQ-PARTICIPANT:mailto:zhouyang@pmo.com
+ATTENDEE;CN=李雪;ROLE=OPT-PARTICIPANT:mailto:lixue@pmo.com
+CATEGORIES:PMO,P3,Sprint4,Review,压测,安全
+STATUS:CONFIRMED
+SEQUENCE:0
+PRIORITY:1
+TRANSP:OPAQUE
+CLASS:PUBLIC
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:明天 14:00 P3 W5 评审 (2h), 录屏准备
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:2h 后 W5 评审, 准备 13 端点 + ZAP + 慢 SQL 报告
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT30M
+ACTION:DISPLAY
+DESCRIPTION:30min 后 W5 评审, 准备飞书直播
+END:VALARM
+END:VEVENT
+END:VCALENDAR

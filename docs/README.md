@@ -1,0 +1,214 @@
+---
+status: active
+created: 2026-08-07
+updated: 2026-08-07
+summary: 文档目录规划、命名约定、上下文加载规则(STATUS/WBS 双轨版)
+---
+
+# docs/ — 文档目录
+
+本目录是 PMO·PMS 项目所有文档的统一入口。文档同时服务两类读者:**人**(评审、决策、回溯)和 **AI 编码代理**(实现时的上下文来源)。目录规划围绕一个原则:**单一事实来源,互相引用,不复制内容**。
+
+> 本项目在 Sift 文档规范基础上做了两项调整(见 ADR [003](decisions/003-docs-status-wbs-split.md)):
+> 1. 新增 [`STATUS.md`](STATUS.md) 作为全局项目计划执行情况的**单一事实来源**;
+> 2. [`WBS.md`](WBS.md) **只登记任务分解**,不再承载进度/风险/决策。
+
+---
+
+## 目录结构
+
+```
+docs/
+├── README.md          ← 本文档:目录规划与约定
+│
+├── PRD.md             ← 产品需求(版本迭代)
+├── DESIGN.md          ← 架构设计:系统结构与"为什么"(版本迭代)
+├── WBS.md             ← 工作分解:里程碑 → 工作包 → 任务(只列结构,版本迭代)
+├── STATUS.md          ← 全局状态:里程碑进度 / WIP / 风险 / 决策快照 / 门禁(版本迭代)
+├── CHANGELOG.md       ← 演进记录:版本间变更与修订沉淀(只追加)
+│
+├── decisions/         ← ADR 架构决策记录(只追加不修改)
+├── specs/             ← 模块规格与接口契约(随代码同步)
+├── plans/             ← 实现计划(一次性写入,完成后标记状态)
+├── testing/           ← 测试策略与测试方案(随代码同步)
+├── analysis/          ← 分析过程:选型、对比、根因分析(一次性写入,只读)
+├── drafts/            ← 各阶段初稿,评审融合后归档(只读)
+├── reviews/           ← 评审过程存档(只读)
+├── guides/            ← 用户文档(随功能迭代)
+├── runbooks/          ← 运维手册:部署、告警处置、故障排查(按需补充)
+└── dev/               ← 开发者文档:环境搭建、调试、贡献指南(按需补充)
+```
+
+---
+
+## 顶层文档职责
+
+| 文档 | 写什么 | 不写什么 | 更新频率 |
+|------|--------|----------|----------|
+| `PRD.md` | 需求、场景、状态模型、成功标准 | 实现细节、历史版本对照 | 版本迭代 |
+| `DESIGN.md` | 系统结构、关键机制的**设计理由**(为什么这么架构) | 接口字段级契约(下沉到 `specs/`)、模块内部实现 | 版本迭代 |
+| `WBS.md` | 里程碑、工作包、任务分解、验收标准 | 进度/状态/风险(去 STATUS.md);执行步骤(去 `plans/`) | 版本迭代 |
+| `STATUS.md` | 当前快照:里程碑进度、WIP、风险、决策指针、门禁、基线盘点 | 任务结构(去 WBS.md);版本历史(去 CHANGELOG.md) | **每次里程碑/门禁评审后更新一次** |
+| `CHANGELOG.md` | 版本间变更摘要;PRD/DESIGN 正文中剥离的修订历史 | 当前结论(留在正文) | **只追加** |
+
+**STATUS ↔ WBS ↔ CHANGELOG 边界仲裁**:
+- **STATUS** = 内存快照(回答"现在到哪了")
+- **WBS** = 任务结构图(回答"任务怎么拆")
+- **CHANGELOG** = 历史日志(回答"过去发生了什么")
+- 三者**互不重复**,通过超链接引用。
+
+**DESIGN 与 specs 的边界仲裁规则**:DESIGN 只讲结构与理由;凡是"实现代码时要对照的字段、接口、行为契约"一律写在 `specs/`,DESIGN 中用链接引用,不重复叙述。
+
+---
+
+## 各目录定位
+
+### 子目录
+
+| 目录 | 更新方式 | 说明 |
+|------|---------|------|
+| `decisions/` | **只追加** | 每条 ADR 一个文件。记录"决定了什么 + 为什么 + 放弃了什么"。一旦提交不修改;决策被推翻时追加新 ADR 并在旧文件头部加一行指向它 |
+| `specs/` | **随代码同步** | 模块规格 / 接口契约,是代码与测试的共同依据。规格变了代码必须跟上,反之亦然 |
+| `plans/` | **一次性写入** | 单个功能的实现计划。完成后标记 `done`;废弃标记 `abandoned` 并注明原因,不删除 |
+| `testing/` | **随代码同步** | `strategy.md` 写测试金字塔、覆盖目标、门禁标准;每个特性/模块一个测试方案文件,从对应 spec 派生(spec 是测试的判定基准) |
+| `analysis/` | **只读存档** | 技术选型、方案对比、可行性分析、根因分析等。分析过程本身是产出,做完即存档,不修改。与 `decisions/` 互补——`analysis/` 写"怎么比出来的",`decisions/` 写"定的是什么",ADR 中链接引用分析文档 |
+| `drafts/` | **只读存档** | 各阶段初稿。评审融合成正式文档后,在头部加一行 `superseded` 指针并保留原文,不删除、不回填修订 |
+| `reviews/` | **只读存档** | 评审过程存档,一份评审一个文件。存档即终态,后续处置写在被评审文档的处置对账节里,不改评审原文 |
+| `guides/` | **随功能迭代** | 面向用户的文档 |
+| `runbooks/` | **按需补充** | 面向运维的处置手册:部署、告警、故障排查。每条 runbook 针对一个具体症状 |
+| `dev/` | **按需补充** | 面向开发者的环境搭建、调试技巧、贡献流程 |
+
+### plans 与 decisions 的衔接
+
+计划废弃若涉及**方向性变化**(换技术路线、砍掉需求、改变契约),必须在 `decisions/` 追加对应 ADR;plan 里的废弃原因只做简述并链接到 ADR。纯执行层面的放弃(排期调整、拆分合并)只需在 plan 里注明。
+
+---
+
+## 约定
+
+### 文件头(所有子目录文档必填)
+
+```markdown
+---
+status: draft | active | done | abandoned | superseded
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+summary: 一句话说明本文档回答什么问题(30 字以内)
+---
+```
+
+- `status` 取值全集:`draft | active | done | abandoned | superseded`,机器可读,AI 代理据此判断文档可信度。
+- `summary` 供代理做渐进披露:先读文件头判断相关性,再决定是否加载全文。
+- `decisions/` 的 ADR 被新 ADR 取代时,旧文件改 `status: superseded` 并在正文头部加一行 `> 已被 [NNN-xxx.md](NNN-xxx.md) 取代`。
+- `reviews/` 存档不需要 status(存档即终态)。
+- **WBS.md 的工作包上不写 status 字段**(见 ADR [003](decisions/003-docs-status-wbs-split.md));工作包状态以"已盘点/未启动"等结构性标记出现,细粒度状态进 STATUS.md。
+
+### 命名
+
+- `decisions/`:`NNN-短横线标题.md`(`001-spring-boot-vue-baseline.md`),编号即排序。
+- `plans/`:`YYYY-MM-DD-短横线标题.md`,日期即排序。
+- `analysis/`:`YYYY-MM-DD-主题.md`,日期 + 主题(如 `2026-07-27-design-proposals-comparison.md`)。
+- `drafts/`:`YYYY-MM-DD-主题-作者.md`,日期 + 作者标识。
+- `reviews/`:`YYYY-MM-DD-主题-作者.md`,日期 + 作者标识。多人同日对同一主题出 review 时用作者标识自然区分,无需序号抢占。
+
+  **作者标识规则**:
+  - **人类作者**用个人代号(如 `hex`)。
+  - **AI 代理**用 `代理名-模型名` 格式,如 `pi-k3`(pi × Kimi K3)、`pi-gpt-5.6`(pi × GPT-5.6)、`cursor-opus5`(Cursor × Opus 5)、`codex-gpt5` 等。
+  - 示例:`2026-07-27-design-hex.md`、`2026-07-27-prd-review-pi-k3.md`、`2026-07-28-design-review-codex-gpt5.md`。
+- `specs/`、`testing/`:`模块名.md` 或 `模块名-主题.md`,与代码模块同名,便于对照。
+
+### 内容纪律
+
+- **所有文档随仓库 git 追踪**。过程产物的历史价值覆盖体积成本。
+- **正文不混 changelog**。版本间变更在 commit 与 `CHANGELOG.md` 中追溯;正文只保留当前结论。
+- **`CHANGELOG.md` 的「只追加」允许修正事实性错误**(如条目里写错的版本号、失效的链接),但**不得改写已发布条目的结论**——那属于伪造记录。改结论的做法是追加新条目并注明它推翻了哪一条。
+- **STATUS.md 与 WBS.md 不重复内容**:WBS 描述"任务是什么",STATUS 描述"任务现在到哪了";同一信息只写一次,另一处用链接引用。
+- **引用不复制**。同一份事实只写一次,其余地方用相对链接引用。AI 代理对矛盾上下文的容错很差,重复内容必然漂移。
+- **规格即测试基准**。`testing/` 中的每个测试方案注明派生自哪个 spec 文件;spec 更新时同步检查对应测试方案。
+
+### 与 AI 代理的接口
+
+- 仓库根目录的 [`AGENTS.md`](../AGENTS.md) 指向本文件,作为代理的文档导航入口。AGENTS.md 只放指针与规则,不放大段内容;项目状态/进度均在 STATUS.md。
+- 文档路径一经被引用(代码注释、AGENTS.md、其他文档)即为稳定路径,改名必须全局更新引用。
+- 单文件聚焦单一主题;超过约 1200 行考虑按子主题拆分,用索引文件串起来。**1200 行是提醒线,不是硬上限**:从早期约 300 行上调,是因为 PRD / DESIGN 需要保留完整因果链,过早拆分反而制造跨文件漂移;即使未到提醒线,只要子主题已能独立演进或默认上下文装不下,也应拆分。
+
+### 归档策略:不设 archive/ 目录
+
+"已完成/已废弃"是元数据状态,不是物理位置。过程性文档(plans、reviews、被取代的 ADR)**原地保留**,靠 `status` 字段与默认上下文过滤实现归档语义。物理移动会破坏存量引用、制造第二个查找位置,且 git 历史本身已是归档。
+
+---
+
+## 上下文预算(代理加载规则)
+
+- **默认上下文集**:仅 `status: active | draft` 的文档。`done / abandoned / superseded`、`reviews/`、`CHANGELOG.md` 默认不加载,仅回溯类任务显式读取。
+- **分层路由**:`AGENTS.md` 只放指针与规则,不放内容;任何场景不全量加载 `docs/`。
+- **按任务类型的默认上下文集**:
+
+  | 任务类型 | 加载 |
+  |---------|------|
+  | 实现功能 X | `specs/X` + 相关 ADR + 当前 plan |
+  | 写/改测试 | 对应 spec + `testing/strategy.md` + 对应测试方案 |
+  | 评审/设计讨论 | PRD、DESIGN 相关章节 |
+  | 里程碑/门禁评审 | `STATUS.md`(必读)+ WBS/PRD/DESIGN 相关章节 |
+  | 立项/范围调整 | `STATUS.md` 风险与决策节 + `decisions/` 全集 |
+  | 回溯、复盘 | `reviews/`、`CHANGELOG.md`、历史 ADR |
+
+---
+
+## 当前文档清单(基线盘点)
+
+> 完整盘点见 [`STATUS.md` §7](STATUS.md)。此处仅列活文档(active / draft)。
+
+### 顶层(5)
+
+- `README.md`(本文件)、`PRD.md`、 `DESIGN.md`、 `WBS.md`、 `STATUS.md`、 `CHANGELOG.md`
+
+### decisions/(3)
+
+- `001-spring-boot-vue-baseline.md`(accepted)
+- `002-mysql-pg-dual-track.md`(accepted)
+- `003-docs-status-wbs-split.md`(accepted)
+
+### specs/(待补充)
+
+- `openapi/openapi.json` — OpenAPI 3.0 契约存档(33 paths / 37 schemas / 10 tags)
+- `legacy/pmo-pms-proposal.md`(active)— v4.0.0 立项提案
+- `legacy/pmo-pms-mvp-design.md`(active)— v4.0.0 MVP 技术设计
+- `legacy/pmo-pms-cost-engine.md`(active)— 成本引擎设计
+- `legacy/PRD-cost-control.md`(active)— 成本控制 PRD
+
+### drafts/(历史沉淀)
+
+- `扩展文档/` — 老 `pmo-pms-requirements/` 31 个子目录归档(状态:`superseded`)
+- `扩展文档/A1-数据字典/`、`A2-API规范/`、`A3-UI原型/`、`A4-数据迁移/`、`A5-上线计划/`、`A6-培训赋能/` — 扩展文档
+- `seeds/` — 种子数据 SQL
+- `archive/workflows/` — 历史 workflow 文件
+- `CHANGELOG-legacy-v1-v4.md`、`RELEASE-NOTES-legacy-v4.0.0.md` — 老仓库 changelog
+
+### reviews/(5)
+
+- `2026-06-06-p1.5-d-auditlog-fe-summary-pmo-hex.md`
+- `2026-06-06-p1.5-d-doc-update-pmo-hex.md`
+- `2026-06-06-p1.5-d-e-eval-pmo-hex.md`
+- `2026-06-09-p2-b-workload-views-fix-pmo-hex.md`
+- `2026-06-09-p2-c-gantt-axis-fix-pmo-hex.md`
+
+### runbooks/(1)
+
+- `A5-上线计划/` — 灰度方案、RACI、变更沟通、应急、演练(共 3 份)
+
+### testing/(1)
+
+- `postman/` — Postman 集合(29 请求)+ Shell smoke(16 端点)
+
+### analysis/(1)
+
+- `commit-splits/` — 14-commit 拆分计划
+
+### plans/(空)
+
+> 实现计划按需新增。占位:WBS 工作包下新增计划时,在对应工作包的 `Plan` 字段填计划文件名。
+
+### guides/(空)、dev/(空)、specs/(模块规格占位)
+
+> 按需补充。

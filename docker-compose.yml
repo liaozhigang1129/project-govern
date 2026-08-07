@@ -1,0 +1,107 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: pmo-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_dev_2025
+      MYSQL_DATABASE: pmo_pms
+      MYSQL_USER: pmo_pms
+      MYSQL_PASSWORD: pmo_pms_dev_2025
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+08:00
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD","mysqladmin","ping","-h","localhost","-uroot","-proot_dev_2025"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks: [pmo-net]
+
+  backend:
+    build:
+      context: .
+      dockerfile: deploy/docker/backend/Dockerfile
+    image: pmo-pms-backend:latest
+    container_name: pmo-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: mysql
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/pmo_pms?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8
+      SPRING_DATASOURCE_USERNAME: pmo_pms
+      SPRING_DATASOURCE_PASSWORD: pmo_pms_dev_2025
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_FLYWAY_ENABLED: "true"
+      PMO_CORS_ALLOWED_ORIGINS: "http://localhost,http://localhost:8080,http://localhost:5173"
+      # Mail: dev 用 mailpit (auth-off,见下方容器);生产改 SPRING_MAIL_HOST/PMO_MAIL_ENABLED=true
+      SPRING_MAIL_HOST: mailpit
+      SPRING_MAIL_PORT: "1025"
+      # V_4_22: jar 内 server.port 默认 ${SERVER_PORT:8089}, 显式对齐 compose 端口映射 8088:8088
+      SERVER_PORT: "8088"
+      PMO_MAIL_ENABLED: "true"
+      PMO_MAIL_DEPT_LEAD: lead_wu@company.com
+      PMO_MAIL_PMO_ADMIN: admin@company.com
+      PMO_MAIL_EXEC: vp_chen@company.com
+      # V4.20: AI WBS Prompt 引擎 — 通义千问 OpenAI-compatible (与 LLM_QWEN_API_KEY 共用)
+      PMO_AI_PROMPT_BASE_URL: ${PMO_AI_PROMPT_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
+      PMO_AI_PROMPT_MODEL: ${PMO_AI_PROMPT_MODEL:-qwen-plus}
+      PMO_AI_PROMPT_API_KEY: ${LLM_QWEN_API_KEY:-}
+      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx1024m"
+      TZ: Asia/Shanghai
+    ports:
+      - "8088:8088"
+    healthcheck:
+      test: ["CMD","wget","--quiet","--tries=1","--spider","http://localhost:8088/api/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 60s
+    volumes:
+      - backend_uploads:/app/uploads
+    networks: [pmo-net]
+
+  frontend:
+    build:
+      context: .
+      dockerfile: deploy/docker/frontend/Dockerfile
+    image: pmo-pms-frontend:latest
+    container_name: pmo-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    networks: [pmo-net]
+
+  # Dev SMTP catch-all;Web UI 看邮件 http://localhost:8025
+  # 用 mailpit(axllent)替换 mailhog,支持 ARM64 镜像 + auth-off 默认
+  mailpit:
+    image: axllent/mailpit:latest
+    command: ["--smtp","0.0.0.0:1025","--listen","0.0.0.0:8025"]
+    container_name: pmo-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+    networks: [pmo-net]
+
+volumes:
+  mysql_data:
+  backend_uploads:
+
+networks:
+  pmo-net:
+    driver: bridge

@@ -1,0 +1,172 @@
+spring:
+  application:
+    name: pmo-pms-backend
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/pmo_pms
+    username: pmo_pms
+    password: pmo_pms_dev_2025
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          time_zone: Asia/Shanghai
+  flyway:
+    enabled: true
+    locations: classpath:db/migration-pg
+    baseline-on-migrate: true
+    # V3.0 修复模式:启动时自动同步 checksum(仅 dev,prod 切 false)
+    repair-on-migrate: true
+    # V4.17 关闭 validate 防止本地源码 vs DB checksum 不一致(只 dev 用,prod 切 false)
+    validate-on-migrate: false
+  # Mail: dev 默认 mailpit/mailhog (compose 容器内 smtp:1025,auth-off),生产用 env 覆盖
+  mail:
+    host: ${SPRING_MAIL_HOST:localhost}
+    port: ${SPRING_MAIL_PORT:1025}
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+server:
+  port: 8088
+  servlet:
+    context-path: /api
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+  json:
+    encoding:
+      charset: UTF-8
+  # 中文乱码修复: HTTP 响应强制 UTF-8 + Jackson 串行化
+
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-strings-as-utf8: true
+      charset: UTF-8
+
+pmo:
+  security:
+    jwt:
+      secret: pmo-pms-dev-secret-please-change-in-production-2025-min-32-bytes
+      # 2h access + 30d refresh 双 token 模式(P1.5-c)
+      access-expiration-hours: ${PMO_JWT_ACCESS_HOURS:2}
+      refresh-expiration-days: ${PMO_JWT_REFRESH_DAYS:30}
+  cors:
+    allowed-origins: http://localhost:5173,http://localhost:3000
+  mail:
+    enabled: ${PMO_MAIL_ENABLED:false}    # 默认关闭(避免无 SMTP 时启动失败)
+    from: ${PMO_MAIL_FROM:PMO PMS <noreply@pmo.local>}
+    cc-pmo: true
+    async: true
+    approve-step-emails:
+      DEPT_LEAD: ${PMO_MAIL_DEPT_LEAD:lead_wu@company.com}
+      PMO_ADMIN: ${PMO_MAIL_PMO_ADMIN:admin@company.com}
+      EXEC: ${PMO_MAIL_EXEC:vp_chen@company.com}
+  # V4.20: AI WBS Prompt 引擎 (LLM via 通义千问 OpenAI-compatible)
+  #  - base-url/model 走 env 覆盖(生产可换成 DeepSeek / Claude / 本地 Ollama)
+  #  - api-key 留空 = 禁用 prompt 引擎,只走规则引擎
+  ai:
+    prompt:
+      base-url: ${PMO_AI_PROMPT_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
+      model: ${PMO_AI_PROMPT_MODEL:qwen-plus}
+      api-key: ${PMO_AI_PROMPT_API_KEY:}
+      timeout-seconds: 60
+      temperature: 0.2
+
+  # P2-A IM 通知: 三平台 IM 通道(企业微信/钉钉/飞书)
+  # 默认全部关闭 → 零侵入。生产通过环境变量打开。
+  im:
+    enabled: ${PMO_IM_ENABLED:false}        # 总开关(打开后仍需 channels 单独开)
+    channels:                              # 通道独立开关(覆盖总开关)
+      wechat_work: ${PMO_IM_WECHAT_WORK:false}
+      dingtalk: ${PMO_IM_DINGTALK:false}
+      feishu: ${PMO_IM_FEISHU:false}
+    wechat-work:                           # 企业微信自建应用
+      corp-id: ${PMO_WECOM_CORP_ID:}
+      agent-id: ${PMO_WECOM_AGENT_ID:}
+      app-secret: ${PMO_WECOM_APP_SECRET:}
+      # 可覆盖 API 端点(默认 qyapi.weixin.qq.com;测试用 mock 时改 PMO_WECOM_GETTOKEN_URL / PMO_WECOM_SEND_URL)
+      gettoken-url: ${PMO_WECOM_GETTOKEN_URL:https://qyapi.weixin.qq.com/cgi-bin/gettoken}
+      send-url: ${PMO_WECOM_SEND_URL:https://qyapi.weixin.qq.com/cgi-bin/message/send}
+    dingtalk:                              # 钉钉群机器人(加签)
+      webhook-url: ${PMO_DINGTALK_WEBHOOK:}
+      secret: ${PMO_DINGTALK_SECRET:}
+    feishu:                                # 飞书群机器人(加签)
+      webhook-url: ${PMO_FEISHU_WEBHOOK:}
+      secret: ${PMO_FEISHU_SECRET:}
+    routing:                               # 路由策略
+      default-route: [email]               # 无 IM 绑定的用户走哪些通道
+      bound-user-route: [email, im]        # 有 IM 绑定的用户走哪些通道
+  # V2.13 钉钉通讯录同步任务
+  dingtalk:
+    sync-job-enabled: ${PMO_DINGTALK_SYNC_JOB:true}    # 每天 02:00 跑全公司
+    sync-cron: ${PMO_DINGTALK_SYNC_CRON:0 0 2 * * *}
+    # V4.30 钉钉考勤同步任务
+    attendance-job-enabled: ${PMO_DINGTALK_ATTENDANCE_JOB:true}
+    attendance-cron: ${PMO_DINGTALK_ATTENDANCE_CRON:0 0 3 ? * SUN}   # 每周日 03:00
+
+  # P5-LLM 润色: 异步调 LLM 把规则引擎的 suggestions 润色成自然语言 (默认关闭 → 零侵入)
+  llm:
+    enabled: ${PMO_LLM_ENABLED:false}     # 总开关 (生产通过环境变量打开)
+    provider: ${PMO_LLM_PROVIDER:DEEPSEEK} # DEEPSEEK / OPENAI / CLAUDE
+    timeout-seconds: 8                     # 单次请求超时 (规则引擎不能被 LLM 拖垮)
+    max-suggestions: 4                     # 取 Top-N 信号 (避免 prompt 过长)
+    deepseek:
+      base-url: ${PMO_DEEPSEEK_BASE_URL:https://api.deepseek.com/v1}
+      api-key: ${PMO_DEEPSEEK_API_KEY:}
+      model: ${PMO_DEEPSEEK_MODEL:deepseek-chat}
+    openai:
+      base-url: ${PMO_OPENAI_BASE_URL:https://api.openai.com/v1}
+      api-key: ${PMO_OPENAI_API_KEY:}
+      model: ${PMO_OPENAI_MODEL:gpt-4o-mini}
+    claude:
+      base-url: ${PMO_CLAUDE_BASE_URL:https://api.anthropic.com}
+      api-key: ${PMO_CLAUDE_API_KEY:}
+      model: ${PMO_CLAUDE_MODEL:claude-3-5-sonnet-20241022}
+  # P5-ML 推理: 用训练好的 LightGBM 模型预测风险严重度 (默认关闭)
+  ml:
+    enabled: ${PMO_ML_ENABLED:false}
+    model-path: ${PMO_ML_MODEL_PATH:./models/milestone_lgbm_v1.pkl}
+
+logging:
+  level:
+    root: INFO
+    com.company.pmo: DEBUG
+    org.hibernate.SQL: TRACE
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.hibernate.resource.jdbc: DEBUG
+    org.flowable: INFO
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+# V4.20: AI WBS Prompt 引擎 (LLM via 通义千问 OpenAI-compatible)
+#  - base-url/model 走 env 覆盖(生产可换成 DeepSeek / Claude / 本地 Ollama)
+#  - api-key 留空 = 禁用 prompt 引擎,只走规则引擎
+#  注: 并入顶层 pmo.ai.prompt 节点(不新建顶层 pmo:,避免 YAML duplicate key)
+
+# P2 #7 Flowable 引擎:关闭自动部署(由 FlowableConfig.java 显式部署,便于版本管理)
+flowable:
+  async-executor-activate: true     # 异步执行器(任务监听器、定时器需要)
+  database-schema-update: true      # 自动建表(act_*) — 与 Flyway 共存
+  deployment-mode: default
+  app:
+    deployment-enabled: false       # 关掉 resources/**/bpmn*.xml 自动扫描

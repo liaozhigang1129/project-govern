@@ -1,0 +1,6 @@
+backend/src/main/java/com/company/pmo/module/cost/
+backend/src/test/java/com/company/pmo/module/cost/
+backend/src/main/resources/db/migration-pg/V4.0__hourly_rate.sql
+backend/src/main/resources/db/migration-pg/V4.1__cost_views.sql
+docs/PRD-cost-control.md
+docs/pmo-pms-cost-engine.md

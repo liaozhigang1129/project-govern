@@ -1,0 +1,103 @@
+# 🏷️ GitHub Release workflow
+#
+# 触发: 推送 v*.*.* tag 时自动创建 GitHub Release
+# 内容: 复用 RELEASE-NOTES-v*.md + 自动加 commits + artifact
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g. v4.0.0)'
+        required: true
+
+permissions:
+  contents: write   # 需要创建 release
+
+jobs:
+  release:
+    name: 🚀 Create GitHub Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 Determine tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+          else
+            TAG="${{ inputs.tag }}"
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "🏷️  Releasing $TAG"
+
+      - name: 📝 Locate release notes file
+        id: notes
+        run: |
+          NOTES_FILE="RELEASE-NOTES-${TAG}.md"
+          if [ ! -f "$NOTES_FILE" ]; then
+            # fallback: 通用 CHANGELOG 段落
+            NOTES_FILE="CHANGELOG.md"
+            echo "⚠️ $NOTES_FILE not found, using CHANGELOG.md"
+          fi
+          echo "file=$NOTES_FILE" >> $GITHUB_OUTPUT
+
+      - name: 📊 Collect commits since previous tag
+        id: commits
+        run: |
+          # 找到上一个 tag
+          PREV_TAG=$(git tag --sort=-version:refname | grep -v "^${TAG}$" | head -1 || true)
+          if [ -n "$PREV_TAG" ]; then
+            RANGE="${PREV_TAG}..${TAG}"
+            echo "Range: $RANGE"
+            git log "$RANGE" --pretty=format:"- %s (%h)" --no-merges > commits.txt
+          else
+            echo "No previous tag, using first 50 commits"
+            git log --pretty=format:"- %s (%h)" --no-merges | head -50 > commits.txt
+          fi
+          echo "✅ $(wc -l < commits.txt) commits collected"
+
+      - name: 🚀 Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: ${{ steps.tag.outputs.tag }}
+          body: |
+            ${{ steps.notes.outputs.file }}
+            
+            ---
+            
+            ## 📦 Commits in this release
+            
+            ```
+            $(cat commits.txt)
+            ```
+            
+            ---
+            
+            **Full Changelog**: https://github.com/${{ github.repository }}/blob/${{ steps.tag.outputs.tag }}/CHANGELOG.md
+          draft: false
+          prerelease: ${{ contains(steps.tag.outputs.tag, '-') }}
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: ⬆️ Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.tag.outputs.tag }}-backend
+          path: |
+            backend/target/*.jar
+            CHANGELOG.md
+            ${{ steps.notes.outputs.file }}
+          retention-days: 90
+          if-no-files-found: ignore

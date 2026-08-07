@@ -1,0 +1,11 @@
+# Default owners for everything
+* @lzg
+
+# Frontend
+/frontend/ @lzg
+
+# Backend
+/backend/ @lzg
+
+# Deploy
+/deploy/ @lzg

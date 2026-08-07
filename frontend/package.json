@@ -1,0 +1,38 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview",
+    "e2e": "node ../scripts/e2e/run-all.mjs",
+    "e2e:auth": "node ../scripts/e2e/auth.test.mjs",
+    "e2e:pages": "node ../scripts/e2e/pages.test.mjs",
+    "e2e:dashboard": "node ../scripts/e2e/dashboard.test.mjs",
+    "e2e:cypress": "cypress run",
+    "cypress:open": "cypress open"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
+    "axios": "^1.17.0",
+    "echarts": "^6.1.0",
+    "element-plus": "^2.14.1",
+    "pinia": "^3.0.4",
+    "vue": "^3.5.34",
+    "vue-echarts": "^8.0.1",
+    "vue-router": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.12.3",
+    "@vitejs/plugin-vue": "^6.0.6",
+    "@vue/tsconfig": "^0.9.1",
+    "sass-embedded": "^1.100.0",
+    "typescript": "~6.0.2",
+    "unplugin-auto-import": "^21.0.0",
+    "unplugin-vue-components": "^32.1.0",
+    "vite": "^8.0.12",
+    "vue-tsc": "^3.2.8"
+  }
+}

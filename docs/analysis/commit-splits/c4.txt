@@ -1,0 +1,3 @@
+backend/src/main/java/com/company/pmo/module/alert/AlertEventRepository.java
+backend/src/main/java/com/company/pmo/module/alert/AlertRuleRepository.java
+backend/src/main/resources/db/migration-pg/V4.3__alert.sql

@@ -1,0 +1,71 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//PMO//S1 Review+Demo//ZH
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VTIMEZONE
+TZID:Asia/Shanghai
+BEGIN:STANDARD
+DTSTART:19700101T000000
+TZOFFSETFROM:+0800
+TZOFFSETTO:+0800
+TZNAME:CST
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:p3-s1-review-demo-20250627T160000@pmo.pms
+DTSTAMP:20250610T120000Z
+DTSTART;TZID=Asia/Shanghai:20250627T160000
+DTEND;TZID=Asia/Shanghai:20250627T170000
+SUMMARY:P3 Sprint 1 评审 + W2 Demo
+LOCATION:总部 8F 会议室 A
+DESCRIPTION:【P3 Sprint 1 评审 + W2 Demo】\n
+  时间: 2025-06-27 (周五) 16:00-17:00 (1h)\n
+  地点: 总部 8F 会议室 A + 飞书直播\n
+  主持: @陈昊 (PM)\n
+  \n
+  议程:\n
+  16:00 开场 (陈昊)\n
+  16:05 7端点 Demo (李伟)\n
+  16:25 W2 准出 7 项核查 (孙琪)\n
+  16:40 3 评审人打分 (陈昊+张博+孙琪)\n
+  16:50 S2 任务预览 (陈昊)\n
+  16:55 拍板+收尾 (王磊)\n
+  \n
+  演示范围: WbsTask 7 端点 + 4 辅助 + 5 错误码\n
+  评审人: @陈昊 + @张博 + @孙琪 (10 分制, 通过线 8.0)\n
+  \n
+  链接: [飞书直播 https://meeting.feishu.cn/xxxxxxx]
+ORGANIZER;CN=陈昊 (PM):mailto:chenhao@pmo.com
+ATTENDEE;CN=王磊;ROLE=CHAIR:mailto:wanglei@pmo.com
+ATTENDEE;CN=陈昊;ROLE=REQ-PARTICIPANT:mailto:chenhao@pmo.com
+ATTENDEE;CN=张博;ROLE=REQ-PARTICIPANT:mailto:zhangbo@pmo.com
+ATTENDEE;CN=李伟;ROLE=REQ-PARTICIPANT:mailto:liwei@pmo.com
+ATTENDEE;CN=赵敏;ROLE=OPT-PARTICIPANT:mailto:zhaomin@pmo.com
+ATTENDEE;CN=刘畅;ROLE=OPT-PARTICIPANT:mailto:liuchang@pmo.com
+ATTENDEE;CN=孙琪;ROLE=REQ-PARTICIPANT:mailto:sunqi@pmo.com
+ATTENDEE;CN=周阳;ROLE=OPT-PARTICIPANT:mailto:zhouyang@pmo.com
+ATTENDEE;CN=李雪;ROLE=OPT-PARTICIPANT:mailto:lixue@pmo.com
+CATEGORIES:PMO,P3,Sprint1,Review,Demo
+STATUS:CONFIRMED
+SEQUENCE:0
+PRIORITY:1
+TRANSP:OPAQUE
+CLASS:PUBLIC
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:明天 16:00 P3 W2 demo + 评审, 录屏准备
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:2h 后 W2 demo, 调试 Postman/Curl
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT30M
+ACTION:DISPLAY
+DESCRIPTION:30min 后 W2 demo, 准备飞书直播
+END:VALARM
+END:VEVENT
+END:VCALENDAR

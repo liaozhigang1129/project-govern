@@ -1,0 +1,4 @@
+backend/src/main/java/com/company/pmo/module/risk/
+backend/src/test/java/com/company/pmo/module/risk/
+backend/src/main/resources/db/migration-pg/V2.6__risk.sql
+backend/src/main/resources/db/migration-pg/V2.7__risk_history_deleted_action.sql

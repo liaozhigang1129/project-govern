@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key><string>com.pmo.ai.train-weekly</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>cd /Users/lzg/Documents/pmo-pms &amp;&amp; /opt/homebrew/opt/python@3.12/bin/python3.12 scripts/ml/milestone_lgbm.py train --output models/milestone_lgbm_latest.pkl &gt;&gt; logs/train_weekly.log 2&gt;&amp;1; cp models/milestone_lgbm_real.pkl models/milestone_lgbm_prev.pkl; /opt/homebrew/opt/python@3.12/bin/python3.12 scripts/ml/monitor_model.py --new-model models/milestone_lgbm_latest.pkl --prev-model models/milestone_lgbm_prev.pkl --drop-threshold 0.05 &gt;&gt; logs/monitor.log 2&gt;&amp;1</string>
+    </array>
+    <key>WorkingDirectory</key><string>/Users/lzg/Documents/pmo-pms</string>
+    <key>StartCalendarInterval</key>
+    <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>3</integer><key>Minute</key><integer>0</integer></dict>
+    <key>StandardOutPath</key><string>/Users/lzg/Documents/pmo-pms/logs/train_weekly.log</string>
+    <key>StandardErrorPath</key><string>/Users/lzg/Documents/pmo-pms/logs/train_weekly.err</string>
+</dict>
+</plist>

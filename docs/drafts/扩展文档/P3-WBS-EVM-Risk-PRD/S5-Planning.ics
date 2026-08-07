@@ -1,0 +1,69 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//PMO//S5 Planning//ZH
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VTIMEZONE
+TZID:Asia/Shanghai
+BEGIN:STANDARD
+DTSTART:19700101T000000
+TZOFFSETFROM:+0800
+TZOFFSETTO:+0800
+TZNAME:CST
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:p3-s5-planning-20250721T100000@pmo.pms
+DTSTAMP:20250610T120000Z
+DTSTART;TZID=Asia/Shanghai:20250721T100000
+DTEND;TZID=Asia/Shanghai:20250721T103000
+SUMMARY:P3 Sprint 5 启动会 (W6 灰度 Planning)
+LOCATION:总部 8F 会议室 A
+DESCRIPTION:【P3 Sprint 5 启动会】W6 灰度周\n
+  时间: 2025-07-21 (周一) 10:00-10:30 (30min)\n
+  地点: 总部 8F 会议室 A\n
+  主持: @陈昊\n
+  \n
+  议程:\n
+  10:00 开场\n
+  10:03 W5 评审结果 (陈昊)\n
+  10:08 Staging 演练+回滚预案 (周阳+刘畅)\n
+  10:13 10% 灰度方案 (周阳)\n
+  10:18 6 项任务派发 (陈昊)\n
+  10:23 W6 准入与准出 (周阳)\n
+  10:27 拍板 (王磊)\n
+  \n
+  主题: Staging 演练 + 10% 灰度\n
+  目标: W6 评审 (07-25 14:00) 通过\n
+  任务: W6.1-W6.6 (6项, 4.5人天)\n
+  \n
+  关键节点: 07-23 09:00 灰度启动\n
+  链接: [Jira https://jira.xxx/projects/P3/issues]
+ORGANIZER;CN=陈昊 (PM):mailto:chenhao@pmo.com
+ATTENDEE;CN=王磊;ROLE=CHAIR:mailto:wanglei@pmo.com
+ATTENDEE;CN=陈昊;ROLE=REQ-PARTICIPANT:mailto:chenhao@pmo.com
+ATTENDEE;CN=张博;ROLE=REQ-PARTICIPANT:mailto:zhangbo@pmo.com
+ATTENDEE;CN=李伟;ROLE=REQ-PARTICIPANT:mailto:liwei@pmo.com
+ATTENDEE;CN=赵敏;ROLE=OPT-PARTICIPANT:mailto:zhaomin@pmo.com
+ATTENDEE;CN=刘畅;ROLE=REQ-PARTICIPANT:mailto:liuchang@pmo.com
+ATTENDEE;CN=孙琪;ROLE=REQ-PARTICIPANT:mailto:sunqi@pmo.com
+ATTENDEE;CN=周阳;ROLE=REQ-PARTICIPANT:mailto:zhouyang@pmo.com
+ATTENDEE;CN=李雪;ROLE=OPT-PARTICIPANT:mailto:lixue@pmo.com
+CATEGORIES:PMO,P3,Sprint5,Planning,启动,灰度
+STATUS:CONFIRMED
+SEQUENCE:0
+PRIORITY:1
+TRANSP:OPAQUE
+CLASS:PUBLIC
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:明天 10:00 P3 Sprint 5 启动会 (W6 灰度)
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT15M
+ACTION:DISPLAY
+DESCRIPTION:15min 后 P3 S5 启动会
+END:VALARM
+END:VEVENT
+END:VCALENDAR

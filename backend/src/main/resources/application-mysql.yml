@@ -1,0 +1,44 @@
+# MySQL 8 profile — 用于 docker compose 跑生产型 profile
+# 默认 application.yml 是 PostgreSQL(H2 in 单测 / 启动时校验),
+# 真正连 MySQL 用 --spring.profiles.active=mysql
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/pmo_pms?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=UTF-8}
+    username: ${SPRING_DATASOURCE_USERNAME:pmo_pms}
+    password: ${SPRING_DATASOURCE_PASSWORD:pmo_pms_dev_2025}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        jdbc:
+          time_zone: Asia/Shanghai
+  flyway:
+    enabled: true
+    locations: classpath:db/migration-mysql
+    baseline-on-migrate: true
+    validate-on-migrate: false
+    repair-on-migrate: true
+    out-of-order: true
+    ignore-migration-patterns: "" 
+  # Mail: docker compose 默认用 mailpit 容器 (smtp:1025 auth-off),生产改 env
+  mail:
+    host: ${SPRING_MAIL_HOST:mailpit}
+    port: ${SPRING_MAIL_PORT:1025}
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+  # actuator 关掉 mail 健康检查(开发期 mailpit 容器不一定起,会让 /actuator/health 报 DOWN)
+management:
+  health:
+    mail:
+      enabled: false

@@ -1,0 +1,91 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//PMO//Sprint 0 Kick-off//ZH
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VTIMEZONE
+TZID:Asia/Shanghai
+BEGIN:STANDARD
+DTSTART:19700101T000000
+TZOFFSETFROM:+0800
+TZOFFSETTO:+0800
+TZNAME:CST
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:p3-sprint0-kickoff-20250617T140000@pmo.pms
+DTSTAMP:20250610T120000Z
+DTSTART;TZID=Asia/Shanghai:20250617T140000
+DTEND;TZID=Asia/Shanghai:20250617T170000
+SUMMARY:P3 Sprint 0 启动会 (Kick-off)
+LOCATION:总部 8F 会议室 A
+DESCRIPTION:【P3 Sprint 0 启动会】\n
+  时间: 2025-06-17 (周二) 14:00-17:00 (3h)\n
+  地点: 总部 8F 会议室 A + 飞书会议\n
+  主持人: @王磊 (PMO 总监)\n
+  记录人: @李雪\n
+  必读材料: PR-0~PR-7 (Confluence)\n
+  \n
+  议程:\n
+  14:00-14:10 开场+破冰  @王磊\n
+  14:10-14:30 业务背景+Q3续约  @王磊\n
+  14:30-14:50 PRD串讲(PR-0全景)  @陈昊\n
+  14:50-15:10 技术方案(PR-6)  @张博\n
+  15:10-15:25 茶歇\n
+  15:25-15:45 数据模型(PR-2)  @刘畅\n
+  15:45-16:05 UI设计(PR-4)  @赵敏\n
+  16:05-16:25 测试策略(PR-7)  @孙琪\n
+  16:25-16:45 Sprint 0任务分配  @陈昊\n
+  16:45-16:55 风险+答疑  全体\n
+  16:55-17:00 收尾+拍板  @王磊\n
+  \n
+  8周承诺目标: 文档定稿(已✅)→ 开发(W2)→ 前端(W3)→ 测试(W4)→ 压测(W5)→ 灰度(W6)→ 兼容(W7)→ 发布(W8)\n
+  \n
+  决策待拍板(5项): 软删唯一/EVM计算位置/缓存/灰度比例/算法顾问\n
+  风险Top 4: DHTMLX授权/vis-network熟/Flyway V3兼容/SonarQube规则\n
+  \n
+  会议链接: [飞书会议 https://meeting.feishu.cn/xxxxxxx]\n
+  文档链接: [Confluence https://confluence.xxx/page/p3-kickoff]\n
+  Jira链接: [https://jira.xxx/projects/P3/issues]\n
+  \n
+  注意事项:\n
+  1. 请提前30min到场, 调试投影\n
+  2. 必读 PR-0 (项目索引与总览)\n
+  3. 选读 PR-1/2/5/6/7 (本角色相关)\n
+  4. 设计师 @小敏 远程接入, 准备 5 视图线框\n
+  5. 茶歇 15:10, 茶歇后再集中
+URL:https://confluence.xxx/page/p3-kickoff
+ORGANIZER;CN=王磊 (PMO总监):mailto:wanglei@pmo.com
+ATTENDEE;CN=王磊;ROLE=CHAIR:mailto:wanglei@pmo.com
+ATTENDEE;CN=陈昊 (PM);ROLE=REQ-PARTICIPANT:mailto:chenhao@pmo.com
+ATTENDEE;CN=张博 (架构);ROLE=REQ-PARTICIPANT:mailto:zhangbo@pmo.com
+ATTENDEE;CN=李伟 (后端Lead);ROLE=REQ-PARTICIPANT:mailto:liwei@pmo.com
+ATTENDEE;CN=赵敏 (前端Lead);ROLE=REQ-PARTICIPANT:mailto:zhaomin@pmo.com
+ATTENDEE;CN=刘畅 (DBA);ROLE=OPT-PARTICIPANT:mailto:liuchang@pmo.com
+ATTENDEE;CN=孙琪 (QA Lead);ROLE=OPT-PARTICIPANT:mailto:sunqi@pmo.com
+ATTENDEE;CN=周阳 (SRE);ROLE=OPT-PARTICIPANT:mailto:zhouyang@pmo.com
+ATTENDEE;CN=李雪 (PMO助理);ROLE=OPT-PARTICIPANT:mailto:lixue@pmo.com
+ATTENDEE;CN=小敏 (设计师);ROLE=OPT-PARTICIPANT:mailto:xiaomin@design.com
+CATEGORIES:PMO,P3,Sprint0,Kick-off,会议
+STATUS:CONFIRMED
+SEQUENCE:0
+PRIORITY:1
+TRANSP:OPAQUE
+CLASS:PUBLIC
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:P3 Sprint 0 启动会 明天 14:00 (提前 1 天提醒)
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:P3 Sprint 0 启动会 2h 后开始 (提前 2 小时提醒)
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT30M
+ACTION:DISPLAY
+DESCRIPTION:P3 Sprint 0 启动会 30min 后开始 (准备会议材料, 调试投影)
+END:VALARM
+END:VEVENT
+END:VCALENDAR

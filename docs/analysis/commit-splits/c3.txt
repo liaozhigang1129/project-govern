@@ -1,0 +1,2 @@
+backend/src/main/java/com/company/pmo/module/finance/
+backend/src/main/resources/db/migration-pg/V4.2__finance.sql

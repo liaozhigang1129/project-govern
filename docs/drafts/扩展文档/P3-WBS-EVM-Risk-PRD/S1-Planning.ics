@@ -1,0 +1,66 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//PMO//S1 Planning//ZH
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VTIMEZONE
+TZID:Asia/Shanghai
+BEGIN:STANDARD
+DTSTART:19700101T000000
+TZOFFSETFROM:+0800
+TZOFFSETTO:+0800
+TZNAME:CST
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:p3-s1-planning-20250623T100000@pmo.pms
+DTSTAMP:20250610T120000Z
+DTSTART;TZID=Asia/Shanghai:20250623T100000
+DTEND;TZID=Asia/Shanghai:20250623T103000
+SUMMARY:P3 Sprint 1 启动会 (W2 Planning)
+LOCATION:总部 8F 会议室 A
+DESCRIPTION:【P3 Sprint 1 启动会】W2\n
+  时间: 2025-06-23 (周一) 10:00-10:30 (30min)\n
+  地点: 总部 8F 会议室 A\n
+  主持: @陈昊\n
+  \n
+  议程:\n
+  10:00 开场 (陈昊)\n
+  10:03 S0 复盘结果 (陈昊)\n
+  10:10 10 项任务派发 (陈昊+李伟)\n
+  10:18 S0 改进 5 条落地 (全体)\n
+  10:23 W2 demo 通过条件 (孙琪+张博)\n
+  10:28 拍板 (王磊)\n
+  \n
+  主题: WBS 后端 7 端点\n
+  目标: W2 demo (06-27 16:00) 通过\n
+  任务: S1.1-S1.10 (10项, 7人天)\n
+  \n
+  链接: [Jira https://jira.xxx/projects/P3/issues]
+ORGANIZER;CN=陈昊 (PM):mailto:chenhao@pmo.com
+ATTENDEE;CN=王磊;ROLE=CHAIR:mailto:wanglei@pmo.com
+ATTENDEE;CN=陈昊;ROLE=REQ-PARTICIPANT:mailto:chenhao@pmo.com
+ATTENDEE;CN=张博;ROLE=REQ-PARTICIPANT:mailto:zhangbo@pmo.com
+ATTENDEE;CN=李伟;ROLE=REQ-PARTICIPANT:mailto:liwei@pmo.com
+ATTENDEE;CN=赵敏;ROLE=OPT-PARTICIPANT:mailto:zhaomin@pmo.com
+ATTENDEE;CN=刘畅;ROLE=OPT-PARTICIPANT:mailto:liuchang@pmo.com
+ATTENDEE;CN=孙琪;ROLE=REQ-PARTICIPANT:mailto:sunqi@pmo.com
+ATTENDEE;CN=李雪;ROLE=OPT-PARTICIPANT:mailto:lixue@pmo.com
+CATEGORIES:PMO,P3,Sprint1,Planning,启动
+STATUS:CONFIRMED
+SEQUENCE:0
+PRIORITY:2
+TRANSP:OPAQUE
+CLASS:PUBLIC
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:明天 10:00 P3 Sprint 1 启动会
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT15M
+ACTION:DISPLAY
+DESCRIPTION:15min 后 P3 S1 启动会
+END:VALARM
+END:VEVENT
+END:VCALENDAR

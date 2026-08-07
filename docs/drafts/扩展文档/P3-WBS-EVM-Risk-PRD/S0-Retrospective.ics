@@ -1,0 +1,67 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//PMO//S0 Retrospective//ZH
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VTIMEZONE
+TZID:Asia/Shanghai
+BEGIN:STANDARD
+DTSTART:19700101T000000
+TZOFFSETFROM:+0800
+TZOFFSETTO:+0800
+TZNAME:CST
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:p3-s0-retrospective-20250620T160000@pmo.pms
+DTSTAMP:20250610T120000Z
+DTSTART;TZID=Asia/Shanghai:20250620T160000
+DTEND;TZID=Asia/Shanghai:20250620T170000
+SUMMARY:P3 Sprint 0 复盘会 (Retrospective)
+LOCATION:总部 8F 会议室 A
+DESCRIPTION:【P3 Sprint 0 复盘会】\n
+  时间: 2025-06-20 (周五) 16:00-17:00 (1h)\n
+  地点: 总部 8F 会议室 A + 飞书会议\n
+  主持: @陈昊 (PM)\n
+  记录: @李雪\n
+  \n
+  议程:\n
+  16:00 开场 (陈昊)\n
+  16:05 24项任务收口 KPI (李伟/赵敏/刘畅)\n
+  16:20 5决策拍板回顾 (张博/王磊)\n
+  16:35 4风险当前状态 (周阳/孙琪)\n
+  16:50 Sprint 1 任务预览 (陈昊)\n
+  16:55 拍板+收尾 (王磊)\n
+  \n
+  输入: Sprint 0 启动会议 (06-17) 派发 24 项任务\n
+  输出: S1 任务清单 (10项) + 5决策拍板 + 4风险更新\n
+  \n
+  链接: [Confluence https://confluence.xxx/page/s0-retrospective]
+ORGANIZER;CN=陈昊 (PM):mailto:chenhao@pmo.com
+ATTENDEE;CN=王磊;ROLE=CHAIR:mailto:wanglei@pmo.com
+ATTENDEE;CN=陈昊;ROLE=REQ-PARTICIPANT:mailto:chenhao@pmo.com
+ATTENDEE;CN=张博;ROLE=REQ-PARTICIPANT:mailto:zhangbo@pmo.com
+ATTENDEE;CN=李伟;ROLE=REQ-PARTICIPANT:mailto:liwei@pmo.com
+ATTENDEE;CN=赵敏;ROLE=REQ-PARTICIPANT:mailto:zhaomin@pmo.com
+ATTENDEE;CN=刘畅;ROLE=OPT-PARTICIPANT:mailto:liuchang@pmo.com
+ATTENDEE;CN=孙琪;ROLE=OPT-PARTICIPANT:mailto:sunqi@pmo.com
+ATTENDEE;CN=周阳;ROLE=OPT-PARTICIPANT:mailto:zhouyang@pmo.com
+ATTENDEE;CN=李雪;ROLE=OPT-PARTICIPANT:mailto:lixue@pmo.com
+CATEGORIES:PMO,P3,Sprint0,Retrospective,复盘
+STATUS:CONFIRMED
+SEQUENCE:0
+PRIORITY:2
+TRANSP:OPAQUE
+CLASS:PUBLIC
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:明天 16:00 P3 Sprint 0 复盘会, 请提前填 4L 复盘
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT30M
+ACTION:DISPLAY
+DESCRIPTION:30min 后 P3 S0 复盘, 准备 KPI 数据
+END:VALARM
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,69 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//PMO//S7 Planning//ZH
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VTIMEZONE
+TZID:Asia/Shanghai
+BEGIN:STANDARD
+DTSTART:19700101T000000
+TZOFFSETFROM:+0800
+TZOFFSETTO:+0800
+TZNAME:CST
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:p3-s7-planning-20250804T100000@pmo.pms
+DTSTAMP:20250610T120000Z
+DTSTART;TZID=Asia/Shanghai:20250804T100000
+DTEND;TZID=Asia/Shanghai:20250804T103000
+SUMMARY:P3 Sprint 7 启动会 (W8 全量发布 Planning)
+LOCATION:总部 8F 会议室 A
+DESCRIPTION:【P3 Sprint 7 启动会】W8 全量发布 + 8 周收官\n
+  时间: 2025-08-04 (周一) 10:00-10:30 (30min)\n
+  地点: 总部 8F 会议室 A\n
+  主持: @陈昊\n
+  \n
+  议程:\n
+  10:00 开场\n
+  10:03 W7 评审结果 (陈昊)\n
+  10:08 100% 全量发布方案 (周阳)\n
+  10:13 客户通知 T-3 (陈昊)\n
+  10:18 7 项任务派发 (陈昊)\n
+  10:23 W8 准入与准出 (周阳+孙琪)\n
+  10:27 拍板+8 周收官 (王磊)\n
+  \n
+  主题: 100% 全量发布 + 48h 监控 + 8 周收官\n
+  目标: W8 评审 (08-15 14:00) 通过 + 8 周收官\n
+  任务: W8.1-W8.7 (7项, 5.5人天)\n
+  \n
+  关键节点: 08-04 09:00 100% 扩量\n
+  链接: [Jira https://jira.xxx/projects/P3/issues]
+ORGANIZER;CN=陈昊 (PM):mailto:chenhao@pmo.com
+ATTENDEE;CN=王磊;ROLE=CHAIR:mailto:wanglei@pmo.com
+ATTENDEE;CN=陈昊;ROLE=REQ-PARTICIPANT:mailto:chenhao@pmo.com
+ATTENDEE;CN=张博;ROLE=REQ-PARTICIPANT:mailto:zhangbo@pmo.com
+ATTENDEE;CN=李伟;ROLE=REQ-PARTICIPANT:mailto:liwei@pmo.com
+ATTENDEE;CN=赵敏;ROLE=REQ-PARTICIPANT:mailto:zhaomin@pmo.com
+ATTENDEE;CN=刘畅;ROLE=OPT-PARTICIPANT:mailto:liuchang@pmo.com
+ATTENDEE;CN=孙琪;ROLE=REQ-PARTICIPANT:mailto:sunqi@pmo.com
+ATTENDEE;CN=周阳;ROLE=REQ-PARTICIPANT:mailto:zhouyang@pmo.com
+ATTENDEE;CN=李雪;ROLE=OPT-PARTICIPANT:mailto:lixue@pmo.com
+CATEGORIES:PMO,P3,Sprint7,Planning,启动,全量发布,8周收官
+STATUS:CONFIRMED
+SEQUENCE:0
+PRIORITY:1
+TRANSP:OPAQUE
+CLASS:PUBLIC
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:明天 10:00 P3 Sprint 7 启动会 (W8 全量)
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT15M
+ACTION:DISPLAY
+DESCRIPTION:15min 后 P3 S7 启动会
+END:VALARM
+END:VEVENT
+END:VCALENDAR

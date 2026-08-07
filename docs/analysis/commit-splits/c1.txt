@@ -1,0 +1,14 @@
+backend/src/main/java/com/company/pmo/module/milestone/Milestone.java
+backend/src/main/java/com/company/pmo/module/milestone/MilestoneController.java
+backend/src/main/java/com/company/pmo/module/milestone/MilestoneRepository.java
+backend/src/main/java/com/company/pmo/module/milestone/MilestoneService.java
+backend/src/main/java/com/company/pmo/module/milestone/dto/MilestoneCreateRequest.java
+backend/src/main/java/com/company/pmo/module/milestone/dto/MilestoneResponse.java
+backend/src/main/java/com/company/pmo/module/milestone/dto/MilestoneUpdateRequest.java
+backend/src/main/java/com/company/pmo/module/milestone/MilestoneAnalysisService.java
+backend/src/main/java/com/company/pmo/module/milestone/MilestonePhase.java
+backend/src/main/java/com/company/pmo/module/milestone/MilestonePhaseRepository.java
+backend/src/main/java/com/company/pmo/module/milestone/dto/MilestoneAnalysisQuery.java
+backend/src/main/java/com/company/pmo/module/milestone/dto/MilestoneAnalysisResponse.java
+backend/src/main/java/com/company/pmo/module/milestone/dto/MilestoneDrillDownResponse.java
+backend/src/main/resources/db/migration-pg/V3.1__milestone_phase.sql

@@ -1,0 +1,275 @@
+-- V4.26 风险规则数据库化 (PostgreSQL 版)
+-- 业务诉求: 把 SowExtractor.RISK_SIGNAL_TO_BUCKET (106 条) 和
+--   InitiationAiWbsService.generateRisks switch (40 个 addRisk)
+--   全部搬到 MySQL/PG, 让 PMO 业务通过"系统管理 → 风险规则"菜单维护。
+-- 兼容性: 启动时加载到 RiskRuleCache, 与原硬编码 Map.ofEntries 输出 100% 等价。
+-- 数据约定:
+--   - risk_bucket.code 是自然主键 (业务标识)
+--   - risk_signal.industry = NULL = 通用信号 (匹配 SOW 即触发,与行业无关 — 保留原行为)
+--   - risk_template.evidence_claim: 给用户展示的"声称证据";NULL/SIGNAL_MATCH 表示用实际信号匹配
+--   - risk_template.sow_contains_any: 额外门控 (用于 AI_HALLUCINATION: SOW 含 可预测/可追溯/幻觉)
+--   - risk_template.industry_in: 行业门控 (NULL = 任何行业;或列表如 {AI, AI_AGENT})
+--   - risk_template.agent_code: 仅 AI_AGENT 桶使用,标识智能体 (SUMMARY/QA/TAG/FINREPT)
+--   - risk_template.title 中 {agent_name} 占位符在生成时替换为 agent.name
+
+-- ============================================================
+-- ① risk_bucket —— 风险桶字典
+-- ============================================================
+CREATE TABLE IF NOT EXISTS risk_bucket (
+    id              BIGSERIAL PRIMARY KEY,
+    code            VARCHAR(50)  NOT NULL UNIQUE,
+    name            VARCHAR(100) NOT NULL,
+    category        VARCHAR(50),
+    default_level   VARCHAR(20),
+    default_impact  INTEGER,
+    sort_order      INTEGER NOT NULL DEFAULT 0,
+    enabled         BOOLEAN NOT NULL DEFAULT TRUE,
+    remark          TEXT,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+COMMENT ON TABLE risk_bucket IS '风险桶字典 — 把代码中的 switch case 全部搬到这里';
+COMMENT ON COLUMN risk_bucket.code IS '风险桶 code, 与 signal.template.bucket_code 关联';
+COMMENT ON COLUMN risk_bucket.default_level IS '默认等级 (HIGH/MEDIUM/CRITICAL/LOW), UI 新建模板时建议值';
+COMMENT ON COLUMN risk_bucket.default_impact IS '默认影响值 1-5, UI 新建模板时建议值';
+
+-- 38 个风险桶种子数据 (与 SowExtractor + generateRisks 100% 一致)
+INSERT INTO risk_bucket(code, name, category, default_level, default_impact, sort_order, remark) VALUES
+    ('GENERIC', '通用风险', '通用', NULL, NULL, 0, '无 SOW 触发,无条件加入 (V4.17)'),
+    ('DATA_LABEL', '数据标注', '数据', 'HIGH', 4, 10, '数据标注质量/数量 (V4.17)'),
+    ('DATA_SAMPLE', '训练样本', '数据', 'HIGH', 4, 20, '样本不足/分布偏差 (V4.17)'),
+    ('DATA_COMPLIANCE', '数据脱敏/合规', '数据', 'CRITICAL', 5, 30, '数据脱敏/隐私合规 (V4.17)'),
+    ('DATA_MIGRATION', '数据迁移', '数据', 'CRITICAL', 5, 40, '数据迁移停机/丢失 (V4.17)'),
+    ('MODEL_ASR', 'ASR/WER', '模型', 'HIGH', 4, 50, '语音识别 WER 超标 (V4.17)'),
+    ('MODEL_OCR', 'OCR 识别', '模型', 'HIGH', 4, 60, 'OCR 识别率/版式 (V4.17)'),
+    ('MODEL_ACCURACY', '模型准确率', '模型', 'CRITICAL', 5, 70, '模型效果未达预期 (V4.17)'),
+    ('INTEG_CALLCENTER', '坐席系统集成', '集成', 'HIGH', 4, 80, '坐席系统对接/数据流 (V4.17)'),
+    ('INTEG_3RD', '第三方接口', '集成', 'HIGH', 4, 90, '第三方接口不稳定 (V4.17)'),
+    ('INTEG_API', 'API 网关', '集成', 'MEDIUM', 3, 100, 'API 网关限流/版本 (V4.17)'),
+    ('TEAM_NLP', '算法人员', '团队', 'HIGH', 4, 110, 'NLP/算法人员招聘难 (V4.17)'),
+    ('TEAM_NOVICE', '新员工', '团队', 'MEDIUM', 3, 120, '新员工占比高 (V4.17)'),
+    ('SCHEDULE_TIGHT', '工期紧', '工期', 'HIGH', 4, 130, '工期紧/关键路径缓冲 (V4.17)'),
+    ('SCHEDULE_PARALLEL', '并行依赖', '工期', 'MEDIUM', 3, 140, '多模块并行冲突 (V4.17)'),
+    ('BUDGET', '预算/费率', '预算', 'HIGH', 4, 150, '预算超支/费率波动 (V4.17)'),
+    ('BUSINESS_KPI', '业务 KPI', '业务', 'HIGH', 4, 160, '业务 KPI 不达预期 (V4.17)'),
+    ('COMPLIANCE', '合规/审计/等保', '合规', 'CRITICAL', 5, 170, '合规/等保/审计/隐私 (V4.17)'),
+    ('CUSTODY', '托管业务连续性', '托管', 'CRITICAL', 5, 180, 'V4.24 资产托管业务连续性'),
+    ('VALUATION', '估值核算', '托管', 'CRITICAL', 5, 190, 'V4.24 估值核算错误净值失真'),
+    ('SETTLEMENT', '资金清算/交收', '托管', 'CRITICAL', 5, 200, 'V4.24 资金清算/交收/头寸'),
+    ('SUPERVISION', '投资监督', '托管', 'CRITICAL', 5, 210, 'V4.24 投资监督违规'),
+    ('DISCLOSURE', '信息披露', '托管', 'CRITICAL', 5, 220, 'V4.24 信息披露延迟/错误'),
+    ('CUSTODY_OPS', '托管指令处理', '托管', 'HIGH', 4, 230, 'V4.24 托管指令处理失败'),
+    ('AML', '反洗钱', '合规', 'CRITICAL', 5, 240, 'V4.24 反洗钱/可疑报送'),
+    ('REGULATORY', '监管报送', '合规', 'CRITICAL', 5, 250, 'V4.24 EAST/1104/人行报送'),
+    ('KNOWLEDGE_TRANSFER', '知识转移', '移交', 'MEDIUM', 3, 260, '知识转移不充分 (V4.24)'),
+    ('ONSITE', '驻场人员', '现场', 'MEDIUM', 3, 270, '驻场人员变动 (V4.24)'),
+    ('SUPPLY_VENDOR', '供应商管理', '供应链', 'HIGH', 4, 280, 'V4.24 供应商集中度'),
+    ('SUPPLY_PROCURE', '采购合规', '供应链', 'HIGH', 4, 290, 'V4.24 采购合规'),
+    ('SUPPLY_INVENTORY', '库存管理', '供应链', 'HIGH', 4, 300, 'V4.24 库存积压/缺货'),
+    ('SUPPLY_INTRANSIT', '在途运输', '供应链', 'HIGH', 4, 310, 'V4.24 在途跟踪/运输延误'),
+    ('SUPPLY_ALERT', '异常预警', '供应链', 'HIGH', 4, 320, 'V4.24 预警误报/漏报'),
+    ('EXEC_REG', '执行/承做监管', '合规', NULL, NULL, 330, 'Step 55-56 投行/IPO/核心系统改造 — 当前代码无 switch case,仅日志'),
+    ('TECH_NEW', '新技术依赖', '技术', NULL, NULL, 340, 'Step 55 量化/算法交易 — 当前代码无 switch case,仅日志'),
+    ('AI_MODEL', '大模型效果', 'AI', 'CRITICAL', 5, 350, 'AI/AI_AGENT 行业专属 (V4.17)'),
+    ('AI_AGENT', '智能体质量', 'AI', 'HIGH', 4, 360, 'AI_AGENT 智能体专属,4 智能体各自触发 (V4.17)'),
+    ('AI_HALLUCINATION', 'AI 幻觉/可追溯', 'AI', 'CRITICAL', 5, 370, 'AI_AGENT 行业 + SOW 含可预测/可追溯/幻觉 (V4.17)');
+
+-- ============================================================
+-- ② risk_signal —— SOW 关键词 → 风险桶 映射
+-- ============================================================
+CREATE TABLE IF NOT EXISTS risk_signal (
+    id              BIGSERIAL PRIMARY KEY,
+    bucket_code     VARCHAR(50)  NOT NULL,
+    keyword         VARCHAR(100) NOT NULL,
+    industry        VARCHAR(50),  -- NULL = 通用 (任何行业都触发,保留原行为)
+    weight          INTEGER NOT NULL DEFAULT 1,
+    enabled         BOOLEAN NOT NULL DEFAULT TRUE,
+    remark          TEXT,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (bucket_code, keyword)
+);
+COMMENT ON TABLE risk_signal IS '风险信号词典 — SOW 含 keyword 时,触发 bucket_code 桶';
+COMMENT ON COLUMN risk_signal.industry IS 'NULL=通用;否则限定行业 (BANKING_LOAN/INSURANCE/SECURITIES/BANKING_CUSTODY/BANKING_CORE/SUPPLY_CHAIN 等)。当前实现 industry=NULL,与原代码兼容。';
+CREATE INDEX IF NOT EXISTS idx_risk_signal_kw ON risk_signal(keyword);
+CREATE INDEX IF NOT EXISTS idx_risk_signal_bucket ON risk_signal(bucket_code);
+
+-- 106 个风险信号种子数据 (与 SowExtractor.RISK_SIGNAL_TO_BUCKET 100% 一致)
+INSERT INTO risk_signal(bucket_code, keyword, remark) VALUES
+    ('DATA_LABEL', '数据标注', '通用'),
+    ('DATA_LABEL', '标注', '通用'),
+    ('DATA_SAMPLE', '样本', '通用'),
+    ('DATA_COMPLIANCE', '数据脱敏', '通用'),
+    ('DATA_COMPLIANCE', '脱敏', '通用'),
+    ('DATA_MIGRATION', '数据迁移', '通用'),
+    ('MODEL_ASR', 'ASR', '通用'),
+    ('MODEL_OCR', 'OCR', '通用'),
+    ('MODEL_ACCURACY', '准确率', '通用'),
+    ('MODEL_ASR', 'WER', '通用'),
+    ('INTEG_CALLCENTER', '坐席系统', '通用'),
+    ('INTEG_3RD', '第三方', '通用'),
+    ('INTEG_API', 'API', '通用'),
+    ('INTEG_3RD', '对接', '通用'),
+    ('TEAM_NLP', 'NLP', '通用'),
+    ('TEAM_NLP', '算法工程师', '通用'),
+    ('TEAM_NOVICE', '新员工', '通用'),
+    ('SCHEDULE_TIGHT', '赶', '通用'),
+    ('SCHEDULE_TIGHT', '紧', '通用'),
+    ('SCHEDULE_PARALLEL', '并行', '通用'),
+    ('BUDGET', '预算', '通用'),
+    ('BUDGET', '报价', '通用'),
+    ('BUSINESS_KPI', '目标', '通用'),
+    ('BUSINESS_KPI', 'KPI', '通用'),
+    ('BUSINESS_KPI', '转化', '通用'),
+    ('BUSINESS_KPI', '提升', '通用'),
+    ('COMPLIANCE', '合规', '通用'),
+    ('COMPLIANCE', '隐私', '通用'),
+    ('COMPLIANCE', '审计', '通用'),
+    ('COMPLIANCE', '等保', '通用'),
+    ('COMPLIANCE', 'ISO', '通用'),
+    ('COMPLIANCE', '抵押登记', 'Step 48 银行/信贷 - 抵押登记合规要求'),
+    ('INTEG_3RD', '联网核查', 'Step 48 银行/信贷 - 第三方接口'),
+    ('INTEG_3RD', '人脸识别', 'Step 48 银行/信贷 - 第三方接口'),
+    ('COMPLIANCE', '征信查询', 'Step 48 银行/信贷 - 央行征信合规'),
+    ('COMPLIANCE', '电子签章', 'Step 48 银行/信贷 - CA 证书合规'),
+    ('BUSINESS_KPI', '担保', 'Step 48 银行/信贷 - 担保率 KPI'),
+    ('COMPLIANCE', '反欺诈', 'Step 48 银行/信贷 - 反欺诈合规'),
+    ('INTEG_3RD', '房估', 'Step 48 银行/信贷 - 房估宝等'),
+    ('COMPLIANCE', '信贷', 'Step 48 银行/信贷 - 信贷业务合规'),
+    ('CUSTODY', '托管', 'V4.24 资产托管 - 业务连续性'),
+    ('CUSTODY', '资产托管', 'V4.24 资产托管 - 业务连续性'),
+    ('CUSTODY', '托管业务', 'V4.24 资产托管 - 业务连续性'),
+    ('CUSTODY', '托管协议', 'V4.24 资产托管 - 业务连续性'),
+    ('VALUATION', '估值核算', 'V4.24 资产托管 - 估值错误'),
+    ('SETTLEMENT', '资金清算', 'V4.24 资产托管 - 清算失败'),
+    ('SUPERVISION', '投资监督', 'V4.24 资产托管 - 投资监督违规'),
+    ('DISCLOSURE', '信息披露', 'V4.24 资产托管 - 信息披露延迟/错误'),
+    ('VALUATION', '净值', 'V4.24 资产托管 - 估值错误'),
+    ('SETTLEMENT', '头寸', 'V4.24 资产托管 - 清算失败'),
+    ('SETTLEMENT', '交收', 'V4.24 资产托管 - 清算失败'),
+    ('CUSTODY_OPS', '指令', 'V4.24 资产托管 - 指令处理失败'),
+    ('CUSTODY_OPS', '场外划款', 'V4.24 资产托管 - 指令处理失败'),
+    ('AML', '反洗钱', 'V4.24 资产托管 - 反洗钱合规 (升级到 AML 桶)'),
+    ('REGULATORY', '报送', 'V4.24 资产托管 - 监管报送'),
+    ('REGULATORY', 'east', 'V4.24 资产托管 - EAST 报送'),
+    ('REGULATORY', '1104', 'V4.24 资产托管 - 1104 报送'),
+    ('KNOWLEDGE_TRANSFER', '培训', 'V4.24 资产托管 - 培训/知识转移'),
+    ('KNOWLEDGE_TRANSFER', '知识转移', 'V4.24 资产托管 - 培训/知识转移'),
+    ('ONSITE', '驻场', 'V4.24 资产托管 - 驻场约束'),
+    ('BUSINESS_KPI', '授信', 'V4.24 银行/信贷 - 授信额度 KPI'),
+    ('COMPLIANCE', '准备金', 'Step 54 保险 - 监管合规'),
+    ('COMPLIANCE', 'ifrs17', 'Step 54 保险 - IFRS17 国际准则'),
+    ('COMPLIANCE', '精算', 'Step 54 保险 - 精算合规'),
+    ('COMPLIANCE', '黑名单', 'Step 54 保险 - 反欺诈名单'),
+    ('DATA_COMPLIANCE', '保单', 'Step 54 保险 - 保单数据合规'),
+    ('BUSINESS_KPI', '报案', 'Step 54 保险 - 报案量 KPI'),
+    ('BUSINESS_KPI', '理赔', 'Step 54 保险 - 理赔时效 KPI'),
+    ('BUSINESS_KPI', '续保率', 'Step 54 保险 - 续保率 KPI'),
+    ('COMPLIANCE', '集中风控', 'Step 55 证券 - 监管强制'),
+    ('COMPLIANCE', '监控中心', 'Step 55 证券 - 证监会报送'),
+    ('COMPLIANCE', '适当性', 'Step 55 证券 - 投资者适当性'),
+    ('COMPLIANCE', '双录', 'Step 55 证券 - 销售双录合规'),
+    ('COMPLIANCE', '净资本', 'Step 55 证券 - 净资本监控'),
+    ('TECH_NEW', '量化', 'Step 55 证券 - 新技术依赖'),
+    ('TECH_NEW', '算法交易', 'Step 55 证券 - 新技术依赖'),
+    ('COMPLIANCE', '跨境', 'Step 55 证券 - 跨境合规'),
+    ('BUSINESS_KPI', '自营', 'Step 55 证券 - 自营 KPI'),
+    ('BUSINESS_KPI', '资管', 'Step 55 证券 - 资管 KPI'),
+    ('EXEC_REG', '投行', 'Step 55 证券 - 投行承做监管'),
+    ('EXEC_REG', 'ipo', 'Step 55 证券 - IPO 监管'),
+    ('EXEC_REG', '核心系统', 'Step 56 银行核心 - 核心系统改造'),
+    ('COMPLIANCE', '五级分类', 'Step 56 银行核心 - 监管合规'),
+    ('BUSINESS_KPI', '不良', 'Step 56 银行核心 - 不良率 KPI'),
+    ('BUSINESS_KPI', '拨备', 'Step 56 银行核心 - 拨备覆盖率 KPI'),
+    ('EXEC_REG', '存款', 'Step 56 银行核心 - 存款保险条例'),
+    ('COMPLIANCE', '宏观审慎', 'Step 56 银行核心 - MPA 监管'),
+    ('COMPLIANCE', '外汇', 'Step 56 银行核心 - 外汇管理合规'),
+    ('COMPLIANCE', '跨境支付', 'Step 56 银行核心 - 跨境合规'),
+    ('SUPPLY_VENDOR', '供应商管理', 'V4.24 供应链 - 供应商管理'),
+    ('SUPPLY_VENDOR', '供应商', 'V4.24 供应链 - 供应商准入/质量/集中度'),
+    ('SUPPLY_PROCURE', '采购', 'V4.24 供应链 - 采购合规'),
+    ('SUPPLY_INVENTORY', '库存', 'V4.24 供应链 - 库存积压/缺货/准确率'),
+    ('SUPPLY_INTRANSIT', '在途', 'V4.24 供应链 - 在途跟踪丢失/延误'),
+    ('SUPPLY_INTRANSIT', '运输', 'V4.24 供应链 - 运输异常'),
+    ('SUPPLY_INTRANSIT', '物流', 'V4.24 供应链 - 物流时效'),
+    ('BUSINESS_KPI', '可视化', 'V4.24 供应链 - 看板 KPI'),
+    ('SUPPLY_ALERT', '异常预警', 'V4.24 供应链 - 预警准确率/误报'),
+    ('SUPPLY_ALERT', '预警', 'V4.24 供应链 - 预警准确率/误报'),
+    ('BUSINESS_KPI', '看板', 'V4.24 供应链 - 看板 KPI'),
+    ('INTEG_3RD', 'mes', 'V4.24 供应链 - MES 集成'),
+    ('INTEG_3RD', 'wms', 'V4.24 供应链 - WMS 集成'),
+    ('INTEG_3RD', 'tms', 'V4.24 供应链 - TMS 集成'),
+    ('INTEG_3RD', 'erp', 'V4.24 供应链 - ERP 集成'),
+    ('INTEG_3RD', 'gps', 'V4.24 供应链 - GPS/IoT 集成'),
+    ('INTEG_3RD', 'iot', 'V4.24 供应链 - IoT 设备集成');
+
+-- ============================================================
+-- ③ risk_template —— 风险桶 → 风险条目 (title/suggestion/level)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS risk_template (
+    id                 BIGSERIAL PRIMARY KEY,
+    bucket_code        VARCHAR(50)  NOT NULL,
+    title              VARCHAR(255) NOT NULL,
+    suggestion         TEXT,
+    level              VARCHAR(20),
+    probability        INTEGER NOT NULL DEFAULT 3,
+    impact             INTEGER NOT NULL DEFAULT 3,
+    agent_code         VARCHAR(50),  -- 仅 AI_AGENT 桶使用 (SUMMARY/QA/TAG/FINREPT)
+    industry_in        TEXT,          -- JSON 数组, NULL=不限, 例 '["AI","AI_AGENT"]'
+    sow_contains_any   TEXT,          -- JSON 数组, 额外门控 (SOW 须含其中任一词), 例 '["可预测","可追溯","幻觉"]'
+    sort_order         INTEGER NOT NULL DEFAULT 0,
+    enabled            BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at         TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+COMMENT ON TABLE risk_template IS '风险模板 — bucket 触发后,生成 title/suggestion/level';
+COMMENT ON COLUMN risk_template.title IS 'title 中 {agent_name} 占位符在运行时替换';
+COMMENT ON COLUMN risk_template.industry_in IS '行业白名单 JSON, NULL=不限;否则只在 industry ∈ 列表时触发';
+COMMENT ON COLUMN risk_template.sow_contains_any IS 'SOW 文本须含至少其中一个词 (用于 AI_HALLUCINATION 等需要额外门控的场景)';
+COMMENT ON COLUMN risk_template.agent_code IS '仅 AI_AGENT 桶有意义 — 标识哪个智能体 (SUMMARY/QA/TAG/FINREPT)';
+CREATE INDEX IF NOT EXISTS idx_risk_template_bucket ON risk_template(bucket_code);
+
+-- 40 个风险模板种子数据 (与 InitiationAiWbsService.generateRisks 100% 一致)
+INSERT INTO risk_template(bucket_code, title, suggestion, level, probability, impact, agent_code, industry_in, sow_contains_any, sort_order) VALUES
+    ('GENERIC', '客户需求变更导致返工', '建立变更控制委员会(CCB),所有变更走正式流程', 'HIGH', 4, 4, NULL, NULL, NULL, 0),
+    ('GENERIC', '关键人员流动', '建立知识库,关键模块至少 2 人熟悉;签订留任奖金', 'HIGH', 3, 5, NULL, NULL, NULL, 10),
+    ('DATA_LABEL', '数据标注质量 / 数量不足', '建立标注规范 + 双人标注 + 仲裁机制; 关键场景标注量 ≥ 1000 条', 'HIGH', 4, 4, NULL, NULL, NULL, 20),
+    ('DATA_SAMPLE', '训练样本不足 / 分布偏差', 'PoC 阶段先做样本评估 (≥ 200 条/类), 不足时启动数据增强或采购', 'HIGH', 3, 4, NULL, NULL, NULL, 30),
+    ('DATA_COMPLIANCE', '数据脱敏 / 隐私合规风险', '全流程脱敏 (采集/存储/训练/推理), 留审计日志; 评估个保法 / GDPR 影响', 'CRITICAL', 3, 5, NULL, NULL, NULL, 40),
+    ('DATA_MIGRATION', '数据迁移停机窗口紧 / 数据丢失', '双写演练 + 回滚预案; 分批灰度, 每批验证一致性; 7×24 值班', 'CRITICAL', 4, 5, NULL, NULL, NULL, 50),
+    ('MODEL_ASR', '语音 ASR 转写错误率高 (WER 超标)', 'PoC 用 50 段真实通话测 WER, 达标再展开; 行业术语做热词定制', 'HIGH', 4, 4, NULL, NULL, NULL, 60),
+    ('MODEL_OCR', 'OCR 识别率不稳定 / 版式适配差', '覆盖主流版式建立测试集, 关键字段 (金额/日期) 加人工复核', 'HIGH', 3, 4, NULL, NULL, NULL, 70),
+    ('MODEL_ACCURACY', '模型效果未达预期 (准确率不达标)', 'PoC 阶段先验证, 签订效果分阶段验收条款; 准备降级方案 (人工兜底)', 'CRITICAL', 4, 5, NULL, NULL, NULL, 80),
+    ('INTEG_CALLCENTER', '坐席系统对接 / 数据流不稳定', '签 SLA, 设计熔断降级 + 数据重放; 7×24 监控告警', 'HIGH', 3, 4, NULL, NULL, NULL, 90),
+    ('INTEG_3RD', '第三方接口不稳定 / 文档缺失', '签 SLA, 准备 Mock 兜底; 关键流程加超时/重试/幂等', 'HIGH', 3, 4, NULL, NULL, NULL, 100),
+    ('INTEG_API', 'API 网关限流 / 版本兼容', '走统一 API 网关, 做好版本管理 + 灰度发布', 'MEDIUM', 2, 3, NULL, NULL, NULL, 110),
+    ('TEAM_NLP', 'NLP / 算法人员招聘难 / 流失', '提前 2 个月启动招聘, 关键模块至少 2 人熟悉; 内部培养 + 外部合作', 'HIGH', 3, 4, NULL, NULL, NULL, 120),
+    ('TEAM_NOVICE', '新员工占比高, 学习曲线影响进度', '老带新 1:1 配对, 关键决策设 mentor 复核', 'MEDIUM', 3, 3, NULL, NULL, NULL, 130),
+    ('SCHEDULE_TIGHT', '工期紧 / 关键路径缓冲不足', '里程碑评审时强制检查缓冲 (≥ 20%); 关键路径标橙/红预警', 'HIGH', 4, 4, NULL, NULL, NULL, 140),
+    ('SCHEDULE_PARALLEL', '多模块并行依赖冲突', '接口冻结日 + 联调窗口期; 集成负责人全程协调', 'MEDIUM', 3, 3, NULL, NULL, NULL, 150),
+    ('BUDGET', '预算超支 / 工时费率波动', '月度成本评审; 变更单走 CCB; 预留 10% 应急金', 'HIGH', 3, 4, NULL, NULL, NULL, 160),
+    ('BUSINESS_KPI', '业务 KPI 不达预期 / 用户不接受', '灰度期用 A/B 评测 KPI, 业务方签字验收; 不达标及时调整范围', 'HIGH', 3, 4, NULL, NULL, NULL, 170),
+    ('COMPLIANCE', '合规 / 等保 / 审计 / 隐私合规风险', '上线前走合规预审; 关键日志留 6 个月; 制定应急预案', 'CRITICAL', 3, 5, NULL, NULL, NULL, 180),
+    ('CUSTODY', '托管业务连续性风险(系统故障导致托管业务中断)', '建立 7×24 托管业务连续性方案 (BCP); 主备双活 + 灾备演练每季度 1 次; 关键操作双人复核', 'CRITICAL', 3, 5, NULL, NULL, NULL, 190),
+    ('VALUATION', '估值核算错误导致净值失真', '建立估值 gold set (≥ 200 条) 评测; 异常估值强制人工复核; 估值版本管理与回溯机制', 'CRITICAL', 4, 5, NULL, NULL, NULL, 200),
+    ('SETTLEMENT', '资金清算 / 交收失败 / 头寸不足', '交收日历 + 节假日调度自动化; 日终批量监控 + 告警; 头寸实时监控 + 预警阈值', 'CRITICAL', 4, 5, NULL, NULL, NULL, 210),
+    ('SUPERVISION', '投资监督规则未触发导致违规操作', '投资监督规则引擎双轨部署 (实时 + T+1); 违规分级处置 (警告/暂停/上报); 监督日志 5 年留存', 'CRITICAL', 4, 5, NULL, NULL, NULL, 220),
+    ('DISCLOSURE', '信息披露延迟 / 错误引发监管处罚', '信息披露日历 + 时限预警 (T-N 日提醒); 披露内容双人复核; 紧急披露 4 小时通道', 'CRITICAL', 3, 5, NULL, NULL, NULL, 230),
+    ('CUSTODY_OPS', '托管指令处理失败 (录入/审核/支付 链路异常)', '指令状态机 + 异常重试; 关键指令双人审核; 指令跟踪 + 电子签名留痕', 'HIGH', 3, 4, NULL, NULL, NULL, 240),
+    ('AML', '反洗钱 / 大额可疑报送不及时', '建立可疑交易识别规则库; 大额可疑 T+0 报送; 客户风险等级季度复评', 'CRITICAL', 3, 5, NULL, NULL, NULL, 250),
+    ('REGULATORY', '监管报送 (EAST/1104/人行) 数据错误或漏报', '报送数据自动化校验 + 双人复核; 报送版本管理与历史回溯; 监管口径变更及时响应', 'CRITICAL', 3, 5, NULL, NULL, NULL, 260),
+    ('KNOWLEDGE_TRANSFER', '知识转移不充分, 维护期客户自助能力不足', '建立知识库 + 操作手册 + 培训课件; 现场培训 + 远程培训结合; 客户值班团队上岗认证', 'MEDIUM', 3, 3, NULL, NULL, NULL, 270),
+    ('ONSITE', '驻场人员变动 / 资源调度风险', '驻场人员 1:1 备份; 关键技能至少 2 人掌握; 月度驻场报告 + 客户满意度回访', 'MEDIUM', 2, 3, NULL, NULL, NULL, 280),
+    ('SUPPLY_VENDOR', '供应商集中度风险 / 单一供应商依赖', '建立供应商分级管理; 关键品类至少 2 家备选; 月度供应商绩效评估', 'HIGH', 3, 4, NULL, NULL, NULL, 290),
+    ('SUPPLY_PROCURE', '采购合规风险 (流程违规 / 价高质次 / 招标异常)', '采购流程线上化 + 审批留痕; 价格对比 + 历史价监控; 关键采购点双人复核', 'HIGH', 3, 4, NULL, NULL, NULL, 300),
+    ('SUPPLY_INVENTORY', '库存积压 / 缺货 / 库存准确率低', '安全库存 + 补货建议规则; 库存盘点周期化 (周/月); ABC 分类管理', 'HIGH', 4, 4, NULL, NULL, NULL, 310),
+    ('SUPPLY_INTRANSIT', '在途跟踪丢失 / 运输延误 / 物流时效不达标', 'GPS/IoT 全程跟踪 + 断点告警; 承运商 SLA + 时效监控; 关键节点电子签收', 'HIGH', 4, 4, NULL, NULL, NULL, 320),
+    ('SUPPLY_ALERT', '异常预警误报率高 / 漏报关键风险', '预警规则 gold set 评测 (≥ 200 条); 误报率月评 + 规则迭代; 关键告警 7×24 值班', 'HIGH', 3, 4, NULL, NULL, NULL, 330),
+    ('AI_MODEL', '大模型效果不可控 / 输出不稳定', '锁定基线模型版本, 同任务多次执行结果比对; 准备降级到小模型方案', 'CRITICAL', 4, 5, NULL, '["AI", "AI_AGENT"]', NULL, 340),
+    ('AI_AGENT', '{agent_name}智能体: 通话小结遗漏关键风险点', '建立 gold set (≥ 200 条) 评测; 关键风险词强制打标; 抽样人工复核', 'HIGH', 4, 4, 'SUMMARY', '["AI_AGENT"]', NULL, 350),
+    ('AI_AGENT', '{agent_name}智能体: LLM 质检规则与人工口径偏差', '用历史质检报告做 200 条 gold set, 指标 ≥95% 一致率才上线', 'HIGH', 3, 5, 'QA', '["AI_AGENT"]', NULL, 360),
+    ('AI_AGENT', '{agent_name}智能体: 标签库随业务漂移, 准确率随时间下降', '建立季度标签库评审机制, 每月抽样 100 条做准确率监控', 'MEDIUM', 4, 3, 'TAG', '["AI_AGENT"]', NULL, 370),
+    ('AI_AGENT', '{agent_name}智能体: 财报语义误判导致决策错误', '每个判断结论强制附原文 span + 来源页码, 人工复核 5% 抽样', 'CRITICAL', 3, 5, 'FINREPT', '["AI_AGENT"]', NULL, 380),
+    ('AI_HALLUCINATION', 'AI 幻觉导致输出与事实不符', '全智能体统一接入来源标注中间件, 每次输出必带原文 span; 同任务多次执行结果做一致性比对', 'CRITICAL', 4, 5, NULL, '["AI_AGENT"]', '["可预测", "可追溯", "幻觉"]', 390);
+
+-- V4.26 end

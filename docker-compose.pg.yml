@@ -1,0 +1,34 @@
+# 本地 E2E 用:启 PG 16 + 后端(连 PG)
+# 用法: docker compose -f docker-compose.pg.yml up -d
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: pmo-pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pmo_pms
+      POSTGRES_USER: pmo_pms
+      POSTGRES_PASSWORD: pmo_pms_dev_2025
+      TZ: Asia/Shanghai
+    command:
+      - "postgres"
+      - "-c"
+      - "timezone=Asia/Shanghai"
+    ports:
+      - "55432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pmo_pms -d pmo_pms"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks: [pmo-pg-net]
+
+volumes:
+  pg_data:
+
+networks:
+  pmo-pg-net:
+    driver: bridge
