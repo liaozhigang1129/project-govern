@@ -230,30 +230,77 @@ jobs:
           fi
 
   # ========================================================================
-  # JOB 5: 汇总状态
+  # JOB 5: 文档规范检查(STATUS/WBS 双轨 + 文件头 + 死链接)
+  # ========================================================================
+  docs-lint:
+    name: 📚 Docs Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔍 Run docs-lint
+        run: |
+          set +e   # docs-lint 返回 1/2/0,只关心非零
+          bash scripts/docs-lint.sh docs
+          EXIT=$?
+          set -e
+          # exit 0 = 全绿;exit 1 = error(挡道);exit 2 = only warning(可允许)
+          if [ $EXIT -eq 1 ]; then
+            echo "❌ docs-lint 发现 error,挡道"
+            exit 1
+          elif [ $EXIT -eq 2 ]; then
+            echo "⚠️ docs-lint 仅 warning,不挡道"
+          else
+            echo "✅ docs-lint 全绿"
+          fi
+
+      - name: 📤 Upload docs-lint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-lint-output
+          path: .docs-lint-cache/
+          retention-days: 3
+          if-no-files-found: ignore
+
+  # ========================================================================
+  # JOB 6: 汇总状态
   # ========================================================================
   ci-status:
     name: 📋 CI Summary
     runs-on: ubuntu-latest
-    needs: [backend-test, backend-build, frontend-build, integration-smoke]
+    needs: [backend-test, backend-build, frontend-build, integration-smoke, docs-lint]
     if: always()
     steps:
       - name: Status
         run: |
-          if [ "${{ needs.backend-test.result }}" = "success" ] && \
-             [ "${{ needs.backend-build.result }}" = "success" ] && \
-             [ "${{ needs.frontend-build.result }}" = "success" ] && \
-             [ "${{ needs.integration-smoke.result }}" = "success" ]; then
+          RESULTS=(
+            "backend-test:${{ needs.backend-test.result }}"
+            "backend-build:${{ needs.backend-build.result }}"
+            "frontend-build:${{ needs.frontend-build.result }}"
+            "integration-smoke:${{ needs.integration-smoke.result }}"
+            "docs-lint:${{ needs.docs-lint.result }}"
+          )
+          FAILED=0
+          for r in "${RESULTS[@]}"; do
+            name="${r%%:*}"; status="${r#*:}"
+            case "$status" in
+              success|skipped) ;;
+              *) FAILED=1; echo "- ❌ $name: $status" >> $GITHUB_STEP_SUMMARY ;;
+            esac
+          done
+          if [ $FAILED -eq 0 ]; then
             echo "## 🎉 All CI jobs passed!" >> $GITHUB_STEP_SUMMARY
           else
             echo "## ❌ Some jobs failed" >> $GITHUB_STEP_SUMMARY
-            echo "- backend-test: ${{ needs.backend-test.result }}" >> $GITHUB_STEP_SUMMARY
-            echo "- backend-build: ${{ needs.backend-build.result }}" >> $GITHUB_STEP_SUMMARY
-            echo "- frontend-build: ${{ needs.frontend-build.result }}" >> $GITHUB_STEP_SUMMARY
-            echo "- integration-smoke: ${{ needs.integration-smoke.result }}" >> $GITHUB_STEP_SUMMARY
+            cat >> $GITHUB_STEP_SUMMARY <<'EOF'
+            EOF
             exit 1
           fi
           echo "### 📊 Coverage artifacts" >> $GITHUB_STEP_SUMMARY
           echo "- Backend JAR: see 'backend-jar'" >> $GITHUB_STEP_SUMMARY
           echo "- Frontend dist: see 'frontend-dist'" >> $GITHUB_STEP_SUMMARY
           echo "- Surefire reports: see 'backend-surefire-reports'" >> $GITHUB_STEP_SUMMARY
+          echo "- Docs lint: see 'docs-lint-output'" >> $GITHUB_STEP_SUMMARY
