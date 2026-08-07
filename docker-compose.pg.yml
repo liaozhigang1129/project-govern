@@ -3,12 +3,12 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: zhiyu-pg
+    container_name: project-govern-pg
     restart: unless-stopped
     environment:
-      POSTGRES_DB: zhiyu_pms
-      POSTGRES_USER: zhiyu_pms
-      POSTGRES_PASSWORD: zhiyu_dev_2025
+      POSTGRES_DB: project_govern
+      POSTGRES_USER: project_govern
+      POSTGRES_PASSWORD: project_govern_dev_2025
       TZ: Asia/Shanghai
     command:
       - "postgres"
@@ -19,16 +19,16 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U zhiyu_pms -d zhiyu_pms"]
+      test: ["CMD-SHELL", "pg_isready -U project_govern -d project_govern"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 20s
-    networks: [zhiyu-pg-net]
+    networks: [project-govern-pg-net]
 
 volumes:
   pg_data:
 
 networks:
-  zhiyu-pg-net:
+  project-govern-pg-net:
     driver: bridge

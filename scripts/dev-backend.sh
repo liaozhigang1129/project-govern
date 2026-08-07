@@ -20,8 +20,8 @@
 #   ./scripts/dev-backend.sh --port=9090      # 改端口 (本地多实例)
 #
 # 要求:
-#   - 数据库 / Mailpit 在 Docker 跑 (zhiyu-mysql / zhiyu-mailpit 容器)
-#   - backend/target/zhiyu-pms-backend.jar 已存在 (或传 --skip-build=false 触发 mvn package)
+#   - 数据库 / Mailpit 在 Docker 跑 (project-govern-mysql / project-govern-mailpit 容器)
+#   - backend/target/project-govern-backend.jar 已存在 (或传 --skip-build=false 触发 mvn package)
 #
 set -euo pipefail
 
@@ -37,7 +37,7 @@ KILL_OLD=true
 SKIP_BUILD=false
 SKIP_HEALTHCHECK=false
 PORT="${SERVER_PORT:-8088}"
-LOG_FILE="${PMO_BACKEND_LOG:-$HOME/Documents/zhiyu-pms/logs/backend.log}"
+LOG_FILE="${PMO_BACKEND_LOG:-$HOME/Documents/project-govern/logs/backend.log}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -59,7 +59,7 @@ done
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 BACKEND_DIR="$REPO_ROOT/backend"
-JAR="$BACKEND_DIR/target/zhiyu-pms-backend.jar"
+JAR="$BACKEND_DIR/target/project-govern-backend.jar"
 
 if [[ ! -d "$BACKEND_DIR" ]]; then
   err "找不到 backend 目录: $BACKEND_DIR"; exit 1
@@ -68,8 +68,8 @@ fi
 # --- 步骤 1: 杀老进程 ---
 if $KILL_OLD; then
   step "1. 清理遗留 java 进程"
-  # 找所有 java -jar.*zhiyu-pms-backend.jar 的 pid (排除 grep / 当前 shell)
-  PIDS=$(pgrep -f "java -jar.*zhiyu-pms-backend\.jar" || true)
+  # 找所有 java -jar.*project-govern-backend.jar 的 pid (排除 grep / 当前 shell)
+  PIDS=$(pgrep -f "java -jar.*project-govern-backend\.jar" || true)
   if [[ -n "$PIDS" ]]; then
     # 把 pid 自己 ($$) 和 grep 过滤掉
     FILTERED=""
@@ -82,7 +82,7 @@ if $KILL_OLD; then
       # 先 SIGTERM, 3 秒后还活着就 SIGKILL
       kill $FILTERED 2>/dev/null || true
       sleep 2
-      REMAIN=$(pgrep -f "java -jar.*zhiyu-pms-backend\.jar" || true)
+      REMAIN=$(pgrep -f "java -jar.*project-govern-backend\.jar" || true)
       if [[ -n "$REMAIN" ]]; then
         warn "老进程未退出, 强制 SIGKILL: $REMAIN"
         kill -9 $REMAIN 2>/dev/null || true
@@ -105,7 +105,7 @@ fi
 
 # --- 步骤 2: 打包 ---
 if ! $SKIP_BUILD; then
-  step "2. 重新打包 backend/target/zhiyu-pms-backend.jar"
+  step "2. 重新打包 backend/target/project-govern-backend.jar"
   cd "$BACKEND_DIR"
   if ! mvn -B -q -DskipTests package; then
     err "mvn package 失败"; exit 1
@@ -133,9 +133,9 @@ printf "  pid:  $$\n\n"
 cd "$BACKEND_DIR"
 exec java -jar \
   -Dspring.profiles.active=mysql \
-  -DSPRING_DATASOURCE_URL="${SPRING_DATASOURCE_URL:-jdbc:mysql://localhost:3306/zhiyu_pms?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=UTF-8}" \
-  -DSPRING_DATASOURCE_USERNAME="${SPRING_DATASOURCE_USERNAME:-zhiyu_pms}" \
-  -DSPRING_DATASOURCE_PASSWORD="${SPRING_DATASOURCE_PASSWORD:-zhiyu_pms_dev_2025}" \
+  -DSPRING_DATASOURCE_URL="${SPRING_DATASOURCE_URL:-jdbc:mysql://localhost:3306/project_govern?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=UTF-8}" \
+  -DSPRING_DATASOURCE_USERNAME="${SPRING_DATASOURCE_USERNAME:-project_govern}" \
+  -DSPRING_DATASOURCE_PASSWORD="${SPRING_DATASOURCE_PASSWORD:-project_govern_dev_2025}" \
   -DSPRING_MAIL_HOST="${SPRING_MAIL_HOST:-localhost}" \
   -DSPRING_MAIL_PORT="${SPRING_MAIL_PORT:-1025}" \
   -DPMO_MAIL_ENABLED="${PMO_MAIL_ENABLED:-true}" \

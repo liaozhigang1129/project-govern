@@ -148,7 +148,7 @@ frontend/src/
 - **Refresh Token**(30d):放 HttpOnly cookie,仅 `/api/auth/refresh` 端点使用
 - **黑名单**(`revoked_token` 表):登出 / 改密时主动失效,即使 token 未到期
 
-详见 `specs/legacy/zhiyu-mvp-design.md` §安全设计。
+详见 `specs/legacy/pmo-pms-mvp-design.md` §安全设计。
 
 ### 3.4 为什么审计日志走切面 + 异步写
 
@@ -208,7 +208,7 @@ frontend/src/
 - **实时计算**:每次查询都从 Timesheet × RoleRate 重算,P95 < 500ms,数据最新
 - **月度快照**:每月 1 号跑一次落 `cost_snapshot` 表,做历史趋势 / 财务对账
 
-两条链路并存,实时链路供 Dashboard / CostUserMonth 视图,快照链路供 Finance 3-way match。详见 `specs/legacy/zhiyu-cost-engine.md`。
+两条链路并存,实时链路供 Dashboard / CostUserMonth 视图,快照链路供 Finance 3-way match。详见 `specs/legacy/pmo-pms-cost-engine.md`。
 
 ### 3.10 为什么测试用三档(H2 / PG / MySQL)
 
@@ -331,7 +331,7 @@ docker compose up -d
 **不写**字段级契约(那是 `specs/`),只列**契约存放位置**:
 - **OpenAPI 3.0 存档**:`specs/openapi/openapi.json`(33 paths / 37 schemas / 10 tags)
 - **swagger UI 实时**:启动后端访问 `http://localhost:8088/api/swagger-ui.html`
-- **Postman 集合**:`testing/postman/zhiyu-pms.postman_collection.json`(29 请求 / 8 文件夹)
+- **Postman 集合**:`testing/postman/project-govern.postman_collection.json`(29 请求 / 8 文件夹)
 - **Shell smoke**:`testing/postman/smoke.sh`(16 端点,可进 CI)
 
 修改接口必须同步改 `specs/openapi/openapi.json`(随 PR 提交)。

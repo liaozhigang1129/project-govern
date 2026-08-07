@@ -1,7 +1,7 @@
 #!/bin/bash
 # ml_service 健康检查 + 自动重启
-LOG="/Users/lzg/Documents/zhiyu-pms/logs/healthcheck.log"
-PMO="/Users/lzg/Documents/zhiyu-pms"
+LOG="/Users/lzg/Documents/pmo-pms/logs/healthcheck.log"
+PMO="/Users/lzg/Documents/pmo-pms"
 PY="/opt/homebrew/opt/python@3.12/bin/python3.12"
 TS=$(date '+%Y-%m-%d %H:%M:%S')
 if ! curl -sf http://localhost:8000/health > /dev/null 2>&1; then

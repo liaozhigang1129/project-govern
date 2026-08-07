@@ -6,9 +6,9 @@
 
 ## 背景
 
-老仓库 (`/Users/lzg/Documents/zhiyu-pms`) 的 docs 目录里:
+老仓库 (`/Users/lzg/Documents/pmo-pms`) 的 docs 目录里:
 - 顶层 4 个 doc(`README.md` / `CHANGELOG.md` / `RELEASE-NOTES-v4.0.0.md` / `docs/*.md`)把"项目现状 / 任务进度 / 实现细节 / 版本历史"全混在一起;
-- `zhiyu-requirements/` 31 个子目录 + `A5-上线计划/` + `项目经营台账/` 等过程文件散落;
+- `pmo-pms-requirements/` 31 个子目录 + `A5-上线计划/` + `项目经营台账/` 等过程文件散落;
 - 没有任何"全局状态快照"机制,新代理 / 新评审读老仓库时只能从 `README.md` 一路猜。
 
 参考 sift (`/Users/lzg/github/sift/docs/`) 的规范:AGENTS.md 只放指针、docs/README.md 做文档地图、PRD/DESIGN/WBS/CHANGELOG 各管一摊。sift 的 AGENTS.md 内嵌了"项目现状"段落,但该段落实质是"全局状态"信息,与 AGENTS.md 的"指针与规则"定位不符。
@@ -43,5 +43,5 @@
 ## 影响
 
 - 代理默认上下文集(见 docs/README.md §"上下文预算")不变:`status: active | draft` 才加载。
-- 老 `docs/*.md`(`zhiyu-proposal.md` 等)按 sift 规范下沉到 `specs/legacy/`,作为历史规格指针保留,不再被默认上下文加载。
+- 老 `docs/*.md`(`pmo-pms-proposal.md` 等)按 sift 规范下沉到 `specs/legacy/`,作为历史规格指针保留,不再被默认上下文加载。
 - 本次会话产出:本 ADR(003) + `docs/STATUS.md` + `docs/WBS.md` 重写 + `AGENTS.md` 精简。

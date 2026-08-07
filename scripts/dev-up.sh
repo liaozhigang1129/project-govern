@@ -24,7 +24,7 @@
 #
 # 要求:
 #   - pnpm / java / mvn 都在 PATH
-#   - 数据库 / Mailpit 在 Docker 跑 (zhiyu-mysql / zhiyu-mailpit 容器)
+#   - 数据库 / Mailpit 在 Docker 跑 (project-govern-mysql / project-govern-mailpit 容器)
 #
 set -euo pipefail
 
@@ -127,18 +127,18 @@ start_backend() {
   # setpgid 之后 java / node 子进程都跟 dev-backend.sh 在同一组,
   # 我们给整个组发信号就能保证子进程也跟着退出
   setsid bash "$SCRIPT_DIR/dev-backend.sh" "${BACKEND_ARGS[@]}" \
-    > /tmp/zhiyu-backend.stdout 2>&1 &
+    > /tmp/project-govern-backend.stdout 2>&1 &
   BACKEND_PID=$!
-  ok "backend pid=$BACKEND_PID, 日志: /tmp/zhiyu-backend.stdout"
+  ok "backend pid=$BACKEND_PID, 日志: /tmp/project-govern-backend.stdout"
 }
 
 # --- 起 frontend (后台) ---
 start_frontend() {
   step "▶ 启动 frontend (后台)"
   cd "$FRONTEND_DIR"
-  setsid pnpm dev > /tmp/zhiyu-frontend.stdout 2>&1 &
+  setsid pnpm dev > /tmp/project-govern-frontend.stdout 2>&1 &
   FRONTEND_PID=$!
-  ok "frontend pid=$FRONTEND_PID, 日志: /tmp/zhiyu-frontend.stdout"
+  ok "frontend pid=$FRONTEND_PID, 日志: /tmp/project-govern-frontend.stdout"
 }
 
 $SKIP_BACKEND  || start_backend
@@ -172,13 +172,13 @@ wait_ready() {
 
 if [[ -n "$BACKEND_PID" ]]; then
   # Spring Boot 启动后一般会有 "Started ... in X.XXX seconds" / "Tomcat started on port"
-  wait_ready "backend"  "$BACKEND_PID" /tmp/zhiyu-backend.stdout  "(Started .*Application|Tomcat started on port)" 120 \
+  wait_ready "backend"  "$BACKEND_PID" /tmp/project-govern-backend.stdout  "(Started .*Application|Tomcat started on port)" 120 \
     || { cleanup; exit 1; }
 fi
 
 if [[ -n "$FRONTEND_PID" ]]; then
   # vite 启动后会有 "Local:   http://localhost:xxxx/"
-  wait_ready "frontend" "$FRONTEND_PID" /tmp/zhiyu-frontend.stdout "Local:.*http://localhost" 60 \
+  wait_ready "frontend" "$FRONTEND_PID" /tmp/project-govern-frontend.stdout "Local:.*http://localhost" 60 \
     || { cleanup; exit 1; }
 fi
 
@@ -192,13 +192,13 @@ printf "${GREEN}═════════════════════�
 # --- 把后台日志持续转发到当前 tty ---
 # 用 tail -F 跟随, 用户能实时看到两边输出, 又不阻塞我们的 wait
 if [[ -n "$BACKEND_PID" && -n "$FRONTEND_PID" ]]; then
-  tail -n +1 -F /tmp/zhiyu-backend.stdout /tmp/zhiyu-frontend.stdout &
+  tail -n +1 -F /tmp/project-govern-backend.stdout /tmp/project-govern-frontend.stdout &
   TAIL_PID=$!
 elif [[ -n "$BACKEND_PID" ]]; then
-  tail -n +1 -F /tmp/zhiyu-backend.stdout &
+  tail -n +1 -F /tmp/project-govern-backend.stdout &
   TAIL_PID=$!
 else
-  tail -n +1 -F /tmp/zhiyu-frontend.stdout &
+  tail -n +1 -F /tmp/project-govern-frontend.stdout &
   TAIL_PID=$!
 fi
 

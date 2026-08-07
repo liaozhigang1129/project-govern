@@ -25,7 +25,7 @@ export PMO_WECOM_SEND_URL=http://localhost:18080/wechat-work/send
 export PMO_DINGTALK_WEBHOOK=http://localhost:18080/dingtalk/webhook
 export PMO_FEISHU_WEBHOOK=http://localhost:18080/feishu/webhook
 mvn package -DskipTests
-nohup java -jar target/zhiyu-pms-backend.jar > /tmp/backend-im-smoke.log 2>&1 &
+nohup java -jar target/project-govern-backend.jar > /tmp/backend-im-smoke.log 2>&1 &
 ```
 
 > ⚠️ `PMO_WECOM_GETTOKEN_URL` / `PMO_WECOM_SEND_URL` / `PMO_DINGTALK_WEBHOOK` / `PMO_FEISHU_WEBHOOK` 走 `pmo.im.wechat-work.{gettoken-url,send-url}` 字段绑定,application.yml 已声明默认值。生产不设这些 env 时,自动走 `qyapi.weixin.qq.com` 官方地址。
@@ -35,7 +35,7 @@ nohup java -jar target/zhiyu-pms-backend.jar > /tmp/backend-im-smoke.log 2>&1 &
 脚本会自动启动。手动启动:
 
 ```bash
-cd /Users/lzg/Documents/zhiyu-pms
+cd /Users/lzg/Documents/pmo-pms
 python3 scripts/im-smoke/im_webhook_receiver.py --port 18080 --logdir logs
 ```
 

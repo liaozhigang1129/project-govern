@@ -57,7 +57,7 @@ bash scripts/commit-all-14.sh 1 2 3 4 5 6 7 8 9 10 11 12 13
 
 1. **`3}` 文件**:误建的文件名,在 c14 里。建议手动 `rm -rf 3}` 后再 commit
 2. **`uploads/`**:开发产物,建议加进 `.gitignore`,但目前未忽略
-3. **`zhiyu-requirements/P3-*`**:文档型,可能二进制,确认后保留
+3. **`pmo-pms-requirements/P3-*`**:文档型,可能二进制,确认后保留
 4. **`P2.C-gantt-axis-fix.md`**:历史修复记录,可与 docs 合并
 5. **MySQL 迁移滞后**:c13 里包含 V2.12/V2.13/V3.1/V4.1-V4.4,但实际上 MySQL 目录还没建这些 SQL;
    当前 c13.txt 只列了 V2.5-V4.0 的 MySQL SQL,后续补 MySQL 端 SQL 时单独再 commit

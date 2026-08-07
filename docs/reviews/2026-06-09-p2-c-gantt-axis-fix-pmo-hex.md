@@ -70,7 +70,7 @@ for (Milestone m : ms) {
 
 ```bash
 # 1) 数据无变更
-PGPASSWORD=zhiyu_pms_dev_2025 psql -h localhost -p 5432 -U zhiyu_pms -d zhiyu_pms \
+PGPASSWORD=project_govern_dev_2025 psql -h localhost -p 5432 -U project_govern -d project_govern \
   -c "SELECT count(*) FROM project; SELECT count(*) FROM milestone;"
 # → 18, 64 (未变)
 
@@ -130,7 +130,7 @@ rangeFrom/To,那里就是 bug 现场。
 ### 数据双库问题(顺手发现的真相)
 
 执行过程中发现:
-- `localhost:55432`(docker `zhiyu-pg` 容器):只有 4 个 e2e 项目,0 里程碑
+- `localhost:55432`(docker `project-govern-pg` 容器):只有 4 个 e2e 项目,0 里程碑
 - `localhost:5432`(本机 PostgreSQL 18):**18 个项目,64 里程碑,客户CRM 真实存在**
 
 后端 `application.yml` 默认连 5432。`docs/seeds/2026-06-09-e2e-gantt-probe.sql`

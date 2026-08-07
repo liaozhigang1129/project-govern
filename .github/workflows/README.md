@@ -1,6 +1,6 @@
 # 📋 CI / Release Workflows
 
-GitHub Actions 配置 — 知驭 ZhiYu 项目。
+GitHub Actions 配置 — project-govern 项目。
 
 ---
 
@@ -76,7 +76,7 @@ git tag -a v4.1.0 -m "V4.1.0 ..."
 git push origin v4.1.0
 
 # 3. GitHub 自动创建 Release
-#    → 浏览器打开 https://github.com/liaozhigang1129/zhiyu-pms/releases/tag/v4.1.0
+#    → 浏览器打开 https://github.com/liaozhigang1129/project-govern/releases/tag/v4.1.0
 ```
 
 ---

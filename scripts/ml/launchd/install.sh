@@ -3,7 +3,7 @@
 # 用法: ./install.sh {install|uninstall|status}
 set -e
 LAUNCH_DIR="$HOME/Library/LaunchAgents"
-PMO="/Users/lzg/Documents/zhiyu-pms"
+PMO="/Users/lzg/Documents/pmo-pms"
 SRC="$PMO/scripts/ml/launchd"
 mkdir -p "$LAUNCH_DIR" "$PMO/logs"
 

@@ -13,9 +13,9 @@
 # 环境变量(可覆盖默认值):
 #   PGHOST=localhost
 #   PGPORT=5432
-#   PGUSER=zhiyu_pms
+#   PGUSER=project_govern
 #   PGPASSWORD=***(必传,脚本内不 echo)
-#   PGDATABASE=zhiyu_pms
+#   PGDATABASE=project_govern
 #
 # 退出码:
 #   0 = 执行成功
@@ -35,8 +35,8 @@ SEED_DIR="$ROOT_DIR/docs/seeds"
 
 PGHOST="${PGHOST:-localhost}"
 PGPORT="${PGPORT:-5432}"
-PGUSER="${PGUSER:-zhiyu_pms}"
-PGDATABASE="${PGDATABASE:-zhiyu_pms}"
+PGUSER="${PGUSER:-project_govern}"
+PGDATABASE="${PGDATABASE:-project_govern}"
 # PGPASSWORD 由环境传入,脚本内不 echo
 
 SEED_FILE=""

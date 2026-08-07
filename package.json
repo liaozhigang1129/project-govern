@@ -1,5 +1,5 @@
 {
-  "name": "zhiyu-pms",
+  "name": "project-govern",
   "private": true,
   "scripts": {
     "e2e": "node scripts/e2e/run-all.mjs",
