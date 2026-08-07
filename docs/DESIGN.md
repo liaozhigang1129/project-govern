@@ -148,7 +148,7 @@ frontend/src/
 - **Refresh Token**(30d):放 HttpOnly cookie,仅 `/api/auth/refresh` 端点使用
 - **黑名单**(`revoked_token` 表):登出 / 改密时主动失效,即使 token 未到期
 
-详见 `specs/legacy/pmo-pms-mvp-design.md` §安全设计。
+详见 `specs/security.md`。
 
 ### 3.4 为什么审计日志走切面 + 异步写
 
@@ -208,7 +208,7 @@ frontend/src/
 - **实时计算**:每次查询都从 Timesheet × RoleRate 重算,P95 < 500ms,数据最新
 - **月度快照**:每月 1 号跑一次落 `cost_snapshot` 表,做历史趋势 / 财务对账
 
-两条链路并存,实时链路供 Dashboard / CostUserMonth 视图,快照链路供 Finance 3-way match。详见 `specs/legacy/pmo-pms-cost-engine.md`。
+两条链路并存,实时链路供 Dashboard / CostUserMonth 视图,快照链路供 Finance 3-way match。详见 `specs/cost-engine.md`。
 
 ### 3.10 为什么测试用三档(H2 / PG / MySQL)
 
@@ -280,7 +280,7 @@ docker compose up -d
 
 ## 5. 数据模型(高层视图)
 
-完整字段定义见 `specs/legacy/` 与 `drafts/扩展文档/A1-数据字典/`。此处只列**域**与**关键关系**:
+完整字段定义见 `specs/data-model.md` + `drafts/扩展文档/A1-数据字典/`。此处只列**域**与**关键关系**:
 
 ```
 ┌─ org 域 ────────────────┐

@@ -22,7 +22,7 @@ summary: WP-M5-02 预警控制器 + 触发器实现计划
 ### 1.2 范围内
 
 - `AlertController` 端点:`GET /api/alerts` / `GET /api/alerts/{id}` / `POST /api/alerts/{id}/ack` / `POST /api/alerts/{id}/resolve` / `GET /api/alerts/stats`
-- 6 类规则触发器(见 [specs/legacy/PRD-cost-control.md §3](../specs/legacy/PRD-cost-control.md)):
+- 6 类规则触发器(见 [specs/cost-control-prd.md §3](../specs/cost-control-prd.md)):
   1. `cost_overrun`:成本超支(月累计 > 预算 90%)
   2. `schedule_delay`:进度落后(实际完成 % < 计划完成 % - 10)
   3. `quality_issue`:质量事件(缺陷率 > 阈值)

@@ -9,7 +9,10 @@ summary: project-govern 产品需求(场景、状态模型、模块清单、成�
 
 > 本文档回答"做什么、为什么、做到什么程度",不回答"怎么实现"(那是 [DESIGN.md](DESIGN.md))与"接口契约长啥样"(那是 [specs/](specs/))。
 >
-> **当前版本基线**:v4.0.0(2026-06-13 release,`c45df49`)。本文为基线 PRD 重写,承接老仓库 `drafts/扩展文档/A1-数据字典/`、`A2-API规范/`、`A3-UI原型/`、`pmo-pms-proposal.md` 与 `PRD-cost-control.md` 的内容沉淀。
+> **当前版本基线**:v4.0.0(2026-06-13 release,`c45df49`)。本文为基线 PRD 重写,内容沉淀自:
+> - 老仓库 `drafts/扩展文档/A1-数据字典/` / `A2-API规范/` / `A3-UI原型/`
+> - 老规格 `pmo-pms-proposal.md` / `PRD-cost-control.md` / `pmo-pms-mvp-design.md` / `pmo-pms-cost-engine.md`
+> - 拆分后的 [`specs/cost-engine.md`](specs/cost-engine.md) 与 [`specs/cost-control-prd.md`](specs/cost-control-prd.md)
 
 ---
 
@@ -113,8 +116,8 @@ INTAKE → ANALYSIS → PROPOSAL → APPROVAL → KICKOFF → EXECUTION → CLOS
 
 | 模块 | 里程碑 | 状态 | 端点 | 文档 |
 |------|--------|------|------|------|
-| **项目主数据** | M1 | done | 5 | `specs/legacy/pmo-pms-mvp-design.md` §3 |
-| **立项三级审批** | M1 | done | 5 | `specs/legacy/pmo-pms-proposal.md` §3.1 |
+| **项目主数据** | M1 | done | 5 | `specs/architecture.md` §3 |
+| **立项三级审批** | M1 | done | 5 | `specs/architecture.md` §2 |
 | **里程碑 + 加权进度** | M1 | done | 5 | [README §4.2](../README.md) |
 | **Dashboard KPI** | M1 | done | 4 | `specs/openapi/openapi.json` |
 | **工时审批** | M2 | done | 5+ | `drafts/扩展文档/P1.5-收尾/P1.5-收尾一页纸.md` |
@@ -128,10 +131,10 @@ INTAKE → ANALYSIS → PROPOSAL → APPROVAL → KICKOFF → EXECUTION → CLOS
 
 | 模块 | 里程碑 | 状态 | 文档 |
 |------|--------|------|------|
-| **角色档(Role Rate)** | M4 | active 85% | `specs/legacy/pmo-pms-cost-engine.md` §2 |
+| **角色档(Role Rate)** | M4 | active 85% | `specs/cost-engine.md` §2 |
 | **成本引擎核心** | M4 | active 85% | 同上 §3 |
 | **财务-成本对账** | M4 | active 85% | 同上 §5 |
-| **预警实体 + 6 种子规则** | M5 | active 60% | `specs/legacy/PRD-cost-control.md` §3 |
+| **预警实体 + 6 种子规则** | M5 | active 60% | `specs/cost-control-prd.md` §3 |
 | **预警控制器** | M5 | active 60% | 同上 §4 |
 
 ### 4.3 集成主线(M6,active)
