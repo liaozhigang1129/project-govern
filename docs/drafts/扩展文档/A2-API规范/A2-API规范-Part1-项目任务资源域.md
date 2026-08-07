@@ -1,6 +1,6 @@
 # A2 OpenAPI 3.0 规范 Part1 — 总览 + 项目/任务/资源域
 
-> 文档名：`pmo-pms-api-v1.yaml`（规范导出）。本 Part 覆盖：A2.0 全局约定、错误模型、分页、鉴权、版本、限流、查询语言；A2.1 项目域；A2.2 工作项域；A2.3 资源域（人员/部门/资源调度）。
+> 文档名：`zhiyu-api-v1.yaml`（规范导出）。本 Part 覆盖：A2.0 全局约定、错误模型、分页、鉴权、版本、限流、查询语言；A2.1 项目域；A2.2 工作项域；A2.3 资源域（人员/部门/资源调度）。
 
 ## A2.0 全局约定
 
@@ -14,13 +14,13 @@ info:
   description: |
     PMO-PMS 开放 API。覆盖项目、任务、资源、成本、风险、文档、流程、报表全领域。
     所有接口需要 Bearer Token，遵循 OAuth 2.0。
-  contact: { name: PMO-PMS API Support, email: api@pmo-pms.example.com }
+  contact: { name: PMO-PMS API Support, email: api@zhiyu-pms.example.com }
   license: { name: Proprietary }
 servers:
-  - { url: https://api.pmo-pms.example.com/v1, description: Production }
-  - { url: https://api-staging.pmo-pms.example.com/v1, description: Staging }
+  - { url: https://api.zhiyu-pms.example.com/v1, description: Production }
+  - { url: https://api-staging.zhiyu-pms.example.com/v1, description: Staging }
 externalDocs:
-  url: https://docs.pmo-pms.example.com/api
+  url: https://docs.zhiyu-pms.example.com/api
 ```
 
 ### A2.0.2 通用请求头

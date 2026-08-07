@@ -3,9 +3,9 @@
 # 真正连 MySQL 用 --spring.profiles.active=mysql
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/pmo_pms?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=UTF-8}
-    username: ${SPRING_DATASOURCE_USERNAME:pmo_pms}
-    password: ${SPRING_DATASOURCE_PASSWORD:pmo_pms_dev_2025}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/zhiyu_pms?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=UTF-8}
+    username: ${SPRING_DATASOURCE_USERNAME:zhiyu_pms}
+    password: ${SPRING_DATASOURCE_PASSWORD:zhiyu_dev_2025}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:

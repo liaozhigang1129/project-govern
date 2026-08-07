@@ -4,9 +4,9 @@
 <dict>
     <key>Label</key><string>com.pmo.ai.healthcheck</string>
     <key>ProgramArguments</key>
-    <array><string>/Users/lzg/Documents/pmo-pms/scripts/ml/launchd/healthcheck.sh</string></array>
+    <array><string>/Users/lzg/Documents/zhiyu-pms/scripts/ml/launchd/healthcheck.sh</string></array>
     <key>StartInterval</key><integer>300</integer>
-    <key>StandardOutPath</key><string>/Users/lzg/Documents/pmo-pms/logs/healthcheck.log</string>
-    <key>StandardErrorPath</key><string>/Users/lzg/Documents/pmo-pms/logs/healthcheck.err</string>
+    <key>StandardOutPath</key><string>/Users/lzg/Documents/zhiyu-pms/logs/healthcheck.log</string>
+    <key>StandardErrorPath</key><string>/Users/lzg/Documents/zhiyu-pms/logs/healthcheck.err</string>
 </dict>
 </plist>

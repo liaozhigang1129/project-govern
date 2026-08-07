@@ -1,5 +1,5 @@
 -- V4.27 SOW Skill (PMI 7 阶段硬骨架) 持久化产物 (PostgreSQL 版)
--- 业务诉求: skill/pmo-pms v1.4.0 落地
+-- 业务诉求: skill/zhiyu v1.4.0 落地
 --   - PMI 7 阶段硬骨架 (WBS-1..WBS-7, 名字镜像 lifecyclePhases[])
 --   - 9 维 NFR 打标 (performance/security/availability/scalability/
 --     usability/maintainability/compliance/interoperability/dataIntegrity)

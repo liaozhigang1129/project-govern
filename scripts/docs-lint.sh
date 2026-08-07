@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# docs-lint.sh — PMO·PMS 文档规范检查
+# docs-lint.sh — 知驭 ZhiYu 文档规范检查
 #
 # 校验项:
 #   1. 文件头(--- status / created / summary ---)完整性

@@ -1,13 +1,13 @@
 services:
   mysql:
     image: mysql:8.0
-    container_name: pmo-mysql
+    container_name: zhiyu-mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root_dev_2025
-      MYSQL_DATABASE: pmo_pms
-      MYSQL_USER: pmo_pms
-      MYSQL_PASSWORD: pmo_pms_dev_2025
+      MYSQL_DATABASE: zhiyu_pms
+      MYSQL_USER: zhiyu_pms
+      MYSQL_PASSWORD: zhiyu_dev_2025
       TZ: Asia/Shanghai
     command:
       - --character-set-server=utf8mb4
@@ -23,14 +23,14 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
-    networks: [pmo-net]
+    networks: [zhiyu-net]
 
   backend:
     build:
       context: .
       dockerfile: deploy/docker/backend/Dockerfile
-    image: pmo-pms-backend:latest
-    container_name: pmo-backend
+    image: zhiyu-pms-backend:latest
+    container_name: zhiyu-backend
     restart: unless-stopped
     depends_on:
       mysql:
@@ -39,9 +39,9 @@ services:
         condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: mysql
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/pmo_pms?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8
-      SPRING_DATASOURCE_USERNAME: pmo_pms
-      SPRING_DATASOURCE_PASSWORD: pmo_pms_dev_2025
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/zhiyu_pms?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8
+      SPRING_DATASOURCE_USERNAME: zhiyu_pms
+      SPRING_DATASOURCE_PASSWORD: zhiyu_dev_2025
       SPRING_JPA_HIBERNATE_DDL_AUTO: none
       SPRING_FLYWAY_ENABLED: "true"
       PMO_CORS_ALLOWED_ORIGINS: "http://localhost,http://localhost:8080,http://localhost:5173"
@@ -69,39 +69,39 @@ services:
       retries: 8
       start_period: 60s
     volumes:
-      - backend_uploads:/app/uploads
-    networks: [pmo-net]
+      - zhiyu_uploads:/app/uploads
+    networks: [zhiyu-net]
 
   frontend:
     build:
       context: .
       dockerfile: deploy/docker/frontend/Dockerfile
-    image: pmo-pms-frontend:latest
-    container_name: pmo-frontend
+    image: zhiyu-pms-frontend:latest
+    container_name: zhiyu-frontend
     restart: unless-stopped
     depends_on:
       backend:
         condition: service_healthy
     ports:
       - "8080:80"
-    networks: [pmo-net]
+    networks: [zhiyu-net]
 
   # Dev SMTP catch-all;Web UI 看邮件 http://localhost:8025
   # 用 mailpit(axllent)替换 mailhog,支持 ARM64 镜像 + auth-off 默认
   mailpit:
     image: axllent/mailpit:latest
     command: ["--smtp","0.0.0.0:1025","--listen","0.0.0.0:8025"]
-    container_name: pmo-mailpit
+    container_name: zhiyu-mailpit
     restart: unless-stopped
     ports:
       - "1025:1025"   # SMTP
       - "8025:8025"   # Web UI
-    networks: [pmo-net]
+    networks: [zhiyu-net]
 
 volumes:
   mysql_data:
-  backend_uploads:
+  zhiyu_uploads:
 
 networks:
-  pmo-net:
+  zhiyu-net:
     driver: bridge

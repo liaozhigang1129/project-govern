@@ -1,7 +1,7 @@
 # A2 OpenAPI 3.0 规范 Part2 — 成本/工时/风险/变更/缺陷/文档/流程/报表/Webhook
 
 > 本 Part 涵盖 A2.4 ~ A2.9 全部剩余域。
-> 文件命名建议：`pmo-pms-api-v1.yaml`（与 Part1 合并为单一规范）。
+> 文件命名建议：`zhiyu-api-v1.yaml`（与 Part1 合并为单一规范）。
 
 ---
 

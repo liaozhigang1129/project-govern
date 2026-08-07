@@ -1,4 +1,4 @@
-# PMO PMS Seed 数据集
+# 知驭 ZhiYu Seed 数据集
 
 > 收集**手动执行**的种子数据 SQL,用于演示 / 培训 / 联调 / 补数据。
 > 区别于 Flyway 迁移(`backend/src/main/resources/db/migration-pg/`),本目录
@@ -28,10 +28,10 @@
 
 ```bash
 # 标准方式
-psql -h <host> -U pmo_pms -d pmo_pms -f <seed-file>.sql
+psql -h <host> -U zhiyu_pms -d zhiyu_pms -f <seed-file>.sql
 
 # 事务+回滚式(先 dry-run 看影响行数)
-psql -h <host> -U pmo_pms -d pmo_pms --single-transaction --variable=ON_ERROR_STOP=1 \
+psql -h <host> -U zhiyu_pms -d zhiyu_pms --single-transaction --variable=ON_ERROR_STOP=1 \
   -f <seed-file>.sql
 ```
 

@@ -7,7 +7,7 @@ summary: 文档目录规划、命名约定、上下文加载规则(STATUS/WBS �
 
 # docs/ — 文档目录
 
-本目录是 PMO·PMS 项目所有文档的统一入口。文档同时服务两类读者:**人**(评审、决策、回溯)和 **AI 编码代理**(实现时的上下文来源)。目录规划围绕一个原则:**单一事实来源,互相引用,不复制内容**。
+本目录是 知驭 ZhiYu 项目所有文档的统一入口。文档同时服务两类读者:**人**(评审、决策、回溯)和 **AI 编码代理**(实现时的上下文来源)。目录规划围绕一个原则:**单一事实来源,互相引用,不复制内容**。
 
 > 本项目在 Sift 文档规范基础上做了两项调整(见 ADR [003](decisions/003-docs-status-wbs-split.md)):
 > 1. 新增 [`STATUS.md`](STATUS.md) 作为全局项目计划执行情况的**单一事实来源**;
@@ -172,14 +172,14 @@ summary: 一句话说明本文档回答什么问题(30 字以内)
 ### specs/(待补充)
 
 - `openapi/openapi.json` — OpenAPI 3.0 契约存档(33 paths / 37 schemas / 10 tags)
-- `legacy/pmo-pms-proposal.md`(active)— v4.0.0 立项提案
-- `legacy/pmo-pms-mvp-design.md`(active)— v4.0.0 MVP 技术设计
-- `legacy/pmo-pms-cost-engine.md`(active)— 成本引擎设计
+- `legacy/zhiyu-proposal.md`(active)— v4.0.0 立项提案
+- `legacy/zhiyu-mvp-design.md`(active)— v4.0.0 MVP 技术设计
+- `legacy/zhiyu-cost-engine.md`(active)— 成本引擎设计
 - `legacy/PRD-cost-control.md`(active)— 成本控制 PRD
 
 ### drafts/(历史沉淀)
 
-- `扩展文档/` — 老 `pmo-pms-requirements/` 31 个子目录归档(状态:`superseded`)
+- `扩展文档/` — 老 `zhiyu-requirements/` 31 个子目录归档(状态:`superseded`)
 - `扩展文档/A1-数据字典/`、`A2-API规范/`、`A3-UI原型/`、`A4-数据迁移/`、`A5-上线计划/`、`A6-培训赋能/` — 扩展文档
 - `seeds/` — 种子数据 SQL
 - `archive/workflows/` — 历史 workflow 文件

@@ -1,6 +1,6 @@
-# 📋 Changelog — PMO · PMS
+# 📋 Changelog — 知驭 ZhiYu
 
-All notable changes to **pmo-pms** (PMO 项目管理系统) will be documented in this file.
+All notable changes to **zhiyu-pms** (知驭 · 项目治理平台) will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -13,6 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 品牌重命名(2026-08-07)
+
+- **重命名**:系统由 `pmo-pms` (PMO Project Management System) 重命名为 **知驭 ZhiYu** —— 治理视角的项目全生命周期管理平台。
+  - 中文名 **知驭**:知(洞察)驭(掌控),寓意 PMO 洞察项目、掌控全局
+  - 包路径 `com.company.pmo` → `com.company.zhiyu`
+  - Maven artifact `pmo-pms-backend` → `zhiyu-pms-backend`
+  - Spring 应用名 `zhiyu-pms-backend`
+  - 数据库 `pmo_pms` → `zhiyu_pms`、DB 密码同步更新
+  - Docker 镜像/容器/网络: `pmo-mysql / pmo-backend / pmo-frontend / pmo-mailpit / pmo-pg / pmo-net` → `zhiyu-*`
+  - JWT dev secret、邮件签名、Postman 集合、环境变量同步更新
+  - Legacy 设计文档重命名:`pmo-pms-proposal.md` → `zhiyu-proposal.md` 等
+- **影响范围**:514 个文件(1436 行新增 / 1434 行删除),后端 `mvn compile + test-compile` BUILD SUCCESS,399 主源 + 22 测试源全部就绪。
+
 ### 文档规范整改(2026-08-07)
 
 - **新增** [`docs/STATUS.md`](STATUS.md):全局项目计划执行情况的单一事实来源
@@ -22,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **新增** [`docs/README.md`](README.md):文档地图与命名约定
 - **新增** 3 份 ADR:`001-spring-boot-vue-baseline.md`、`002-mysql-pg-dual-track.md`、`003-docs-status-wbs-split.md`
 - **精简** `AGENTS.md`:项目现状段下沉到 STATUS.md,AGENTS.md 只留指针
-- **重组** docs/ 目录结构,按 sift 规范十个子目录落地;老 `pmo-pms-requirements/` 31 个子目录归档到 `drafts/扩展文档/`
+- **重组** docs/ 目录结构,按 sift 规范十个子目录落地;老 `zhiyu-requirements/` 31 个子目录归档到 `drafts/扩展文档/`
 
 ---
 

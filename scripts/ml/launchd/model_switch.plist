@@ -7,12 +7,12 @@
     <array>
         <string>/bin/bash</string>
         <string>-c</string>
-        <string>pkill -f ml_service.py 2&gt;/dev/null; sleep 2; /opt/homebrew/opt/python@3.12/bin/python3.12 /Users/lzg/Documents/pmo-pms/scripts/ml/ml_service.py --model /Users/lzg/Documents/pmo-pms/models/milestone_lgbm_latest.pkl --port 8000 >> /Users/lzg/Documents/pmo-pms/logs/ml_service.log 2&gt;&amp;1</string>
+        <string>pkill -f ml_service.py 2&gt;/dev/null; sleep 2; /opt/homebrew/opt/python@3.12/bin/python3.12 /Users/lzg/Documents/zhiyu-pms/scripts/ml/ml_service.py --model /Users/lzg/Documents/zhiyu-pms/models/milestone_lgbm_latest.pkl --port 8000 >> /Users/lzg/Documents/zhiyu-pms/logs/ml_service.log 2&gt;&amp;1</string>
     </array>
-    <key>WorkingDirectory</key><string>/Users/lzg/Documents/pmo-pms</string>
+    <key>WorkingDirectory</key><string>/Users/lzg/Documents/zhiyu-pms</string>
     <key>StartCalendarInterval</key>
     <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>3</integer><key>Minute</key><integer>30</integer></dict>
-    <key>StandardOutPath</key><string>/Users/lzg/Documents/pmo-pms/logs/model_switch.log</string>
-    <key>StandardErrorPath</key><string>/Users/lzg/Documents/pmo-pms/logs/model_switch.err</string>
+    <key>StandardOutPath</key><string>/Users/lzg/Documents/zhiyu-pms/logs/model_switch.log</string>
+    <key>StandardErrorPath</key><string>/Users/lzg/Documents/zhiyu-pms/logs/model_switch.err</string>
 </dict>
 </plist>

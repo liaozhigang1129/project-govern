@@ -2,7 +2,7 @@
 // 用法: npx cypress run (需先装 cypress: pnpm add -D cypress)
 // 注意:CI 默认跑 scripts/e2e/*.test.mjs(零依赖),cypress 只是开发者可选 GUI
 
-describe('PMO PMS - 3 页面可访问性', () => {
+describe('知驭 ZhiYu - 3 页面可访问性', () => {
   before(() => {
     // 登出(如有)
     cy.clearLocalStorage()

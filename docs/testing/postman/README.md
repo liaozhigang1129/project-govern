@@ -1,4 +1,4 @@
-# PMO PMS API 测试集
+# 知驭 ZhiYu API 测试集
 
 > 一套**双重测试套件**:
 > 1. **Postman Collection** (29 个请求,带断言 + JWT 自动注入)
@@ -7,12 +7,12 @@
 ## 1. Postman 集
 
 ### 文件
-- `pmo-pms.postman_collection.json` — 8 个文件夹 / 29 个请求 / 自动断言 `code == 0`
-- `pmo-pms.postman_environment.json` — 环境变量(baseUrl / token)
+- `zhiyu-pms.postman_collection.json` — 8 个文件夹 / 29 个请求 / 自动断言 `code == 0`
+- `zhiyu-pms.postman_environment.json` — 环境变量(baseUrl / token)
 
 ### 导入步骤
 1. Postman → **Import** → 拖入上面两个 JSON
-2. 右上角环境选择器选 **"PMO PMS Local"**
+2. 右上角环境选择器选 **"知驭 ZhiYu Local"**
 3. 启动后端:
    ```bash
    cd backend && mvn spring-boot:run
@@ -62,7 +62,7 @@ chmod +x smoke.sh
 ```yaml
 - name: API smoke
   run: |
-    java -jar backend/target/pmo-pms-backend.jar &
+    java -jar backend/target/zhiyu-pms-backend.jar &
     sleep 20  # 等 Spring 启动
     chmod +x docs/api-testing/smoke.sh
     docs/api-testing/smoke.sh
@@ -74,8 +74,8 @@ chmod +x smoke.sh
 
 ```bash
 npm install -g newman newman-reporter-htmlextra
-newman run pmo-pms.postman_collection.json \
-  -e pmo-pms.postman_environment.json \
+newman run zhiyu-pms.postman_collection.json \
+  -e zhiyu-pms.postman_environment.json \
   --reporters cli,htmlextra \
   --reporter-htmlextra-export report.html
 ```

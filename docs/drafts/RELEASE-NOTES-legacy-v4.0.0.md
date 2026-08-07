@@ -231,5 +231,5 @@ Private repository · All rights reserved.
 
 > **Full Changelog**: [CHANGELOG.md](./CHANGELOG.md)
 > **Project README**: [README.md](./README.md)
-> **成本引擎设计**: [docs/pmo-pms-cost-engine.md](./docs/pmo-pms-cost-engine.md)
+> **成本引擎设计**: [docs/zhiyu-cost-engine.md](./docs/zhiyu-cost-engine.md)
 > **PRD 成本控制**: [docs/PRD-cost-control.md](./docs/PRD-cost-control.md)

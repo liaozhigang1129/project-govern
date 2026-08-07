@@ -1,12 +1,12 @@
 spring:
   application:
-    name: pmo-pms-backend
+    name: zhiyu-pms-backend
   main:
     allow-bean-definition-overriding: true
   datasource:
-    url: jdbc:postgresql://localhost:5432/pmo_pms
-    username: pmo_pms
-    password: pmo_pms_dev_2025
+    url: jdbc:postgresql://localhost:5432/zhiyu_pms
+    username: zhiyu_pms
+    password: zhiyu_dev_2025
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -62,7 +62,7 @@ server:
 pmo:
   security:
     jwt:
-      secret: pmo-pms-dev-secret-please-change-in-production-2025-min-32-bytes
+      secret: zhiyu-dev-secret-please-change-in-production-2025-min-32-bytes
       # 2h access + 30d refresh 双 token 模式(P1.5-c)
       access-expiration-hours: ${PMO_JWT_ACCESS_HOURS:2}
       refresh-expiration-days: ${PMO_JWT_REFRESH_DAYS:30}
@@ -70,7 +70,7 @@ pmo:
     allowed-origins: http://localhost:5173,http://localhost:3000
   mail:
     enabled: ${PMO_MAIL_ENABLED:false}    # 默认关闭(避免无 SMTP 时启动失败)
-    from: ${PMO_MAIL_FROM:PMO PMS <noreply@pmo.local>}
+    from: ${PMO_MAIL_FROM:知驭 ZhiYu <noreply@zhiyu.local>}
     cc-pmo: true
     async: true
     approve-step-emails:
@@ -146,7 +146,7 @@ pmo:
 logging:
   level:
     root: INFO
-    com.company.pmo: DEBUG
+    com.company.zhiyu: DEBUG
     org.hibernate.SQL: TRACE
     org.hibernate.orm.jdbc.bind: TRACE
     org.hibernate.resource.jdbc: DEBUG

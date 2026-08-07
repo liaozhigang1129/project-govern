@@ -1,4 +1,4 @@
-# PMO Project Management System
+# 知驭 ZhiYu — 项目治理平台
 
 > 治理视角下的项目全生命周期管理:**立项审批 → 项目执行 → 里程碑跟踪 → 健康度监控 → 成本 / 工时 / 风险 / 通知**。
 
@@ -97,7 +97,7 @@ docker compose up -d     # mysql + backend + frontend 一起拉起
 ## 三、目录结构
 
 ```
-pmo-pms/
+zhiyu-pms/
 ├── backend/                            # Spring Boot 后端
 │   ├── pom.xml
 │   └── src/main/java/com/company/pmo/  # 19 个业务模块
@@ -188,7 +188,7 @@ pmo-pms/
 
 - 源文件: [`docs/specs/openapi/openapi.json`](docs/specs/openapi/openapi.json)
 - Swagger UI: 启动后端后访问 <http://localhost:8088/api/swagger-ui.html>
-- Postman 一键导入: [`docs/testing/postman/pmo-pms.postman_collection.json`](docs/testing/postman/pmo-pms.postman_collection.json)
+- Postman 一键导入: [`docs/testing/postman/zhiyu.postman_collection.json`](docs/testing/postman/zhiyu.postman_collection.json)
 
 ### 5.1 业务响应约定
 
@@ -222,7 +222,7 @@ Authorization: Bearer <token>
 ### 6.2 一键启动(推荐)
 
 ```bash
-git clone <repo> && cd pmo-pms
+git clone <repo> && cd zhiyu-pms
 docker compose up -d
 # 等待 ~60s (MySQL + Flyway + Spring Boot 启动)
 docker compose ps
@@ -281,7 +281,7 @@ pnpm e2e
 
 ### 7.4 Postman GUI
 
-导入 [`docs/testing/postman/pmo-pms.postman_collection.json`](docs/testing/postman/pmo-pms.postman_collection.json) + 同目录 `*environment.json`,用 **Collection Runner** 跑完 29 个请求。
+导入 [`docs/testing/postman/zhiyu.postman_collection.json`](docs/testing/postman/zhiyu.postman_collection.json) + 同目录 `*environment.json`,用 **Collection Runner** 跑完 29 个请求。
 
 ### 7.5 文档规范检查
 
@@ -350,7 +350,7 @@ docker compose up -d
 ```bash
 # 1. 把 docker-compose.yml 里的 mysql 服务删掉
 # 2. 修改 backend 环境变量指向 RDS
-SPRING_DATASOURCE_URL=jdbc:mysql://rds.example.com:3306/pmo_pms
+SPRING_DATASOURCE_URL=jdbc:mysql://rds.example.com:3306/zhiyu_pms
 SPRING_DATASOURCE_USERNAME=pmo_app
 SPRING_DATASOURCE_PASSWORD=<from-secret-manager>
 

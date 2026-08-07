@@ -40,7 +40,7 @@
 
 ```bash
 # 启动后端
-java -jar backend/target/pmo-pms-backend.jar
+java -jar backend/target/zhiyu-pms-backend.jar
 
 # 抓取
 TOKEN=$(curl -s -X POST http://localhost:8088/api/auth/login \

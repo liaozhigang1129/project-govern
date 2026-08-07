@@ -35,14 +35,14 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 
 - **前置依赖**:无
 - **验收标准**:项目创建/查询/更新/软删可用,编码唯一性约束生效
-- **Spec**:见 `specs/legacy/pmo-pms-proposal.md` §3.1、`specs/legacy/pmo-pms-mvp-design.md` §3
+- **Spec**:见 `specs/legacy/zhiyu-proposal.md` §3.1、`specs/legacy/zhiyu-mvp-design.md` §3
 - **Plan**:—
 
 ### WP-M1-02 立项三级审批状态机
 
 - **前置依赖**:WP-M1-01
 - **验收标准**:DEPT_LEAD → PMO → EXEC 三级流转,驳回可回到 PENDING DEPT_LEAD
-- **Spec**:见 [README.md](../README.md) §4.1 + `specs/legacy/pmo-pms-mvp-design.md` §3.2
+- **Spec**:见 [README.md](../README.md) §4.1 + `specs/legacy/zhiyu-mvp-design.md` §3.2
 - **Plan**:—
 
 ### WP-M1-03 里程碑 + 加权进度
@@ -130,21 +130,21 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 
 - **前置依赖**:WP-M2-01
 - **验收标准**:RoleRate 表 + 管理端点,部门/角色双维度
-- **Spec**:见 `specs/legacy/pmo-pms-cost-engine.md` §2
+- **Spec**:见 `specs/legacy/zhiyu-cost-engine.md` §2
 - **Plan**:—
 
 ### WP-M4-02 成本引擎核心
 
 - **前置依赖**:WP-M2-01、WP-M4-01
 - **验收标准**:Timesheet × RoleRate → CostItem 实时计算,月度快照持久化
-- **Spec**:见 `specs/legacy/pmo-pms-cost-engine.md` §3
+- **Spec**:见 `specs/legacy/zhiyu-cost-engine.md` §3
 - **Plan**:—
 
 ### WP-M4-03 财务-成本对账
 
 - **前置依赖**:WP-M4-02
 - **验收标准**:合同 ↔ 发票 ↔ 付款 ↔ 成本 3-way match 闭环,差异告警
-- **Spec**:见 `specs/legacy/pmo-pms-cost-engine.md` §5
+- **Spec**:见 `specs/legacy/zhiyu-cost-engine.md` §5
 - **Plan**:— **【当前阻塞:对账口径未对齐,R-001】**
 
 ---

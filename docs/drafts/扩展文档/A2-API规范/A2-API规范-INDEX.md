@@ -199,10 +199,10 @@ tags:
 
 | 语言 | 包名 | 维护方 |
 | --- | --- | --- |
-| TypeScript | `@pmo-pms/sdk-js` | 官方 |
-| Java | `com.pmo-pms:sdk-java` | 官方 |
-| Python | `pmo-pms-sdk` | 官方 |
-| Go | `github.com/pmo-pms/sdk-go` | 官方 |
+| TypeScript | `@zhiyu-pms/sdk-js` | 官方 |
+| Java | `com.zhiyu-pms:sdk-java` | 官方 |
+| Python | `zhiyu-sdk` | 官方 |
+| Go | `github.com/zhiyu-pms/sdk-go` | 官方 |
 
 ### 2.17.2 错误处理模板
 

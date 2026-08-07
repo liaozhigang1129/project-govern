@@ -32,7 +32,7 @@ V1.6__timesheet.sql 里 `CREATE OR REPLACE VIEW v_active_user` 是幂等的,
 
 ```bash
 # 1) 健康校验
-PGPASSWORD=pmo_pms_dev_2025 bash scripts/db-views-healthcheck.sh
+PGPASSWORD=zhiyu_pms_dev_2025 bash scripts/db-views-healthcheck.sh
 # ✅ 视图健康: v_active_user / v_user_weekly_load 均存在
 # ✅ v_active_user 可查询,WorkloadService 启动无忧
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PMO PMS API 烟雾测试 - 16 个核心调用,需先启动后端 (端口 8088)
+# 知驭 ZhiYu API 烟雾测试 - 16 个核心调用,需先启动后端 (端口 8088)
 # 用法: chmod +x smoke.sh && ./smoke.sh
 set -euo pipefail
 BASE='http://localhost:8088/api'

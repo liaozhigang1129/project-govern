@@ -12,7 +12,7 @@ RUN mvn -s .mvn-settings.xml -B -q package -DskipTests
 FROM eclipse-temurin:21-jre-alpine
 RUN addgroup -S pmo && adduser -S pmo -G pmo
 WORKDIR /app
-COPY --from=build /workspace/target/pmo-pms-backend.jar app.jar
+COPY --from=build /workspace/target/zhiyu-pms-backend.jar app.jar
 RUN mkdir -p /app/uploads && chown -R pmo:pmo /app
 USER pmo
 EXPOSE 8088

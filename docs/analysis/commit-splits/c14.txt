@@ -1,10 +1,10 @@
-pmo-pms-requirements/P3-项目成本管理-业务规划.md
-pmo-pms-requirements/P3plus-v2-立项/
+zhiyu-requirements/P3-项目成本管理-业务规划.md
+zhiyu-requirements/P3plus-v2-立项/
 3}
 Makefile
 P2.C-gantt-axis-fix.md
 docs/seeds/
-pmo-pms-requirements/P3-WBS-EVM-Risk-PRD/
+zhiyu-requirements/P3-WBS-EVM-Risk-PRD/
 scripts/commit-fix-test-green.sh
 scripts/seed-crm-gantt.sh
 scripts/seed-initiation-buliao.sh

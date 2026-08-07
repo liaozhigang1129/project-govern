@@ -264,7 +264,7 @@ US-8 [DOER] 作为开发, 我要打开 WBS 任务详情, 看自己的任务和�
 
 ## 9. 关联文档
 
-- 立项 PRD: `pmo-pms-requirements/03-项目管理/03-项目管理模块.md`
-- 数据字典: `pmo-pms-requirements/A1-数据字典/`
-- API 规范: `pmo-pms-requirements/A2-API规范/`
+- 立项 PRD: `zhiyu-requirements/03-项目管理/03-项目管理模块.md`
+- 数据字典: `zhiyu-requirements/A1-数据字典/`
+- API 规范: `zhiyu-requirements/A2-API规范/`
 - 后续: PR-2 (数据模型) / PR-3 (核心功能) / PR-4 (可视化) / PR-5 (API)

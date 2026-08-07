@@ -437,7 +437,7 @@
 
 📣 反馈渠道：
    - 飞书群：[PMS 上线项目群]
-   - 邮箱：pmo-pms@example.com
+   - 邮箱：zhiyu-pms@example.com
    - 热线：400-xxx-xxxx
 
 👤 Owner: PMO 总监 张三 | v1.0 | 2025-01-01 09:00
@@ -764,7 +764,7 @@
 🙏 感谢：切流指挥部 + 全 BU 值班 + 客服 + 全员
 
 📊 战时报告：<链接>
-📣 反馈：pmo-pms@example.com
+📣 反馈：zhiyu-pms@example.com
 
 👤 Owner: PMO 总监 张三 | v1.0 | 2025-XX-XX 09:00
 ```

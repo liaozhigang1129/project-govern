@@ -1,4 +1,4 @@
-# PMO PMS 根目录 Makefile
+# 知驭 ZhiYu 根目录 Makefile
 # 一键跑开发 / 测试 / 部署 / seed 等常用任务
 # 用法: make <target>  或  make help
 
@@ -15,8 +15,8 @@ SHELL         := /bin/bash
 # ---------------------------------------------------------------
 PGHOST     ?= localhost
 PGPORT     ?= 5432
-PGUSER     ?= pmo_pms
-PGDATABASE ?= pmo_pms
+PGUSER     ?= zhiyu_pms
+PGDATABASE ?= zhiyu_pms
 # PGPASSWORD 走环境变量,Makefile 不出现明文
 
 # ---------------------------------------------------------------

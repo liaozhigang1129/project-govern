@@ -7,8 +7,8 @@
 #
 # 用法:
 #   bash scripts/db-views-healthcheck.sh                 # 用默认值
-#   PGHOST=localhost PGPORT=5432 PGUSER=pmo_pms \
-#   PGPASSWORD=pmo_pms_dev_2025 PGDATABASE=pmo_pms \
+#   PGHOST=localhost PGPORT=5432 PGUSER=zhiyu_pms \
+#   PGPASSWORD=zhiyu_pms_dev_2025 PGDATABASE=zhiyu_pms \
 #       bash scripts/db-views-healthcheck.sh
 #
 # 退出码:
@@ -20,8 +20,8 @@ set -uo pipefail
 
 PGHOST="${PGHOST:-localhost}"
 PGPORT="${PGPORT:-5432}"
-PGUSER="${PGUSER:-pmo_pms}"
-PGDATABASE="${PGDATABASE:-pmo_pms}"
+PGUSER="${PGUSER:-zhiyu_pms}"
+PGDATABASE="${PGDATABASE:-zhiyu_pms}"
 # PGPASSWORD 由环境传入,脚本内不 echo
 
 if ! command -v psql >/dev/null 2>&1; then

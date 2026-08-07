@@ -131,6 +131,6 @@ COMMENT ON VIEW v_dept_cost IS 'F2 部门×月成本: 头部成本结构 + 人�
 -- ============================================================
 -- 授权
 -- ============================================================
-GRANT SELECT ON v_project_cost TO pmo_pms;
-GRANT SELECT ON v_phase_cost   TO pmo_pms;
-GRANT SELECT ON v_dept_cost    TO pmo_pms;
+GRANT SELECT ON v_project_cost TO zhiyu_pms;
+GRANT SELECT ON v_phase_cost   TO zhiyu_pms;
+GRANT SELECT ON v_dept_cost    TO zhiyu_pms;

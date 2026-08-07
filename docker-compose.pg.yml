@@ -3,12 +3,12 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: pmo-pg
+    container_name: zhiyu-pg
     restart: unless-stopped
     environment:
-      POSTGRES_DB: pmo_pms
-      POSTGRES_USER: pmo_pms
-      POSTGRES_PASSWORD: pmo_pms_dev_2025
+      POSTGRES_DB: zhiyu_pms
+      POSTGRES_USER: zhiyu_pms
+      POSTGRES_PASSWORD: zhiyu_dev_2025
       TZ: Asia/Shanghai
     command:
       - "postgres"
@@ -19,16 +19,16 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U pmo_pms -d pmo_pms"]
+      test: ["CMD-SHELL", "pg_isready -U zhiyu_pms -d zhiyu_pms"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 20s
-    networks: [pmo-pg-net]
+    networks: [zhiyu-pg-net]
 
 volumes:
   pg_data:
 
 networks:
-  pmo-pg-net:
+  zhiyu-pg-net:
     driver: bridge

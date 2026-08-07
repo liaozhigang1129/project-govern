@@ -1,6 +1,6 @@
 # 📋 Changelog — PMO · PMS
 
-All notable changes to **pmo-pms** (PMO 项目管理系统) will be documented in this file.
+All notable changes to **zhiyu-pms** (PMO 项目管理系统) will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -148,8 +148,8 @@ v4.0.0-alert-data ← V4.3 预警数据层 (a3ffa2e)
 
 ### 📦 技术细节
 
-- **后端 jar** 已 docker cp 到 `pmo-backend:/app/app.jar` 并重启加载
-- **前端 dist** 已 docker cp 到 `pmo-frontend:/usr/share/nginx/html/assets/` 并 `nginx -s reload`
+- **后端 jar** 已 docker cp 到 `zhiyu-backend:/app/app.jar` 并重启加载
+- **前端 dist** 已 docker cp 到 `zhiyu-frontend:/usr/share/nginx/html/assets/` 并 `nginx -s reload`
 - **git**: `b3572fc feat(initiation): V4.19 立项向导资源派遣/风险/预算 全面联动`
 
 ### 🧪 E2E 验证记录
