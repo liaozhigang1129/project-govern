@@ -1,7 +1,7 @@
 # PMO 项目管理系统 — MVP 技术设计 (Design)
 
-> 文件: `zhiyu-mvp-design.md` · 版本: v0.1.0 · 状态: ✅ MVP 已落地
-> 配套: [`zhiyu-proposal.md`](./zhiyu-proposal.md) · [`../README.md`](../README.md)
+> 文件: `pmo-pms-mvp-design.md` · 版本: v0.1.0 · 状态: ✅ MVP 已落地
+> 配套: [`pmo-pms-proposal.md`](./pmo-pms-proposal.md) · [`../README.md`](../README.md)
 
 ---
 
@@ -115,8 +115,8 @@ zhiyu-pms/
 ├── docs/
 │   ├── openapi/                        # OpenAPI 3.0 契约 (33 paths / 37 schemas / 10 tags)
 │   ├── api-testing/                    # Postman (29) + smoke.sh (16)
-│   ├── zhiyu-proposal.md             # ← 立项提案
-│   └── zhiyu-mvp-design.md           # ← 本文档
+│   ├── pmo-pms-proposal.md             # ← 立项提案
+│   └── pmo-pms-mvp-design.md           # ← 本文档
 │
 ├── deploy/docker/                      # Docker 构建文件
 │   ├── backend/Dockerfile              # 多阶段: JDK21 构建 → JRE21 运行
@@ -934,8 +934,8 @@ backend/src/main/java/com/company/pmo/common/audit/
 
 | 文件 | 用途 | 受众 |
 |---|---|---|
-| [`zhiyu-proposal.md`](./zhiyu-proposal.md) | 立项提案(为什么做) | 高管 / PMO 业务方 |
-| `zhiyu-mvp-design.md` (本文) | 技术设计(怎么做的) | 开发 / 接手人 |
+| [`pmo-pms-proposal.md`](./pmo-pms-proposal.md) | 立项提案(为什么做) | 高管 / PMO 业务方 |
+| `pmo-pms-mvp-design.md` (本文) | 技术设计(怎么做的) | 开发 / 接手人 |
 | [`../README.md`](../README.md) | 使用手册(怎么跑 / 怎么测) | 所有干系人 |
 | [`./openapi/README.md`](./openapi/README.md) | API 契约 (8 tags / 25 paths) | 前端 / 集成方 |
 | [`./api-testing/README.md`](./api-testing/README.md) | Postman / smoke 跑法 | 测试 / 运维 |

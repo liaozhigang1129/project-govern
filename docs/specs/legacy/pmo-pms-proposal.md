@@ -1,7 +1,7 @@
 # PMO 项目管理系统 — 立项提案 (Proposal)
 
-> 文件: `zhiyu-proposal.md` · 版本: v0.1.0 · 状态: ✅ 已批准落地
-> 配套: [`zhiyu-mvp-design.md`](./zhiyu-mvp-design.md) · [`../README.md`](../README.md)
+> 文件: `pmo-pms-proposal.md` · 版本: v0.1.0 · 状态: ✅ 已批准落地
+> 配套: [`pmo-pms-mvp-design.md`](./pmo-pms-mvp-design.md) · [`../README.md`](../README.md)
 
 ---
 

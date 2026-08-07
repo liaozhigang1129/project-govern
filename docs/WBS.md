@@ -145,7 +145,7 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 - **前置依赖**:WP-M4-02
 - **验收标准**:合同 ↔ 发票 ↔ 付款 ↔ 成本 3-way match 闭环,差异告警
 - **Spec**:见 `specs/legacy/pmo-pms-cost-engine.md` §5
-- **Plan**:— **【当前阻塞:对账口径未对齐,R-001】**
+- **Plan**:[`plans/2026-08-07-wp-m4-03-finance-cost-3way-match.md`](plans/2026-08-07-wp-m4-03-finance-cost-3way-match.md) **【当前阻塞:对账口径未对齐,R-001】**
 
 ---
 
@@ -165,7 +165,7 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 - **前置依赖**:WP-M5-01
 - **验收标准**:`AlertController` 端点齐全,触发器按规则类型可观测
 - **Spec**:见 `specs/legacy/PRD-cost-control.md` §4
-- **Plan**:—
+- **Plan**:[`plans/2026-08-07-wp-m5-02-alert-controller.md`](plans/2026-08-07-wp-m5-02-alert-controller.md)
 
 ---
 
@@ -192,7 +192,7 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 - **前置依赖**:WP-M6-02
 - **验收标准**:spike 报告:OAuth 工作量、卡片回调可行性、是否进 M6 范围
 - **Spec**:—
-- **Plan**:— **【当前阻塞:评估未启动,R-002】**
+- **Plan**:[`plans/2026-08-07-wp-m6-03-im-callback-spike.md`](plans/2026-08-07-wp-m6-03-im-callback-spike.md) **【当前阻塞:评估未启动,R-002】**
 
 ---
 

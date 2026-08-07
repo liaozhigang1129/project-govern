@@ -456,7 +456,7 @@ curl -fsS -H "Authorization: Bearer $TOKEN" \
 ## 12. 相关文档索引
 
 - **PRD**: [`PRD-cost-control.md`](./PRD-cost-control.md) §F1 + §F2
-- **MVP Design**: [`zhiyu-mvp-design.md`](./zhiyu-mvp-design.md) §5 (Cost 模块反推)
+- **MVP Design**: [`pmo-pms-mvp-design.md`](./pmo-pms-mvp-design.md) §5 (Cost 模块反推)
 - **API OpenAPI**: `/swagger-ui.html` 运行时查看 (`cost-controller`)
 - **代码**: `backend/src/main/java/com/company/pmo/module/cost/`
 - **测试**: `backend/src/test/java/com/company/pmo/module/cost/`
@@ -466,4 +466,4 @@ curl -fsS -H "Authorization: Bearer $TOKEN" \
 ---
 
 > 文档维护者: PMO 团队 · 最后更新: 2026-06-13
-> 反馈/修改: 提 PR 到 `docs/zhiyu-cost-engine.md`
+> 反馈/修改: 提 PR 到 `docs/pmo-pms-cost-engine.md`
