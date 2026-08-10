@@ -43,21 +43,21 @@ frontend/
 
 ## 已实现页面
 
-| 页面 | 功能 |
-|------|------|
-| `/login` | 登录(默认填 `admin/pmo123`)|
-| `/` | Dashboard: 4 KPI 卡片 + 状态/健康度饼图 + 活跃项目表 |
-| `/projects` | 项目列表 + 进度条 + 状态标签 |
-| `/initiations` | 立项列表 + 新建 + 通过/驳回(单步审批) |
+| 页面           | 功能                                                 |
+| -------------- | ---------------------------------------------------- |
+| `/login`       | 登录(默认填 `admin/pmo123`)                          |
+| `/`            | Dashboard: 4 KPI 卡片 + 状态/健康度饼图 + 活跃项目表 |
+| `/projects`    | 项目列表 + 进度条 + 状态标签                         |
+| `/initiations` | 立项列表 + 新建 + 通过/驳回(单步审批)                |
 
 ## 演示账号
 
-| 用户 | 密码 | 角色 |
-|------|------|------|
-| admin | pmo123 | PMO_ADMIN(全权限) |
-| pm_zhang | pmo123 | PM |
-| lead_wu | pmo123 | DEPT_LEAD(可审 DEPT_LEAD) |
-| vp_chen | pmo123 | EXEC(终审) |
+| 用户     | 密码   | 角色                      |
+| -------- | ------ | ------------------------- |
+| admin    | pmo123 | PMO_ADMIN(全权限)         |
+| pm_zhang | pmo123 | PM                        |
+| lead_wu  | pmo123 | DEPT_LEAD(可审 DEPT_LEAD) |
+| vp_chen  | pmo123 | EXEC(终审)                |
 
 ## 集成细节
 
