@@ -212,6 +212,15 @@ const router = createRouter({
       component: () => import('@/views/CostDashboard.vue'),
       meta: { title: '多维成本看板', roles: ['PMO_ADMIN', 'ADMIN', 'EXEC', 'PM', 'DEPT_LEAD', 'FINANCE'] },
     },
+    {
+      // V5.0 / WP-M4-03: 财务-成本 3-way match 对账 (F3 主验收页)
+      path: '/finance/reconciliation',
+      component: () => import('@/views/ReconciliationList.vue'),
+      meta: {
+        title: '财务对账',
+        roles: ['PMO_ADMIN', 'ADMIN', 'FINANCE', 'EXEC'],
+      },
+    },
   ],
 })
 

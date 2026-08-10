@@ -65,6 +65,46 @@
       </el-col>
     </el-row>
 
+    <!-- ===== 对账健康度 (V5.0 / WP-M4-03 / T-06) ===== -->
+    <el-row :gutter="16" class="kpi-row">
+      <el-col :span="8">
+        <el-card shadow="hover" class="kpi-card" :class="healthClass">
+          <div class="kpi-label">对账健康度</div>
+          <div class="kpi-value">{{ greenRatePct }}%</div>
+          <div class="kpi-sub">
+            <el-icon v-if="greenRatePct === 100" class="ok"><CircleCheck /></el-icon>
+            <el-icon v-else-if="greenRatePct < 60" class="err"><CircleClose /></el-icon>
+            <el-icon v-else class="warn"><Warning /></el-icon>
+            matched {{ health?.matched ?? 0 }} / total {{ health?.total ?? 0 }}
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="8">
+        <el-card shadow="hover" class="kpi-card">
+          <div class="kpi-label">差异总额 (MISMATCH)</div>
+          <div class="kpi-value">¥{{ format(totalDiff) }}</div>
+          <div class="kpi-sub">
+            共 {{ health?.mismatch ?? 0 }} 条待处理
+            <el-button
+              v-if="(health?.mismatch ?? 0) > 0"
+              link
+              type="danger"
+              @click="$router.push('/finance')"
+            >
+              查看
+            </el-button>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="8">
+        <el-card shadow="hover" class="kpi-card">
+          <div class="kpi-label">待处理 (PARTIAL + PENDING)</div>
+          <div class="kpi-value">{{ pendingTotal }}</div>
+          <div class="kpi-sub">partial {{ health?.partial ?? 0 }} · pending {{ health?.pending ?? 0 }}</div>
+        </el-card>
+      </el-col>
+    </el-row>
+
     <!-- ===== 筛选 + 刷新 ===== -->
     <el-card class="filter-card" shadow="never">
       <el-form inline>
@@ -153,13 +193,17 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Refresh } from '@element-plus/icons-vue'
+import { Refresh, CircleCheck, CircleClose, Warning } from '@element-plus/icons-vue'
 import { costApi, type CostDimensionRow, type CostDimensionResponse } from '@/api/cost'
+import { financeApi, type ReconciliationHealth } from '@/api/finance'
 
 const dim = ref<'PROJECT' | 'PHASE' | 'DEPT'>('PROJECT')
 const monthDate = ref<string | null>('2026-06')
 const loading = ref(false)
 const response = ref<CostDimensionResponse | null>(null)
+
+// 对账健康度 (V5.0 / WP-M4-03)
+const health = ref<ReconciliationHealth | null>(null)
 
 const dimLabel = computed(() => (dim.value === 'PROJECT' ? '项目' : dim.value === 'PHASE' ? '阶段' : '部门'))
 
@@ -175,6 +219,16 @@ const budgetCoveragePct = computed(() => response.value?.budgetCoveragePct ?? 0)
 const avgHourlyRate = computed(() => response.value?.avgHourlyRate ?? 0)
 const rowCount = computed(() => rows.value.length)
 const avgRate = computed(() => (totalHours.value > 0 ? (totalCost.value / totalHours.value).toFixed(0) : '0'))
+
+const greenRatePct = computed(() => Math.round((health.value?.greenRate ?? 1) * 100))
+const totalDiff = computed(() => health.value?.totalDiff ?? 0)
+const pendingTotal = computed(() => (health.value?.partial ?? 0) + (health.value?.pending ?? 0))
+const healthClass = computed(() => {
+  const r = greenRatePct.value
+  if (r >= 90) return 'kpi-ok'
+  if (r >= 60) return 'kpi-warn'
+  return 'kpi-err'
+})
 
 function format(n: number) {
   return n.toLocaleString('zh-CN', { maximumFractionDigits: 0 })
@@ -206,10 +260,24 @@ async function load() {
     ElMessage.error(e?.message || '加载失败')
   } finally {
     loading.value = false
+    loadHealth()
   }
 }
 
-onMounted(load)
+async function loadHealth() {
+  try {
+    health.value = await financeApi.reconciliationHealth()
+  } catch (e) {
+    // 静默:对账健康度加载失败不影响主 dashboard
+    console.warn('[CostDashboard] loadHealth failed:', (e as Error).message)
+    health.value = null
+  }
+}
+
+onMounted(() => {
+  load()
+  loadHealth()
+})
 </script>
 
 <style scoped>
