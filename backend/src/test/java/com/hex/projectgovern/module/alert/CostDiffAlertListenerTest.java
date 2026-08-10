@@ -25,7 +25,8 @@ class CostDiffAlertListenerTest {
 
     private final AlertRuleRepository ruleRepo = mock(AlertRuleRepository.class);
     private final AlertEventRepository eventRepo = mock(AlertEventRepository.class);
-    private final CostDiffAlertListener listener = new CostDiffAlertListener(ruleRepo, eventRepo);
+    private final AlertNotifier alertNotifier = mock(AlertNotifier.class);
+    private final CostDiffAlertListener listener = new CostDiffAlertListener(ruleRepo, eventRepo, alertNotifier);
 
     private AlertRule rule() {
         AlertRule r = new AlertRule();

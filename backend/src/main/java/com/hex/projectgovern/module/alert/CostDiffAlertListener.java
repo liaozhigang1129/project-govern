@@ -34,6 +34,7 @@ public class CostDiffAlertListener {
 
     private final AlertRuleRepository ruleRepo;
     private final AlertEventRepository eventRepo;
+    private final AlertNotifier alertNotifier;
 
     @Async
     @EventListener
@@ -82,7 +83,13 @@ public class CostDiffAlertListener {
             log.info("[CostDiffAlert] created event id={} projectId={} rule={}",
                     saved.getId(), event.projectId(), RULE_CODE);
 
-            // 通知发送留 alert 模块现有 dispatcher (此处仅落库,后续 P-04 dispatcher 扩展)
+            // 异步触发通知分发 (V5.1+ / T-08)
+            try {
+                int ok = alertNotifier.dispatch(saved, rule);
+                log.debug("[CostDiffAlert] event {} notified, channels={}", saved.getId(), ok);
+            } catch (Exception e) {
+                log.warn("[CostDiffAlert] notify failed event={} err={}", saved.getId(), e.getMessage());
+            }
         } catch (Exception e) {
             log.warn("[CostDiffAlert] failed project={} err={}", event.projectId(), e.getMessage(), e);
         }
