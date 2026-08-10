@@ -172,4 +172,58 @@ public class FinanceDtos {
                     c.getUserId(), c.getRemark());
         }
     }
+
+    // ============================================================
+    // 3-way match 对账 (V5.0 / WP-M4-03)
+    // ============================================================
+
+    public record ReconciliationDto(
+            Long id,
+            Long projectId,
+            Long contractId,
+            Long invoiceId,
+            Long paymentId,
+            Long costItemId,
+            String period,
+            BigDecimal contractAmount,
+            BigDecimal invoiceAmount,
+            BigDecimal paymentAmount,
+            BigDecimal costAmount,
+            BigDecimal diffAmount,
+            String diffReason,
+            CostReconciliation.MatchStatus matchStatus,
+            java.time.Instant reconciledAt,
+            Long reconciledBy
+    ) {
+        public static ReconciliationDto from(CostReconciliation r) {
+            return new ReconciliationDto(r.getId(), r.getProjectId(),
+                    r.getContractId(), r.getInvoiceId(),
+                    r.getPaymentId(), r.getCostItemId(),
+                    r.getPeriod(),
+                    r.getContractAmount(), r.getInvoiceAmount(),
+                    r.getPaymentAmount(), r.getCostAmount(),
+                    r.getDiffAmount(), r.getDiffReason(),
+                    r.getMatchStatus(), r.getReconciledAt(), r.getReconciledBy());
+        }
+    }
+
+    /** 健康度聚合: 总数/绿灯/红/黄/待/差异总额 */
+    public record ReconciliationHealth(
+            Long total,
+            Long matched,
+            Long mismatch,
+            Long partial,
+            Long pending,
+            BigDecimal totalDiff
+    ) {
+        public static ReconciliationHealth empty() {
+            return new ReconciliationHealth(0L, 0L, 0L, 0L, 0L, BigDecimal.ZERO);
+        }
+
+        /** 绿灯率 = matched / total (0..1) */
+        public double greenRate() {
+            if (total == null || total == 0) return 1.0;
+            return matched.doubleValue() / total.doubleValue();
+        }
+    }
 }
