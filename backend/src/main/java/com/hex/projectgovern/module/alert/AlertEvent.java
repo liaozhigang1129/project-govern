@@ -28,7 +28,8 @@ import java.time.OffsetDateTime;
         @Index(name = "idx_alert_event_status", columnList = "status"),
         @Index(name = "idx_alert_event_severity", columnList = "severity"),
         @Index(name = "idx_alert_event_triggered_at", columnList = "triggered_at"),
-        @Index(name = "idx_alert_event_target", columnList = "target_type, target_id")
+        @Index(name = "idx_alert_event_target", columnList = "target_type, target_id"),
+        @Index(name = "idx_alert_event_project_id", columnList = "project_id")
 })
 @Getter @Setter @NoArgsConstructor
 public class AlertEvent extends SoftDeletableEntity {
@@ -51,6 +52,10 @@ public class AlertEvent extends SoftDeletableEntity {
 
     @Column(name = "target_id")
     private Long targetId;
+
+    /** 可选,关联 project.id (COST_DIFF 等 PROJECT 类型告警专用, V5.1) */
+    @Column(name = "project_id")
+    private Long projectId;
 
     @Column(name = "target_label", length = 256)
     private String targetLabel;
