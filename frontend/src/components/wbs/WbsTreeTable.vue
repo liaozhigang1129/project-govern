@@ -38,7 +38,8 @@
       </el-table-column>
       <el-table-column label="工时 (实际/计划)" width="140" align="right">
         <template #default="{ row }">
-          <strong>{{ row.actualHours }}</strong> / {{ row.planHours }}h
+          <strong>{{ row.actualHours }}</strong>
+          / {{ row.planHours }}h
         </template>
       </el-table-column>
       <el-table-column label="进度" width="160" align="center">
@@ -71,7 +72,10 @@
       </el-table-column>
       <el-table-column label="前驱" width="120" align="center">
         <template #default="{ row }">
-          <span v-if="row.predecessorIds?.length" style="font-size: 11px; display: flex; gap: 2px; flex-wrap: wrap; justify-content: center">
+          <span
+            v-if="row.predecessorIds?.length"
+            style="font-size: 11px; display: flex; gap: 2px; flex-wrap: wrap; justify-content: center"
+          >
             <el-tag v-for="pid in row.predecessorIds" :key="pid" size="small" effect="plain">
               #{{ flatData.find((x: any) => x.id === pid)?.wbsCode ?? pid }}
             </el-tag>
@@ -101,7 +105,9 @@
       </el-table-column>
       <el-table-column label="实际工时" width="80" align="right">
         <template #default="{ row }">
-          <strong :style="{ color: progressColor(row.actualHours, row.planHours) }">{{ row.actualHours }}h</strong>
+          <strong :style="{ color: progressColor(row.actualHours, row.planHours) }">
+            {{ row.actualHours }}h
+          </strong>
         </template>
       </el-table-column>
       <el-table-column label="完成度" width="80" align="center">
@@ -156,17 +162,20 @@ interface WbsTaskNode {
   children?: WbsTaskNode[]
 }
 
-const props = withDefaults(defineProps<{
-  mode: 'wbs' | 'plan'
-  treeData: WbsTaskNode[]
-  flatData: WbsTaskNode[]
-  owners: Record<number, string>
-  loading?: boolean
-  expandRowKeys?: number[]
-}>(), {
-  loading: false,
-  expandRowKeys: () => []
-})
+const props = withDefaults(
+  defineProps<{
+    mode: 'wbs' | 'plan'
+    treeData: WbsTaskNode[]
+    flatData: WbsTaskNode[]
+    owners: Record<number, string>
+    loading?: boolean
+    expandRowKeys?: number[]
+  }>(),
+  {
+    loading: false,
+    expandRowKeys: () => [],
+  },
+)
 
 const emit = defineEmits<{
   (e: 'add', row: WbsTaskNode | null): void
@@ -176,7 +185,7 @@ const emit = defineEmits<{
 
 // WBS tab 使用 flat + tree-props children (平铺但可折叠)
 // Plan tab 使用 tree + tree-props (真正树形)
-const displayData = computed(() => props.mode === 'wbs' ? props.flatData : props.treeData)
+const displayData = computed(() => (props.mode === 'wbs' ? props.flatData : props.treeData))
 
 const treeProps = computed(() => {
   if (props.mode === 'wbs') {
@@ -187,11 +196,16 @@ const treeProps = computed(() => {
 
 function statusType(s: string) {
   switch (s) {
-    case 'COMPLETED': return 'success'
-    case 'IN_PROGRESS': return 'warning'
-    case 'BLOCKED': return 'danger'
-    case 'CANCELLED': return 'info'
-    default: return 'info'
+    case 'COMPLETED':
+      return 'success'
+    case 'IN_PROGRESS':
+      return 'warning'
+    case 'BLOCKED':
+      return 'danger'
+    case 'CANCELLED':
+      return 'info'
+    default:
+      return 'info'
   }
 }
 function statusLabel(s: string) {
@@ -200,14 +214,14 @@ function statusLabel(s: string) {
     IN_PROGRESS: '进行中',
     COMPLETED: '已完成',
     BLOCKED: '阻塞',
-    CANCELLED: '已取消'
+    CANCELLED: '已取消',
   }
   return map[s] ?? s
 }
 function progressColor(actual: number, plan: number) {
   if (plan === 0) return '#909399'
   const ratio = actual / plan
-  if (ratio > 1) return '#f56c6c'  // 超支
+  if (ratio > 1) return '#f56c6c' // 超支
   if (ratio > 0.8) return '#67c23a' // 健康
   if (ratio > 0.5) return '#e6a23c' // 落后
   return '#909399'

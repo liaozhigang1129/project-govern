@@ -29,8 +29,8 @@ const emit = defineEmits<{
 // 数据
 // ============================================================
 const treeRef = ref<any>()
-const allMenus = ref<SysMenuItem[]>([])         // 原始
-const checkedKeys = ref<number[]>([])            // 已选 menuId
+const allMenus = ref<SysMenuItem[]>([]) // 原始
+const checkedKeys = ref<number[]>([]) // 已选 menuId
 const loading = ref(false)
 const submitting = ref(false)
 
@@ -41,9 +41,9 @@ type TreeNode = SysMenuItem & { children?: TreeNode[] }
 
 function buildTree(list: SysMenuItem[]): TreeNode[] {
   const map = new Map<number, TreeNode>()
-  list.forEach(m => map.set(m.id, { ...m }))
+  list.forEach((m) => map.set(m.id, { ...m }))
   const roots: TreeNode[] = []
-  map.forEach(n => {
+  map.forEach((n) => {
     if (n.parentId && map.has(n.parentId)) {
       const p = map.get(n.parentId)!
       p.children = p.children ?? []
@@ -55,7 +55,7 @@ function buildTree(list: SysMenuItem[]): TreeNode[] {
   // 按 sortOrder 排序
   const sortRec = (arr: TreeNode[]) => {
     arr.sort((a, b) => a.sortOrder - b.sortOrder || a.id - b.id)
-    arr.forEach(n => n.children && sortRec(n.children))
+    arr.forEach((n) => n.children && sortRec(n.children))
   }
   sortRec(roots)
   return roots
@@ -72,9 +72,7 @@ async function load() {
     allMenus.value = await menuApi.list(true)
     const assigned = await roleMenuApi.listByRole(props.roleId)
     // 仅保留启用的菜单 (停用的不进授权)
-    checkedKeys.value = assigned.filter(id =>
-      allMenus.value.find(m => m.id === id && m.enabled)
-    )
+    checkedKeys.value = assigned.filter((id) => allMenus.value.find((m) => m.id === id && m.enabled))
   } catch (e: any) {
     ElMessage.error(e?.message ?? '加载菜单授权失败')
   } finally {
@@ -86,7 +84,7 @@ async function load() {
 // 操作
 // ============================================================
 function checkAll() {
-  treeRef.value?.setCheckedKeys(allMenus.value.map(m => m.id))
+  treeRef.value?.setCheckedKeys(allMenus.value.map((m) => m.id))
 }
 function clearAll() {
   treeRef.value?.setCheckedKeys([])
@@ -94,11 +92,15 @@ function clearAll() {
 function expandAll() {
   // el-tree 没 API 一次性展开全部, 用节点 ref 递归
   const nodes = treeRef.value?.store?.nodesMap || {}
-  Object.values(nodes).forEach((n: any) => { n.expanded = true })
+  Object.values(nodes).forEach((n: any) => {
+    n.expanded = true
+  })
 }
 function collapseAll() {
   const nodes = treeRef.value?.store?.nodesMap || {}
-  Object.values(nodes).forEach((n: any) => { n.expanded = false })
+  Object.values(nodes).forEach((n: any) => {
+    n.expanded = false
+  })
 }
 
 async function submit() {
@@ -123,14 +125,19 @@ async function submit() {
   }
 }
 
-function close() { emit('update:visible', false) }
+function close() {
+  emit('update:visible', false)
+}
 
 // ============================================================
 // 监听 visible 打开
 // ============================================================
-watch(() => props.visible, (v) => {
-  if (v && props.roleId) load()
-})
+watch(
+  () => props.visible,
+  (v) => {
+    if (v && props.roleId) load()
+  },
+)
 onMounted(() => {
   if (props.visible && props.roleId) load()
 })
@@ -158,7 +165,9 @@ onMounted(() => {
       </div>
 
       <!-- 树 -->
-      <div style="max-height: 56vh; overflow: auto; border: 1px solid #ebeef5; border-radius: 4px; padding: 8px">
+      <div
+        style="max-height: 56vh; overflow: auto; border: 1px solid #ebeef5; border-radius: 4px; padding: 8px"
+      >
         <el-tree
           ref="treeRef"
           :data="treeData"
@@ -189,7 +198,10 @@ onMounted(() => {
 
 <style scoped>
 code {
-  background: #f5f7fa; padding: 1px 6px; border-radius: 3px;
-  font-size: 12px; color: #606266;
+  background: #f5f7fa;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+  color: #606266;
 }
 </style>

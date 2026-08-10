@@ -145,10 +145,7 @@ function fmt(d: string | null) {
 
 <template>
   <div class="notif-wrap">
-    <el-tooltip
-      :content="connected ? '实时连接已建立' : '正在重连 / 已降级为轮询'"
-      placement="bottom"
-    >
+    <el-tooltip :content="connected ? '实时连接已建立' : '正在重连 / 已降级为轮询'" placement="bottom">
       <span class="conn-dot" :class="{ on: connected }" />
     </el-tooltip>
     <el-badge :value="badge" :hidden="!hasUnread" :max="99" type="danger">
@@ -156,26 +153,14 @@ function fmt(d: string | null) {
     </el-badge>
   </div>
 
-  <el-drawer
-    v-model="drawerOpen"
-    title="通知中心"
-    direction="rtl"
-    size="420px"
-  >
+  <el-drawer v-model="drawerOpen" title="通知中心" direction="rtl" size="420px">
     <div class="notif-toolbar">
       <el-radio-group v-model="filter" size="small">
         <el-radio-button value="ALL">全部</el-radio-button>
         <el-radio-button value="UNREAD">未读 ({{ unread }})</el-radio-button>
         <el-radio-button value="READ">已读</el-radio-button>
       </el-radio-group>
-      <el-button
-        v-if="hasUnread"
-        size="small"
-        type="primary"
-        text
-        @click="markAll"
-        :disabled="loading"
-      >
+      <el-button v-if="hasUnread" size="small" type="primary" text @click="markAll" :disabled="loading">
         全部已读
       </el-button>
     </div>
@@ -192,7 +177,20 @@ function fmt(d: string | null) {
         @click="markOne(n); goResource(n)"
       >
         <div class="notif-head">
-          <el-tag size="small" :type="n.category === 'INITIATION_DECIDE' || n.category === 'TIMESHEET_DECIDE' || n.category === 'TIMESHEET_BATCH_APPROVED' ? 'success' : n.category === 'INITIATION_SUPPLEMENT' || n.category === 'TIMESHEET_SUBMIT' || n.category === 'TIMESHEET_REMINDER' ? 'warning' : 'info'">
+          <el-tag
+            size="small"
+            :type="
+              n.category === 'INITIATION_DECIDE' ||
+              n.category === 'TIMESHEET_DECIDE' ||
+              n.category === 'TIMESHEET_BATCH_APPROVED'
+                ? 'success'
+                : n.category === 'INITIATION_SUPPLEMENT' ||
+                    n.category === 'TIMESHEET_SUBMIT' ||
+                    n.category === 'TIMESHEET_REMINDER'
+                  ? 'warning'
+                  : 'info'
+            "
+          >
             {{ CATEGORY_LABEL[n.category] }}
           </el-tag>
           <span class="notif-code">{{ n.resourceCode }}</span>
@@ -216,11 +214,13 @@ function fmt(d: string | null) {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #c0c4cc;   /* 灰:未连接 / 降级中 */
+  background: #c0c4cc; /* 灰:未连接 / 降级中 */
   margin-right: 2px;
   transition: background 0.2s;
 }
-.conn-dot.on { background: #67c23a; }   /* 绿:SSE 已建立 */
+.conn-dot.on {
+  background: #67c23a;
+} /* 绿:SSE 已建立 */
 .notif-toolbar {
   display: flex;
   align-items: center;
@@ -238,9 +238,15 @@ function fmt(d: string | null) {
   cursor: pointer;
   transition: background 0.15s;
 }
-.notif-item:hover { background: #f5f7fa; }
-.notif-item.is-unread { background: #ecf5ff; }
-.notif-item.is-unread:hover { background: #d9ecff; }
+.notif-item:hover {
+  background: #f5f7fa;
+}
+.notif-item.is-unread {
+  background: #ecf5ff;
+}
+.notif-item.is-unread:hover {
+  background: #d9ecff;
+}
 .notif-head {
   display: flex;
   align-items: center;
@@ -253,7 +259,17 @@ function fmt(d: string | null) {
   font-family: monospace;
   color: #606266;
 }
-.notif-time { margin-left: auto; }
-.notif-title { font-weight: 600; font-size: 13px; margin: 4px 0; }
-.notif-content { font-size: 12px; color: #606266; line-height: 1.4; }
+.notif-time {
+  margin-left: auto;
+}
+.notif-title {
+  font-weight: 600;
+  font-size: 13px;
+  margin: 4px 0;
+}
+.notif-content {
+  font-size: 12px;
+  color: #606266;
+  line-height: 1.4;
+}
 </style>

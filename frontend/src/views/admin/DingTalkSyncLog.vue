@@ -46,9 +46,7 @@ async function loadLogs() {
   try {
     // 后端返 List<DingTalkSyncLog>,非分页
     const res: any = await api.get('/admin/dingtalk/sync/logs')
-    const data = Array.isArray(res?.data) ? res.data
-      : Array.isArray(res) ? res
-        : (res?.data?.content ?? [])
+    const data = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : (res?.data?.content ?? [])
     logs.value = Array.isArray(data) ? data : []
   } catch (e: any) {
     ElMessage.error(e?.message ?? '加载同步日志失败')
@@ -77,7 +75,7 @@ onMounted(async () => {
 onBeforeUnmount(stopPolling)
 
 // 当有 RUNNING 时, 提示当前正在同步的那一条; 否则提示"无正在同步的任务"
-const runningLog = computed(() => logs.value.find(l => l.status === 'RUNNING') ?? null)
+const runningLog = computed(() => logs.value.find((l) => l.status === 'RUNNING') ?? null)
 
 // 详情抽屉
 const detailVisible = ref(false)
@@ -105,15 +103,19 @@ function rowClass({ row }: { row: SyncLog }) {
 }
 
 // 监听 query 变化滚动
-watch(focusedId, async (v) => {
-  if (!v) return
-  await loadLogs()
-  // 等 DOM 更新
-  setTimeout(() => {
-    const el = document.querySelector(`tr[data-log-id="${v}"]`) as HTMLElement | null
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  }, 50)
-}, { immediate: true })
+watch(
+  focusedId,
+  async (v) => {
+    if (!v) return
+    await loadLogs()
+    // 等 DOM 更新
+    setTimeout(() => {
+      const el = document.querySelector(`tr[data-log-id="${v}"]`) as HTMLElement | null
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 50)
+  },
+  { immediate: true },
+)
 
 // ============================================================
 // 格式化
@@ -141,10 +143,14 @@ function durationSec(started: string | null, finished: string | null): string {
 
 function statusTag(s: string): 'success' | 'warning' | 'danger' | 'info' {
   switch (s) {
-    case 'SUCCESS': return 'success'
-    case 'FAILED': return 'danger'
-    case 'RUNNING': return 'warning'
-    default: return 'info'
+    case 'SUCCESS':
+      return 'success'
+    case 'FAILED':
+      return 'danger'
+    case 'RUNNING':
+      return 'warning'
+    default:
+      return 'info'
   }
 }
 
@@ -228,11 +234,15 @@ function statusText(s: string): string {
         <el-descriptions :column="2" border>
           <el-descriptions-item label="ID">{{ detailLog.id }}</el-descriptions-item>
           <el-descriptions-item label="状态">
-            <el-tag :type="statusTag(detailLog.status)" size="small">{{ statusText(detailLog.status) }}</el-tag>
+            <el-tag :type="statusTag(detailLog.status)" size="small">
+              {{ statusText(detailLog.status) }}
+            </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="开始时间">{{ fmtTime(detailLog.startedAt) }}</el-descriptions-item>
           <el-descriptions-item label="结束时间">{{ fmtTime(detailLog.finishedAt) }}</el-descriptions-item>
-          <el-descriptions-item label="耗时">{{ durationSec(detailLog.startedAt, detailLog.finishedAt) }}</el-descriptions-item>
+          <el-descriptions-item label="耗时">
+            {{ durationSec(detailLog.startedAt, detailLog.finishedAt) }}
+          </el-descriptions-item>
           <el-descriptions-item label="触发类型">{{ detailLog.triggerType }}</el-descriptions-item>
           <el-descriptions-item label="操作人">{{ detailLog.triggeredBy }}</el-descriptions-item>
           <el-descriptions-item label="部门总数">{{ detailLog.totalDepts }}</el-descriptions-item>

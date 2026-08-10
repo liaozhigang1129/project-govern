@@ -19,10 +19,10 @@ export interface ResourceKpis {
   allocated: number
   idle: number
   overloaded: number
-  utilization: number          // %
-  totalSkills: number          // 技能种类
-  activeProjects: number       // 当前在岗项目数
-  avgAllocation: number        // 平均分配率 (%)
+  utilization: number // %
+  totalSkills: number // 技能种类
+  activeProjects: number // 当前在岗项目数
+  avgAllocation: number // 平均分配率 (%)
 }
 
 /** 单周单元格 */
@@ -79,7 +79,7 @@ export function getResourceKpis() {
 
 export function getCapacityMatrix(from: string, to: string) {
   return api.get<CapacityMatrix>('/resource-pipeline/capacity-matrix', {
-    params: { from, to }
+    params: { from, to },
   })
 }
 

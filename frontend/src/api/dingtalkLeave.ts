@@ -77,8 +77,7 @@ export const dingtalkLeaveApi = {
     }),
 
   /** 2. 同步状态 (上次同步时间 + 累计数) */
-  getState: () =>
-    api.get<DingTalkLeaveSyncState>('/admin/dingtalk/leave/sync/state'),
+  getState: () => api.get<DingTalkLeaveSyncState>('/admin/dingtalk/leave/sync/state'),
 
   /** 3. 同步日志 */
   listLogs: (page = 0, size = 20) =>
@@ -87,8 +86,7 @@ export const dingtalkLeaveApi = {
     }),
 
   /** 4. 统计 (总数 + 本月数) */
-  getStats: () =>
-    api.get<{ code: number; message: string; data: LeaveStats }>('/admin/dingtalk/leave/stats'),
+  getStats: () => api.get<{ code: number; message: string; data: LeaveStats }>('/admin/dingtalk/leave/stats'),
 
   /** 5. 请休假列表 (分页) */
   list: (page = 0, size = 20) =>
@@ -97,6 +95,5 @@ export const dingtalkLeaveApi = {
     }),
 
   /** 6. 详情 */
-  get: (id: number) =>
-    api.get<DingTalkLeave>(`/admin/dingtalk/leave/${id}`),
+  get: (id: number) => api.get<DingTalkLeave>(`/admin/dingtalk/leave/${id}`),
 }

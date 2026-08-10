@@ -7,10 +7,17 @@ import { workloadApi } from '@/api/workload'
 import { userApi } from '@/api/users'
 import VChart from 'vue-echarts'
 import type { GanttBar, GanttResponse } from '@/components/GanttView.vue'
-import type { ProjectOverview, BusinessUnit, ProductLine, RelatedProduct, ProjectMember, ProjectMemberInput } from '@/api/client'
+import type {
+  ProjectOverview,
+  BusinessUnit,
+  ProductLine,
+  RelatedProduct,
+  ProjectMember,
+  ProjectMemberInput,
+} from '@/api/client'
 import type { AppUser } from '@/api/client'
-import WbsTreeTable from "@/components/wbs/WbsTreeTable.vue"
-import WbsEditDialog from "@/components/wbs/WbsEditDialog.vue"
+import WbsTreeTable from '@/components/wbs/WbsTreeTable.vue'
+import WbsEditDialog from '@/components/wbs/WbsEditDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -24,8 +31,20 @@ const newHealth = ref<string>('GREEN')
  *  - 支持 ?tab=config 等 URL 参数直接定位
  *  - 切换时把 tab 写回 URL,方便复制/刷新保留位置
  */
-type DetailTab = 'basic' | 'milestones' | 'wbs' | 'plan' | 'gantt' | 'health' | 'etc' | 'burndown' | 'config' | 'members'
-const VALID_TABS: DetailTab[] = ['basic', 'milestones', 'wbs', 'plan', 'gantt', 'health', 'etc', 'burndown', 'config', 'members']
+type DetailTab =
+  'basic' | 'milestones' | 'wbs' | 'plan' | 'gantt' | 'health' | 'etc' | 'burndown' | 'config' | 'members'
+const VALID_TABS: DetailTab[] = [
+  'basic',
+  'milestones',
+  'wbs',
+  'plan',
+  'gantt',
+  'health',
+  'etc',
+  'burndown',
+  'config',
+  'members',
+]
 function readTabFromRoute(): DetailTab {
   const q = String(route.query.tab ?? '')
   return (VALID_TABS as string[]).includes(q) ? (q as DetailTab) : 'basic'
@@ -37,7 +56,6 @@ const buList = ref<BusinessUnit[]>([])
 const plList = ref<ProductLine[]>([])
 const rpList = ref<RelatedProduct[]>([])
 const userList = ref<AppUser[]>([])
-
 
 // ====== ETC + 燃尽图(V2.13) ======
 type EvmSnapshot = {
@@ -62,7 +80,7 @@ const evmLoading = ref(false)
 const evmSnapshots = ref<EvmSnapshot[]>([])
 /** 最新一条 EVM 快照 (null = 该项目还没快照) */
 const evmLatest = computed<EvmSnapshot | null>(() =>
-  evmSnapshots.value.length ? evmSnapshots.value[evmSnapshots.value.length - 1] : null
+  evmSnapshots.value.length ? evmSnapshots.value[evmSnapshots.value.length - 1] : null,
 )
 /** CPI/SPI 状态颜色 (0.8 / 1.0 / 1.2 三档) */
 function cpiColor(c: number | undefined | null): string {
@@ -100,26 +118,36 @@ async function triggerEvmSnapshot() {
 const burndownChartOpt = computed(() => {
   if (evmSnapshots.value.length === 0) return {}
   const data = evmSnapshots.value
-  const dates = data.map(s => s.snapshotDate)
-  const bac = data.map(s => s.bac)
-  const pv = data.map(s => s.pv)
-  const ev = data.map(s => s.ev)
-  const ac = data.map(s => s.ac)
+  const dates = data.map((s) => s.snapshotDate)
+  const bac = data.map((s) => s.bac)
+  const pv = data.map((s) => s.pv)
+  const ev = data.map((s) => s.ev)
+  const ac = data.map((s) => s.ac)
   return {
     tooltip: { trigger: 'axis' },
     legend: { top: 0, left: 'center' },
     grid: { top: 50, left: 70, right: 30, bottom: 40 },
     xAxis: { type: 'category', data: dates, name: '快照日期' },
-    yAxis: { type: 'value', name: '成本/工时 (¥)', axisLabel: { formatter: (v: number) => v >= 1000 ? (v / 1000).toFixed(0) + 'k' : String(v) } },
+    yAxis: {
+      type: 'value',
+      name: '成本/工时 (¥)',
+      axisLabel: { formatter: (v: number) => (v >= 1000 ? (v / 1000).toFixed(0) + 'k' : String(v)) },
+    },
     series: [
-      { name: 'BAC (预算)',     type: 'line', data: bac, step: 'end',  itemStyle: { color: '#909399' }, lineStyle: { type: 'dashed' } },
-      { name: 'PV (计划值)',    type: 'line', data: pv,  smooth: true, itemStyle: { color: '#409EFF' } },
-      { name: 'EV (挣值)',      type: 'line', data: ev,  smooth: true, itemStyle: { color: '#67C23A' } },
-      { name: 'AC (实际成本)',  type: 'line', data: ac,  smooth: true, itemStyle: { color: '#F56C6C' } },
+      {
+        name: 'BAC (预算)',
+        type: 'line',
+        data: bac,
+        step: 'end',
+        itemStyle: { color: '#909399' },
+        lineStyle: { type: 'dashed' },
+      },
+      { name: 'PV (计划值)', type: 'line', data: pv, smooth: true, itemStyle: { color: '#409EFF' } },
+      { name: 'EV (挣值)', type: 'line', data: ev, smooth: true, itemStyle: { color: '#67C23A' } },
+      { name: 'AC (实际成本)', type: 'line', data: ac, smooth: true, itemStyle: { color: '#F56C6C' } },
     ],
   }
 })
-
 
 // ====== WBS 分解 + 项目计划(V2.14) ======
 type WbsTaskNode = {
@@ -153,14 +181,18 @@ const wbsTree = ref<WbsTaskNode[]>([])
 /** 控制 WBS 树展开行 (避免 default-expand-all 触发 Vue 3.5 patch bug) */
 const defaultExpandedKeys = ref<number[]>([])
 /** 监听 wbsTree 变化,  自动展开前 3 个 phase 节点 */
-watch(wbsTree, (newTree) => {
-  if (newTree.length > 0 && defaultExpandedKeys.value.length === 0) {
-    defaultExpandedKeys.value = newTree
-      .filter(n => !!n.children && n.children.length > 0)
-      .slice(0, 3)
-      .map(n => n.id)
-  }
-}, { immediate: true })
+watch(
+  wbsTree,
+  (newTree) => {
+    if (newTree.length > 0 && defaultExpandedKeys.value.length === 0) {
+      defaultExpandedKeys.value = newTree
+        .filter((n) => !!n.children && n.children.length > 0)
+        .slice(0, 3)
+        .map((n) => n.id)
+    }
+  },
+  { immediate: true },
+)
 
 /** 平铺 WBS (含 path 顺序) — 用于项目计划表 */
 const wbsFlat = computed<WbsTaskNode[]>(() => {
@@ -188,14 +220,26 @@ function collectDescendantIds(rootId: number, tree: WbsTaskNode[] = wbsTree.valu
   function find(n: WbsTaskNode): WbsTaskNode | null {
     if (n.id === rootId) return n
     for (const c of n.children ?? []) {
-      const r = find(c); if (r) return r
+      const r = find(c)
+      if (r) return r
     }
     return null
   }
-  const node = (() => { for (const r of tree) { const f = find(r); if (f) return f } return null })()
+  const node = (() => {
+    for (const r of tree) {
+      const f = find(r)
+      if (f) return f
+    }
+    return null
+  })()
   if (!node) return ids
   ids.add(node.id)
-  function walk(n: WbsTaskNode) { (n.children ?? []).forEach(c => { ids.add(c.id); walk(c) }) }
+  function walk(n: WbsTaskNode) {
+    ;(n.children ?? []).forEach((c) => {
+      ids.add(c.id)
+      walk(c)
+    })
+  }
   walk(node)
   return ids
 }
@@ -205,7 +249,7 @@ const wbsParentCandidates = computed<WbsTaskNode[]>(() => {
   const cur = wbsEditDialog.value.form
   if (!cur?.id) return wbsFlat.value
   const blocked = collectDescendantIds(cur.id)
-  return wbsFlat.value.filter(t => !blocked.has(t.id))
+  return wbsFlat.value.filter((t) => !blocked.has(t.id))
 })
 
 /** 上级任务变更时, 自动按新父重算 wbsCode (仅在用户没手改过的情况下)
@@ -217,19 +261,19 @@ function recomputeWbsCodeIfUserUnset() {
   if (f.parentId == null) {
     // 顶级 — 全局扫无 '.' 的,取最大编号 + 1
     const topCodes = wbsFlat.value
-      .filter(t => !t.wbsCode.includes('.'))
-      .map(t => parseInt(t.wbsCode, 10) || 0)
+      .filter((t) => !t.wbsCode.includes('.'))
+      .map((t) => parseInt(t.wbsCode, 10) || 0)
     const next = (topCodes.length ? Math.max(...topCodes) : 0) + 1
     f.wbsCode = String(next)
   } else {
-    const cur = wbsFlat.value.find(t => t.id === f.parentId)
+    const cur = wbsFlat.value.find((t) => t.id === f.parentId)
     if (cur) {
       // 子级 — 全局扫以 "cur.wbsCode." 开头的(直接段),取最大 + 1
       // 这样能漏掉"parent_id=NULL 但 wbsCode=1.0.5"这种脏数据
       const prefix = cur.wbsCode + '.'
       const subCodes = wbsFlat.value
-        .filter(t => t.wbsCode.startsWith(prefix))
-        .map(t => {
+        .filter((t) => t.wbsCode.startsWith(prefix))
+        .map((t) => {
           const tail = t.wbsCode.slice(prefix.length)
           const firstSeg = tail.split('.')[0]
           return parseInt(firstSeg, 10) || 0
@@ -253,9 +297,13 @@ async function loadWbsUserMap() {
   try {
     const users = await userApi.options()
     const m: Record<number, string> = {}
-    users.forEach((u: any) => { m[u.id] = u.fullName })
+    users.forEach((u: any) => {
+      m[u.id] = u.fullName
+    })
     wbsUserMap.value = m
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 function planProgressColor(actual: number, planned: number): string {
   if (planned === 0) return '#909399'
@@ -265,19 +313,28 @@ function planProgressColor(actual: number, planned: number): string {
   return '#67C23A'
 }
 function statusType(s: string): 'success' | 'warning' | 'info' | 'danger' | 'primary' {
-  return s === 'COMPLETED' ? 'success'
-       : s === 'IN_PROGRESS' ? 'warning'
-       : s === 'BLOCKED' ? 'danger'
-       : s === 'CANCELLED' ? 'info'
-       : 'primary'
+  return s === 'COMPLETED'
+    ? 'success'
+    : s === 'IN_PROGRESS'
+      ? 'warning'
+      : s === 'BLOCKED'
+        ? 'danger'
+        : s === 'CANCELLED'
+          ? 'info'
+          : 'primary'
 }
 function statusLabel(s: string): string {
-  return s === 'NOT_STARTED' ? '未开始'
-       : s === 'IN_PROGRESS' ? '进行中'
-       : s === 'COMPLETED' ? '已完成'
-       : s === 'BLOCKED' ? '阻塞'
-       : s === 'CANCELLED' ? '已取消'
-       : s
+  return s === 'NOT_STARTED'
+    ? '未开始'
+    : s === 'IN_PROGRESS'
+      ? '进行中'
+      : s === 'COMPLETED'
+        ? '已完成'
+        : s === 'BLOCKED'
+          ? '阻塞'
+          : s === 'CANCELLED'
+            ? '已取消'
+            : s
 }
 
 async function loadWbs() {
@@ -323,12 +380,12 @@ const wbsEditDialog = ref({
     predecessorIds: number[] | null
     deliverable: string
     remark: string
-  }
+  },
 })
 
 function onEditWbs(t: WbsTaskNode) {
-  console.log("[onEditWbs] called for", t.wbsCode, t.name, t.id)
-  wbsEditDialog.value.mode = "edit"
+  console.log('[onEditWbs] called for', t.wbsCode, t.name, t.id)
+  wbsEditDialog.value.mode = 'edit'
   wbsEditDialog.value.form = {
     id: t.id,
     parentId: t.parentId,
@@ -349,7 +406,7 @@ function onEditWbs(t: WbsTaskNode) {
     milestone: !!t.milestone,
     predecessorIds: (t.predecessorIds ?? []).slice(),
     deliverable: t.deliverable ?? '',
-    remark: t.remark ?? ''
+    remark: t.remark ?? '',
   }
   wbsDialogVisible.value = true
 }
@@ -357,22 +414,28 @@ function onEditWbs(t: WbsTaskNode) {
 async function onSaveWbs() {
   const f = wbsEditDialog.value.form
   if (!f) return
-  if (!f.name?.trim()) { ElMessage.error('任务名称不能为空'); return }
+  if (!f.name?.trim()) {
+    ElMessage.error('任务名称不能为空')
+    return
+  }
   if (f.planStartDate && f.planEndDate && f.planStartDate > f.planEndDate) {
-    ElMessage.error('计划开始日期不能晚于结束日期'); return
+    ElMessage.error('计划开始日期不能晚于结束日期')
+    return
   }
   if (f.actualStartDate && f.actualEndDate && f.actualStartDate > f.actualEndDate) {
-    ElMessage.error('实际开始日期不能晚于结束日期'); return
+    ElMessage.error('实际开始日期不能晚于结束日期')
+    return
   }
   if (f.progressPct < 0 || f.progressPct > 100) {
-    ElMessage.error('进度必须在 0-100 之间'); return
+    ElMessage.error('进度必须在 0-100 之间')
+    return
   }
   wbsEditDialog.value.loading = true
   try {
     await api.post('/wbs/tasks', {
       id: f.id,
       projectId: overview.value!.project.id,
-      parentId: f.parentId ?? null,   // 跟随表单(之前写死 null 是 BUG 根因)
+      parentId: f.parentId ?? null, // 跟随表单(之前写死 null 是 BUG 根因)
       wbsCode: f.wbsCode,
       name: f.name,
       taskType: f.taskType,
@@ -391,7 +454,7 @@ async function onSaveWbs() {
       milestoneId: null,
       predecessorIds: f.predecessorIds ?? [],
       deliverable: f.deliverable || null,
-      remark: f.remark || null
+      remark: f.remark || null,
     })
     ElMessage.success('保存成功')
     wbsDialogVisible.value = false
@@ -405,43 +468,42 @@ async function onSaveWbs() {
 }
 
 function onAddWbs(parent: WbsTaskNode | null) {
-  let nextCode = ""
-  let parentId: number | null = null
+  const parentId: number | null = parent ? parent.id : null
+  let nextCode!: string
   if (parent) {
-    parentId = parent.id
     // 用 wbsCode 前缀扫描(避免 parent_id 脏数据漏算)
     const prefix = parent.wbsCode + '.'
     const codes = wbsFlat.value
-      .filter(t => t.wbsCode.startsWith(prefix))
-      .map(t => {
+      .filter((t) => t.wbsCode.startsWith(prefix))
+      .map((t) => {
         const tail = t.wbsCode.slice(prefix.length)
         const firstSeg = tail.split('.')[0]
         return parseInt(firstSeg, 10) || 0
       })
     const next = (codes.length ? Math.max(...codes) : 0) + 1
-    nextCode = parent.wbsCode + "." + next
+    nextCode = parent.wbsCode + '.' + next
   } else {
     // 顶级 — 全局扫无 '.' 的
     const codes = wbsFlat.value
-      .filter(t => !t.wbsCode.includes('.'))
-      .map(t => parseInt(t.wbsCode, 10) || 0)
+      .filter((t) => !t.wbsCode.includes('.'))
+      .map((t) => parseInt(t.wbsCode, 10) || 0)
     const next = (codes.length ? Math.max(...codes) : 0) + 1
     nextCode = String(next)
   }
-  wbsEditDialog.value.mode = "add"
+  wbsEditDialog.value.mode = 'add'
   wbsEditDialog.value.parentForAdd = parent
   wbsEditDialog.value.form = {
     id: 0,
     parentId,
     wbsCode: nextCode,
-    name: "",
-    taskType: "EXECUTION",
-    status: "NOT_STARTED",
+    name: '',
+    taskType: 'EXECUTION',
+    status: 'NOT_STARTED',
     ownerUserId: null,
-    planStartDate: "",
-    planEndDate: "",
-    actualStartDate: "",
-    actualEndDate: "",
+    planStartDate: '',
+    planEndDate: '',
+    actualStartDate: '',
+    actualEndDate: '',
     planHours: 0,
     actualHours: 0,
     progressPct: 0,
@@ -449,8 +511,8 @@ function onAddWbs(parent: WbsTaskNode | null) {
     critical: false,
     milestone: false,
     predecessorIds: [],
-    deliverable: "",
-    remark: ""
+    deliverable: '',
+    remark: '',
   }
   wbsDialogVisible.value = true
 }
@@ -458,18 +520,20 @@ function onAddWbs(parent: WbsTaskNode | null) {
 async function onDeleteWbs(t: WbsTaskNode) {
   try {
     await ElMessageBox.confirm(
-      "确认删除任务 \"" + t.wbsCode + " " + t.name + "\"? 此操作不可撤销 (软删)。",
-      "删除 WBS 任务",
-      { type: "warning", confirmButtonText: "删除", cancelButtonText: "取消" }
+      '确认删除任务 "' + t.wbsCode + ' ' + t.name + '"? 此操作不可撤销 (软删)。',
+      '删除 WBS 任务',
+      { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' },
     )
-  } catch { return }
+  } catch {
+    return
+  }
   try {
-    await api.delete("/wbs/tasks/" + t.id)
-    ElMessage.success("删除成功")
+    await api.delete('/wbs/tasks/' + t.id)
+    ElMessage.success('删除成功')
     await loadWbs()
     if (evmSnapshots.value.length > 0) void loadEvm()
   } catch (e: any) {
-    ElMessage.error(e?.response?.data?.message ?? e?.message ?? "未知错误")
+    ElMessage.error(e?.response?.data?.message ?? e?.message ?? '未知错误')
   }
 }
 
@@ -483,7 +547,12 @@ const wbsPredecessorOptions = computed(() => {
   const ban = new Set<number>([me.id])
   const findMeAndBanDescendants = (n: any): boolean => {
     if (n.id === me.id) {
-      const collect = (x: any) => { (x.children || []).forEach((c: any) => { ban.add(c.id); collect(c) }) }
+      const collect = (x: any) => {
+        ;(x.children || []).forEach((c: any) => {
+          ban.add(c.id)
+          collect(c)
+        })
+      }
       collect(n)
       return true
     }
@@ -491,7 +560,7 @@ const wbsPredecessorOptions = computed(() => {
   }
   wbsTree.value.forEach(findMeAndBanDescendants)
   // 平铺, 排除 ban
-  const flat: { id: number, code: string, name: string }[] = []
+  const flat: { id: number; code: string; name: string }[] = []
   const walk = (n: any) => {
     if (!ban.has(n.id)) flat.push({ id: n.id, code: n.wbsCode, name: n.name })
     ;(n.children || []).forEach(walk)
@@ -500,15 +569,18 @@ const wbsPredecessorOptions = computed(() => {
   return flat
 })
 
-const wbsUserOptions = computed<Array<{id: number; label: string}>>(() =>
-  userList.value.map((u: any) => ({ id: u.id, label: (u.fullName || u.username) + (u.jobTitle ? ` (${u.jobTitle})` : "") }))
+const wbsUserOptions = computed<Array<{ id: number; label: string }>>(() =>
+  userList.value.map((u: any) => ({
+    id: u.id,
+    label: (u.fullName || u.username) + (u.jobTitle ? ` (${u.jobTitle})` : ''),
+  })),
 )
 
 // ====== 项目组成员(V2.3) ======
 const memberList = ref<ProjectMember[]>([])
 const memberDialog = ref({
   visible: false,
-  editing: null as ProjectMember | null,  // null=新增,非空=编辑
+  editing: null as ProjectMember | null, // null=新增,非空=编辑
   form: {
     roleCode: 'DEV',
     userId: undefined as number | undefined,
@@ -534,16 +606,19 @@ const editForm = ref({
 // 级联:选 BU 后,PL 下拉只显示该 BU 下的
 const filteredPlList = computed(() => {
   if (!editForm.value.buId) return plList.value
-  return plList.value.filter(pl => pl.bu?.id === editForm.value.buId)
+  return plList.value.filter((pl) => pl.bu?.id === editForm.value.buId)
 })
 const filteredRpList = computed(() => {
   if (!editForm.value.plId) return rpList.value
-  return rpList.value.filter(rp => rp.pl?.id === editForm.value.plId)
+  return rpList.value.filter((rp) => rp.pl?.id === editForm.value.plId)
 })
 
 async function load() {
   const id = route.params.id
-  if (!id) { error.value = '缺少项目 id'; return }
+  if (!id) {
+    error.value = '缺少项目 id'
+    return
+  }
   loading.value = true
   error.value = null
   try {
@@ -563,21 +638,32 @@ async function loadDictionaries() {
     api.get<BusinessUnit[]>('/dict/bus'),
     api.get<ProductLine[]>('/dict/pls'),
     api.get<RelatedProduct[]>('/dict/related-products'),
-    api.get<{ id: number; username: string; fullName: string; primaryRoleCode: string; departmentId: number | null }[]>('/users/options'),
+    api.get<
+      {
+        id: number
+        username: string
+        fullName: string
+        primaryRoleCode: string
+        departmentId: number | null
+      }[]
+    >('/users/options'),
   ])
-  buList.value  = busR.status  === 'fulfilled' ? (busR.value  ?? []) : []
-  plList.value  = plsR.status  === 'fulfilled' ? (plsR.value  ?? []) : []
-  rpList.value  = rpsR.status  === 'fulfilled' ? (rpsR.value  ?? []) : []
-  userList.value = usersR.status === 'fulfilled' ? (usersR.value ?? []).map(u => ({
-    id: u.id,
-    username: u.username,
-    fullName: u.fullName,
-    primaryRole: { id: 0, code: u.primaryRoleCode, name: u.primaryRoleCode },
-    departmentId: u.departmentId,
-  })) : []
-  if (busR.status === 'rejected')  console.warn('加载 BU 字典失败:', busR.reason)
-  if (plsR.status === 'rejected')  console.warn('加载 PL 字典失败:', plsR.reason)
-  if (rpsR.status === 'rejected')  console.warn('加载关联产品失败:', rpsR.reason)
+  buList.value = busR.status === 'fulfilled' ? (busR.value ?? []) : []
+  plList.value = plsR.status === 'fulfilled' ? (plsR.value ?? []) : []
+  rpList.value = rpsR.status === 'fulfilled' ? (rpsR.value ?? []) : []
+  userList.value =
+    usersR.status === 'fulfilled'
+      ? (usersR.value ?? []).map((u) => ({
+          id: u.id,
+          username: u.username,
+          fullName: u.fullName,
+          primaryRole: { id: 0, code: u.primaryRoleCode, name: u.primaryRoleCode },
+          departmentId: u.departmentId,
+        }))
+      : []
+  if (busR.status === 'rejected') console.warn('加载 BU 字典失败:', busR.reason)
+  if (plsR.status === 'rejected') console.warn('加载 PL 字典失败:', plsR.reason)
+  if (rpsR.status === 'rejected') console.warn('加载关联产品失败:', rpsR.reason)
   if (usersR.status === 'rejected') console.warn('加载用户失败:', usersR.reason)
 }
 
@@ -700,11 +786,26 @@ function openEditMemberDialog(m: ProjectMember) {
 async function saveMember() {
   if (!overview.value) return
   const f = memberDialog.value.form
-  if (!f.roleCode) { ElMessage.warning('请选择项目角色'); return }
-  if (!f.external && !f.userId) { ElMessage.warning('内部成员请选择系统用户'); return }
-  if (f.external && !f.memberName?.trim()) { ElMessage.warning('外部人员请填写姓名'); return }
-  if (!f.joinDate) { ElMessage.warning('请填写参与开始日期'); return }
-  if (f.leaveDate && f.leaveDate < f.joinDate) { ElMessage.warning('参与结束日期不能早于开始日期'); return }
+  if (!f.roleCode) {
+    ElMessage.warning('请选择项目角色')
+    return
+  }
+  if (!f.external && !f.userId) {
+    ElMessage.warning('内部成员请选择系统用户')
+    return
+  }
+  if (f.external && !f.memberName?.trim()) {
+    ElMessage.warning('外部人员请填写姓名')
+    return
+  }
+  if (!f.joinDate) {
+    ElMessage.warning('请填写参与开始日期')
+    return
+  }
+  if (f.leaveDate && f.leaveDate < f.joinDate) {
+    ElMessage.warning('参与结束日期不能早于开始日期')
+    return
+  }
 
   memberDialog.value.saving = true
   try {
@@ -728,7 +829,9 @@ async function saveMember() {
 async function deleteMember(m: ProjectMember) {
   try {
     await ElMessageBox.confirm(`确定移除成员「${m.memberName}」?`, '提示', { type: 'warning' })
-  } catch { return }
+  } catch {
+    return
+  }
   if (!overview.value) return
   try {
     await api.delete(`/projects/${overview.value.project.id}/members/${m.id}`)
@@ -764,26 +867,38 @@ function statusNameOf(code: string | null | undefined): string {
 //   - 与全局甘特图保持同一套 HSL 推导: phaseId → 色相, phase 内 index → 4 个深浅
 //   - 单项目通常 5-10 milestone,phase 内 4 槽足够
 const PHASE_HUE_PD: Record<number, number> = {
-  1: 280, 2: 210, 3: 165, 4: 30, 5: 0, 6: 145, 7: 200,
+  1: 280,
+  2: 210,
+  3: 165,
+  4: 30,
+  5: 0,
+  6: 145,
+  7: 200,
 }
 const SLOT_SL_PD: { s: number; l: number }[] = [
-  { s: 75, l: 42 }, { s: 65, l: 52 }, { s: 55, l: 62 }, { s: 45, l: 72 },
+  { s: 75, l: 42 },
+  { s: 65, l: 52 },
+  { s: 55, l: 62 },
+  { s: 45, l: 72 },
 ]
 function hslToHexPd(h: number, s: number, l: number): string {
-  const sn = s / 100, ln = l / 100
+  const sn = s / 100,
+    ln = l / 100
   const c = (1 - Math.abs(2 * ln - 1)) * sn
   const hp = h / 60
   const x = c * (1 - Math.abs((hp % 2) - 1))
-  let r = 0, g = 0, b = 0
-  if      (hp < 1) [r, g, b] = [c, x, 0]
+  let r!: number, g!: number, b!: number
+  if (hp < 1) [r, g, b] = [c, x, 0]
   else if (hp < 2) [r, g, b] = [x, c, 0]
   else if (hp < 3) [r, g, b] = [0, c, x]
   else if (hp < 4) [r, g, b] = [0, x, c]
   else if (hp < 5) [r, g, b] = [x, 0, c]
-  else             [r, g, b] = [c, 0, x]
+  else [r, g, b] = [c, 0, x]
   const m = ln - c / 2
-  const toHex = (v: number) => Math.max(0, Math.min(255, Math.round((v + m) * 255)))
-    .toString(16).padStart(2, '0')
+  const toHex = (v: number) =>
+    Math.max(0, Math.min(255, Math.round((v + m) * 255)))
+      .toString(16)
+      .padStart(2, '0')
   return '#' + toHex(r) + toHex(g) + toHex(b)
 }
 /** 单项目迷你甘特: 返回该 milestone 的颜色 */
@@ -793,10 +908,13 @@ function pdMilestoneColor(m: any): string {
     return hslToHexPd(PHASE_HUE_PD[m.phaseId], 75, 42)
   }
   // fallback: 旧行为按 status
-  return m.status === 'COMPLETED' ? '#67c23a'
-       : m.status === 'IN_PROGRESS' ? '#e6a23c'
-       : m.status === 'DELAYED' ? '#f56c6c'
-       : '#909399'
+  return m.status === 'COMPLETED'
+    ? '#67c23a'
+    : m.status === 'IN_PROGRESS'
+      ? '#e6a23c'
+      : m.status === 'DELAYED'
+        ? '#f56c6c'
+        : '#909399'
 }
 
 const milestoneStats = (() => {
@@ -813,7 +931,9 @@ const milestoneStats = (() => {
 const ganttLoading = ref(false)
 /** 当前项目在 mini 视图里的坐标轴(独立于全公司 ganttData) */
 const miniGantt = ref<{ rangeFrom: string; rangeTo: string; bar: GanttBar | null }>({
-  rangeFrom: '', rangeTo: '', bar: null,
+  rangeFrom: '',
+  rangeTo: '',
+  bar: null,
 })
 /** P3 修复:load() 与 loadGantt() 都在 onMounted 异步触发,
  *  loadGantt 经常先于 overview 回来,被 `if (!overview.value) return` 早退,
@@ -865,31 +985,31 @@ function leftPctLocal(date: string | null, rangeFrom: string): number {
   const a = new Date(rangeFrom + 'T00:00:00').getTime()
   const b = new Date(date + 'T00:00:00').getTime()
   if (isNaN(a) || isNaN(b)) return 0
-  return Math.max(0, ((b - a) / 86400000))
+  return Math.max(0, (b - a) / 86400000)
 }
 function widthPctLocal(start: string, end: string, rangeFrom: string, rangeTo: string): number {
   if (!start || !end || !rangeFrom || !rangeTo) return 0
   const a = new Date(rangeFrom + 'T00:00:00').getTime()
-  const b = new Date(rangeTo   + 'T00:00:00').getTime()
-  const s = new Date(start     + 'T00:00:00').getTime()
-  const e = new Date(end       + 'T00:00:00').getTime()
+  const b = new Date(rangeTo + 'T00:00:00').getTime()
+  const s = new Date(start + 'T00:00:00').getTime()
+  const e = new Date(end + 'T00:00:00').getTime()
   if (isNaN(a) || isNaN(b) || isNaN(s) || isNaN(e)) return 0
   if (e <= s) return 0
   const totalDays = (b - a) / 86400000
   if (totalDays <= 0) return 0
   // 夹紧到坐标轴内
   const visStart = Math.max(s, a)
-  const visEnd   = Math.min(e, b)
+  const visEnd = Math.min(e, b)
   if (visEnd <= visStart) return 0
-  return ((visEnd - visStart) / 86400000) / totalDays * 100
+  return ((visEnd - visStart) / 86400000 / totalDays) * 100
 }
 /** 内部状态:用 ratio(0~1)而非 %,避免无限增长 */
 function leftPctRatio(date: string | null, rangeFrom: string, rangeTo: string): number {
   if (!date) return 0
   if (!rangeFrom || !rangeTo) return 0
   const a = new Date(rangeFrom + 'T00:00:00').getTime()
-  const b = new Date(rangeTo   + 'T00:00:00').getTime()
-  const d = new Date(date     + 'T00:00:00').getTime()
+  const b = new Date(rangeTo + 'T00:00:00').getTime()
+  const d = new Date(date + 'T00:00:00').getTime()
   if (isNaN(a) || isNaN(b) || isNaN(d) || b <= a) return 0
   return Math.max(0, Math.min(1, (d - a) / (b - a)))
 }
@@ -897,12 +1017,12 @@ function widthPctRatio(start: string, end: string, rangeFrom: string, rangeTo: s
   if (!start || !end) return 0
   if (!rangeFrom || !rangeTo) return 0
   const a = new Date(rangeFrom + 'T00:00:00').getTime()
-  const b = new Date(rangeTo   + 'T00:00:00').getTime()
-  const s = new Date(start     + 'T00:00:00').getTime()
-  const e = new Date(end       + 'T00:00:00').getTime()
+  const b = new Date(rangeTo + 'T00:00:00').getTime()
+  const s = new Date(start + 'T00:00:00').getTime()
+  const e = new Date(end + 'T00:00:00').getTime()
   if (isNaN(a) || isNaN(b) || isNaN(s) || isNaN(e) || b <= a) return 0
   const startRatio = Math.max(0, Math.min(1, (s - a) / (b - a)))
-  const endRatio   = Math.max(0, Math.min(1, (e - a) / (b - a)))
+  const endRatio = Math.max(0, Math.min(1, (e - a) / (b - a)))
   return Math.max(0, endRatio - startRatio) * 100
 }
 async function loadGantt() {
@@ -915,7 +1035,7 @@ async function loadGantt() {
     const data = await workloadApi.gantt({ includeCompleted: false })
     ganttData.value = data
     const pid = overview.value.project.id
-    const bar = data.bars.find(b => b.projectId === pid) ?? null
+    const bar = data.bars.find((b) => b.projectId === pid) ?? null
     if (!bar) {
       miniGantt.value = { rangeFrom: '', rangeTo: '', bar: null }
       return
@@ -935,18 +1055,25 @@ onMounted(() => {
   load()
   loadDictionaries()
   loadGantt()
-  wbsDialogVisible.value = false  // fix-ultimate: close on mount
+  wbsDialogVisible.value = false // fix-ultimate: close on mount
 })
-watch(() => route.params.id, () => {
-  activeTab.value = readTabFromRoute()  // 切项目时按 URL 重新定位
-  load(); loadGantt()
-})
+watch(
+  () => route.params.id,
+  () => {
+    activeTab.value = readTabFromRoute() // 切项目时按 URL 重新定位
+    load()
+    loadGantt()
+  },
+)
 // 外部修改 ?tab= 时同步本地 activeTab(例如列表页的"配置"按钮)
-watch(() => route.query.tab, (v) => {
-  if (!v) return
-  const t = String(v)
-  if ((VALID_TABS as string[]).includes(t)) activeTab.value = t as DetailTab
-})
+watch(
+  () => route.query.tab,
+  (v) => {
+    if (!v) return
+    const t = String(v)
+    if ((VALID_TABS as string[]).includes(t)) activeTab.value = t as DetailTab
+  },
+)
 // 用户切 tab 时把状态写回 URL(便于复制/刷新/分享)
 watch(activeTab, (t) => {
   if (route.query.tab === t) return
@@ -962,8 +1089,8 @@ watch(activeTab, (t) => {
 watch(overview, (v) => {
   if (!v) return
   loadMembers()
-  if (ganttTriggered.value) return       // 已有 gantt 数据,不重复拉
-  if (miniGantt.value.bar) return       // mini 视图已有 bar
+  if (ganttTriggered.value) return // 已有 gantt 数据,不重复拉
+  if (miniGantt.value.bar) return // mini 视图已有 bar
   void loadGantt()
   // 初始 tab 可能是 wbs/plan, 主动拉一次
   if (activeTab.value === 'wbs' || activeTab.value === 'plan') {
@@ -979,11 +1106,9 @@ watch(overview, (v) => {
         <span style="font-size: 18px; font-weight: 600">
           {{ overview?.project.name ?? '项目详情' }}
         </span>
-        <el-tag
-          v-if="overview?.project.code"
-          style="margin-left: 12px"
-          effect="plain"
-        >{{ overview.project.code }}</el-tag>
+        <el-tag v-if="overview?.project.code" style="margin-left: 12px" effect="plain">
+          {{ overview.project.code }}
+        </el-tag>
       </template>
     </el-page-header>
 
@@ -1013,11 +1138,9 @@ watch(overview, (v) => {
           <div class="kpi-card kpi-card--orange">
             <div class="kpi-card__label">健康度</div>
             <div class="kpi-card__value" style="font-size: 18px">
-              <el-tag
-                v-if="overview.project.health"
-                :color="overview.project.health.colorHex"
-                effect="dark"
-              >{{ overview.project.health.name }}</el-tag>
+              <el-tag v-if="overview.project.health" :color="overview.project.health.colorHex" effect="dark">
+                {{ overview.project.health.name }}
+              </el-tag>
             </div>
           </div>
         </el-col>
@@ -1056,7 +1179,10 @@ watch(overview, (v) => {
                 <template v-if="overview.project.relatedProduct">
                   <el-tag effect="plain" type="success">
                     {{ overview.project.relatedProduct.name }}
-                    <span v-if="overview.project.relatedProduct.version" style="margin-left: 4px; opacity: .7">
+                    <span
+                      v-if="overview.project.relatedProduct.version"
+                      style="margin-left: 4px; opacity: 0.7"
+                    >
                       v{{ overview.project.relatedProduct.version }}
                     </span>
                   </el-tag>
@@ -1132,10 +1258,21 @@ watch(overview, (v) => {
           <el-card>
             <template #header>
               <div style="display: flex; justify-content: space-between; align-items: center">
-                <el-button size="small" type="primary" plain @click="onAddWbs(null)" style="margin-right: 12px">+ 新增顶级</el-button> <span>WBS 工作分解结构</span>
+                <el-button
+                  size="small"
+                  type="primary"
+                  plain
+                  @click="onAddWbs(null)"
+                  style="margin-right: 12px"
+                >
+                  + 新增顶级
+                </el-button>
+                <span>WBS 工作分解结构</span>
                 <span style="font-size: 12px; color: #909399">
                   {{ wbsTree.length }} 阶段 / {{ wbsFlat.length }} 任务 /
-                  <el-tag v-if="wbsCriticalCount" type="danger" size="small">关键 {{ wbsCriticalCount }}</el-tag>
+                  <el-tag v-if="wbsCriticalCount" type="danger" size="small">
+                    关键 {{ wbsCriticalCount }}
+                  </el-tag>
                 </span>
               </div>
             </template>
@@ -1170,13 +1307,16 @@ watch(overview, (v) => {
               </el-table-column>
               <el-table-column label="责任人" width="100" align="center">
                 <template #default="{ row }">
-                  <span v-if="row.ownerUserId">{{ wbsOwners[row.ownerUserId] ?? '#' + row.ownerUserId }}</span>
+                  <span v-if="row.ownerUserId">
+                    {{ wbsOwners[row.ownerUserId] ?? '#' + row.ownerUserId }}
+                  </span>
                   <span v-else style="color: #c0c4cc">—</span>
                 </template>
               </el-table-column>
               <el-table-column label="工时 (实际/计划)" width="140" align="right">
                 <template #default="{ row }">
-                  <strong>{{ row.actualHours }}</strong> / {{ row.planHours }}h
+                  <strong>{{ row.actualHours }}</strong>
+                  / {{ row.planHours }}h
                 </template>
               </el-table-column>
               <el-table-column label="进度" width="160" align="center">
@@ -1208,7 +1348,16 @@ watch(overview, (v) => {
           <el-card>
             <template #header>
               <div style="display: flex; justify-content: space-between; align-items: center">
-                <el-button size="small" type="primary" plain @click="onAddWbs(null)" style="margin-right: 12px">+ 新增顶级</el-button> <span>项目计划 (层级结构 / 工作包可向下拆解)</span>
+                <el-button
+                  size="small"
+                  type="primary"
+                  plain
+                  @click="onAddWbs(null)"
+                  style="margin-right: 12px"
+                >
+                  + 新增顶级
+                </el-button>
+                <span>项目计划 (层级结构 / 工作包可向下拆解)</span>
                 <el-tag size="small">共 {{ wbsFlat.length }} 任务 / {{ wbsCriticalCount }} 关键路径</el-tag>
               </div>
             </template>
@@ -1227,8 +1376,12 @@ watch(overview, (v) => {
               <el-table-column prop="wbsCode" label="#" width="80" />
               <el-table-column label="层级" width="80" align="center">
                 <template #default="{ row }">
-                  <el-tag v-if="row.children?.length" type="warning" size="small" effect="plain">📦 工作包</el-tag>
-                  <span v-else-if="row.taskType === 'SUMMARY'" style="color: #909399; font-size: 11px">汇总</span>
+                  <el-tag v-if="row.children?.length" type="warning" size="small" effect="plain">
+                    📦 工作包
+                  </el-tag>
+                  <span v-else-if="row.taskType === 'SUMMARY'" style="color: #909399; font-size: 11px">
+                    汇总
+                  </span>
                 </template>
               </el-table-column>
               <el-table-column prop="name" label="任务" min-width="200" />
@@ -1239,9 +1392,12 @@ watch(overview, (v) => {
               </el-table-column>
               <el-table-column label="前驱" width="120" align="center">
                 <template #default="{ row }">
-                  <span v-if="row.predecessorIds?.length" style="font-size: 11px; display: flex; gap: 2px; flex-wrap: wrap; justify-content: center">
+                  <span
+                    v-if="row.predecessorIds?.length"
+                    style="font-size: 11px; display: flex; gap: 2px; flex-wrap: wrap; justify-content: center"
+                  >
                     <el-tag v-for="pid in row.predecessorIds" :key="pid" size="small" effect="plain">
-                      #{{ wbsFlat.find(x => x.id === pid)?.wbsCode ?? pid }}
+                      #{{ wbsFlat.find((x) => x.id === pid)?.wbsCode ?? pid }}
                     </el-tag>
                   </span>
                   <span v-else style="color: #c0c4cc">—</span>
@@ -1260,7 +1416,9 @@ watch(overview, (v) => {
               </el-table-column>
               <el-table-column label="责任人" width="90" align="center">
                 <template #default="{ row }">
-                  <span v-if="row.ownerUserId">{{ wbsOwners[row.ownerUserId] ?? '#' + row.ownerUserId }}</span>
+                  <span v-if="row.ownerUserId">
+                    {{ wbsOwners[row.ownerUserId] ?? '#' + row.ownerUserId }}
+                  </span>
                   <span v-else style="color: #c0c4cc">—</span>
                 </template>
               </el-table-column>
@@ -1269,7 +1427,9 @@ watch(overview, (v) => {
               </el-table-column>
               <el-table-column label="实际工时" width="80" align="right">
                 <template #default="{ row }">
-                  <strong :style="{ color: planProgressColor(row.actualHours, row.planHours) }">{{ row.actualHours }}h</strong>
+                  <strong :style="{ color: planProgressColor(row.actualHours, row.planHours) }">
+                    {{ row.actualHours }}h
+                  </strong>
                 </template>
               </el-table-column>
               <el-table-column label="完成度" width="80" align="center">
@@ -1299,7 +1459,10 @@ watch(overview, (v) => {
           <el-card v-loading="ganttLoading">
             <template v-if="projectBar() && miniGantt.rangeFrom && miniGantt.rangeTo">
               <div style="margin-bottom: 8px; color: #606266; font-size: 13px">
-                项目时间轴: <b>{{ miniGantt.rangeFrom }}</b> → <b>{{ miniGantt.rangeTo }}</b>
+                项目时间轴:
+                <b>{{ miniGantt.rangeFrom }}</b>
+                →
+                <b>{{ miniGantt.rangeTo }}</b>
                 <span style="margin-left: 12px; color: #909399">
                   (基于本项目 plan 区间 ±7d 渲染,不依赖全公司聚合时间窗)
                 </span>
@@ -1325,15 +1488,25 @@ watch(overview, (v) => {
                 </el-button>
               </div>
               <div class="pd-gantt-row">
-                <div class="pd-gantt-label">{{ projectBar()?.projectCode }} {{ projectBar()?.projectName }}</div>
+                <div class="pd-gantt-label">
+                  {{ projectBar()?.projectCode }} {{ projectBar()?.projectName }}
+                </div>
                 <div class="pd-gantt-timeline">
                   <!-- 计划区间(背景) -->
                   <div
                     v-if="projectBar()?.planStart && projectBar()?.planEnd"
                     class="pd-gantt-bar plan"
                     :style="{
-                      left: leftPctRatio(projectBar()!.planStart!, miniGantt.rangeFrom, miniGantt.rangeTo) * 100 + '%',
-                      width: widthPctRatio(projectBar()!.planStart!, projectBar()!.planEnd!, miniGantt.rangeFrom, miniGantt.rangeTo) + '%',
+                      left:
+                        leftPctRatio(projectBar()!.planStart!, miniGantt.rangeFrom, miniGantt.rangeTo) * 100 +
+                        '%',
+                      width:
+                        widthPctRatio(
+                          projectBar()!.planStart!,
+                          projectBar()!.planEnd!,
+                          miniGantt.rangeFrom,
+                          miniGantt.rangeTo,
+                        ) + '%',
                     }"
                     :title="`计划: ${projectBar()!.planStart} ~ ${projectBar()!.planEnd}`"
                   ></div>
@@ -1341,7 +1514,9 @@ watch(overview, (v) => {
                   <div
                     v-if="projectBar() && miniGantt.rangeFrom && miniGantt.rangeTo"
                     class="pd-gantt-today"
-                    :style="{ left: leftPctRatio(isoToday(), miniGantt.rangeFrom, miniGantt.rangeTo) * 100 + '%' }"
+                    :style="{
+                      left: leftPctRatio(isoToday(), miniGantt.rangeFrom, miniGantt.rangeTo) * 100 + '%',
+                    }"
                   ></div>
                   <!-- 实际区间(前景 + 进度)
                        P3 修复:actualEnd 经常为 null(项目进行中),
@@ -1350,9 +1525,23 @@ watch(overview, (v) => {
                     v-if="projectBar()?.actualStart && (projectBar()?.actualEnd || projectBar()?.planEnd)"
                     class="pd-gantt-bar actual"
                     :style="{
-                      left: leftPctRatio(projectBar()!.actualStart!, miniGantt.rangeFrom, miniGantt.rangeTo) * 100 + '%',
-                      width: widthPctRatio(projectBar()!.actualStart!, (projectBar()!.actualEnd || projectBar()!.planEnd!)!, miniGantt.rangeFrom, miniGantt.rangeTo) + '%',
-                      background: (projectBar()!.progressPct ?? 0) >= 80 ? '#67c23a' : (projectBar()!.progressPct ?? 0) >= 50 ? '#409eff' : '#e6a23c',
+                      left:
+                        leftPctRatio(projectBar()!.actualStart!, miniGantt.rangeFrom, miniGantt.rangeTo) *
+                          100 +
+                        '%',
+                      width:
+                        widthPctRatio(
+                          projectBar()!.actualStart!,
+                          (projectBar()!.actualEnd || projectBar()!.planEnd!)!,
+                          miniGantt.rangeFrom,
+                          miniGantt.rangeTo,
+                        ) + '%',
+                      background:
+                        (projectBar()!.progressPct ?? 0) >= 80
+                          ? '#67c23a'
+                          : (projectBar()!.progressPct ?? 0) >= 50
+                            ? '#409eff'
+                            : '#e6a23c',
                     }"
                     :title="`实际: ${projectBar()!.actualStart} ~ ${projectBar()!.actualEnd || '(进行中)'} (${projectBar()?.progressPct ?? 0}%)`"
                   >
@@ -1368,7 +1557,9 @@ watch(overview, (v) => {
                       color: pdMilestoneColor(m),
                     }"
                     :title="`${m.name} (${m.status}) 计划: ${m.planDate}${m.actualDate ? ' / 实际: ' + m.actualDate : ''}`"
-                  >▼</div>
+                  >
+                    ▼
+                  </div>
                 </div>
               </div>
               <!-- 里程碑图例列表(避免单个 ▼ tooltip 太小) -->
@@ -1391,7 +1582,16 @@ watch(overview, (v) => {
                 </el-table-column>
                 <el-table-column label="状态" width="110">
                   <template #default="{ row }">
-                    <el-tag size="small" :type="row.status === 'COMPLETED' ? 'success' : row.status === 'IN_PROGRESS' ? 'warning' : 'info'">
+                    <el-tag
+                      size="small"
+                      :type="
+                        row.status === 'COMPLETED'
+                          ? 'success'
+                          : row.status === 'IN_PROGRESS'
+                            ? 'warning'
+                            : 'info'
+                      "
+                    >
                       {{ statusNameOf(row.status) }}
                     </el-tag>
                   </template>
@@ -1403,7 +1603,7 @@ watch(overview, (v) => {
           </el-card>
         </el-tab-pane>
 
-        <!-- Tab 3: 健康度调整 (后续 Tab 4/5/6 已加 ETC + 燃尽图) --> 
+        <!-- Tab 3: 健康度调整 (后续 Tab 4/5/6 已加 ETC + 燃尽图) -->
         <!-- WBS 编辑弹窗 (任意 WBS / 项目计划 tab 触发) -->
         <!-- WBS 编辑弹窗 (封装到 WbsEditDialog 子组件) -->
         <WbsEditDialog
@@ -1422,11 +1622,9 @@ watch(overview, (v) => {
           <el-card>
             <p style="margin-bottom: 16px; color: #606266">
               当前健康度:
-              <el-tag
-                v-if="overview.project.health"
-                :color="overview.project.health.colorHex"
-                effect="dark"
-              >{{ overview.project.health.name }} ({{ overview.project.health.code }})</el-tag>
+              <el-tag v-if="overview.project.health" :color="overview.project.health.colorHex" effect="dark">
+                {{ overview.project.health.name }} ({{ overview.project.health.code }})
+              </el-tag>
             </p>
             <el-radio-group v-model="newHealth" :disabled="healthUpdating" @change="changeHealth">
               <el-radio-button value="GREEN">正常 🟢</el-radio-button>
@@ -1465,14 +1663,24 @@ watch(overview, (v) => {
               <el-descriptions-item label="版本">v{{ evmLatest.version }}</el-descriptions-item>
               <el-descriptions-item label="原因">{{ evmLatest.reason }}</el-descriptions-item>
 
-              <el-descriptions-item label="BAC (计划预算)">¥ {{ evmLatest.bac.toLocaleString() }}</el-descriptions-item>
-              <el-descriptions-item label="PV (计划值)">¥ {{ evmLatest.pv.toLocaleString() }}</el-descriptions-item>
-              <el-descriptions-item label="EV (挣值)">¥ {{ evmLatest.ev.toLocaleString() }}</el-descriptions-item>
+              <el-descriptions-item label="BAC (计划预算)">
+                ¥ {{ evmLatest.bac.toLocaleString() }}
+              </el-descriptions-item>
+              <el-descriptions-item label="PV (计划值)">
+                ¥ {{ evmLatest.pv.toLocaleString() }}
+              </el-descriptions-item>
+              <el-descriptions-item label="EV (挣值)">
+                ¥ {{ evmLatest.ev.toLocaleString() }}
+              </el-descriptions-item>
 
-              <el-descriptions-item label="AC (实际成本)">¥ {{ evmLatest.ac.toLocaleString() }}</el-descriptions-item>
-              <el-descriptions-item label="EAC (完工估算)">¥ {{ evmLatest.eac.toLocaleString() }}</el-descriptions-item>
+              <el-descriptions-item label="AC (实际成本)">
+                ¥ {{ evmLatest.ac.toLocaleString() }}
+              </el-descriptions-item>
+              <el-descriptions-item label="EAC (完工估算)">
+                ¥ {{ evmLatest.eac.toLocaleString() }}
+              </el-descriptions-item>
               <el-descriptions-item label="ETC (完工尚需)">
-                <strong style="color: #E6A23C">¥ {{ evmLatest.etc.toLocaleString() }}</strong>
+                <strong style="color: #e6a23c">¥ {{ evmLatest.etc.toLocaleString() }}</strong>
               </el-descriptions-item>
 
               <el-descriptions-item label="VAC (完工偏差)">
@@ -1494,10 +1702,26 @@ watch(overview, (v) => {
 
             <el-divider v-if="evmLatest" />
             <div v-if="evmLatest" style="font-size: 12px; color: #909399; line-height: 1.8">
-              <p>📌 <strong>CPI ≥ 1</strong>: 实际成本 ≤ 计划 (省)</p>
-              <p>📌 <strong>CPI &lt; 1</strong>: 实际成本 > 计划 (超支)</p>
-              <p>📌 <strong>SPI ≥ 1</strong>: 进度提前 / 符合计划</p>
-              <p>📌 <strong>SPI &lt; 1</strong>: 进度滞后</p>
+              <p>
+                📌
+                <strong>CPI ≥ 1</strong>
+                : 实际成本 ≤ 计划 (省)
+              </p>
+              <p>
+                📌
+                <strong>CPI &lt; 1</strong>
+                : 实际成本 > 计划 (超支)
+              </p>
+              <p>
+                📌
+                <strong>SPI ≥ 1</strong>
+                : 进度提前 / 符合计划
+              </p>
+              <p>
+                📌
+                <strong>SPI &lt; 1</strong>
+                : 进度滞后
+              </p>
             </div>
           </el-card>
         </el-tab-pane>
@@ -1512,16 +1736,8 @@ watch(overview, (v) => {
               </div>
             </template>
 
-            <v-chart
-              v-if="evmSnapshots.length"
-              :option="burndownChartOpt"
-              style="height: 420px"
-            />
-            <el-empty
-              v-else
-              description="该项目暂无 EVM 快照,先去 ETC tab 触发一次"
-              :image-size="80"
-            />
+            <v-chart v-if="evmSnapshots.length" :option="burndownChartOpt" style="height: 420px" />
+            <el-empty v-else description="该项目暂无 EVM 快照,先去 ETC tab 触发一次" :image-size="80" />
           </el-card>
         </el-tab-pane>
 
@@ -1555,7 +1771,10 @@ watch(overview, (v) => {
                 <template v-if="overview.project.relatedProduct">
                   <el-tag effect="plain" type="success">
                     {{ overview.project.relatedProduct.name }}
-                    <span v-if="overview.project.relatedProduct.version" style="margin-left: 4px; opacity: .7">
+                    <span
+                      v-if="overview.project.relatedProduct.version"
+                      style="margin-left: 4px; opacity: 0.7"
+                    >
                       v{{ overview.project.relatedProduct.version }}
                     </span>
                   </el-tag>
@@ -1606,7 +1825,15 @@ watch(overview, (v) => {
               <el-table-column label="姓名" min-width="140">
                 <template #default="{ row }">
                   {{ row.memberName }}
-                  <el-tag v-if="row.external" type="warning" effect="plain" size="small" style="margin-left: 6px">外部</el-tag>
+                  <el-tag
+                    v-if="row.external"
+                    type="warning"
+                    effect="plain"
+                    size="small"
+                    style="margin-left: 6px"
+                  >
+                    外部
+                  </el-tag>
                 </template>
               </el-table-column>
               <el-table-column label="参与开始" prop="joinDate" width="120" />
@@ -1625,13 +1852,19 @@ watch(overview, (v) => {
               </el-table-column>
               <el-table-column label="操作" width="140" align="center" fixed="right">
                 <template #default="{ row }">
-                  <el-button type="primary" size="small" link @click="openEditMemberDialog(row)">编辑</el-button>
+                  <el-button type="primary" size="small" link @click="openEditMemberDialog(row)">
+                    编辑
+                  </el-button>
                   <el-button type="danger" size="small" link @click="deleteMember(row)">移除</el-button>
                 </template>
               </el-table-column>
             </el-table>
 
-            <el-empty v-else description="该项目暂无成员 — 点击右上「添加成员」开始组建项目组" :image-size="100">
+            <el-empty
+              v-else
+              description="该项目暂无成员 — 点击右上「添加成员」开始组建项目组"
+              :image-size="100"
+            >
               <el-button type="primary" plain @click="openAddMemberDialog">
                 <el-icon style="margin-right: 4px"><span>＋</span></el-icon>
                 添加第一名成员
@@ -1643,12 +1876,7 @@ watch(overview, (v) => {
     </template>
 
     <!-- 编辑项目配置 弹窗 -->
-    <el-dialog
-      v-model="editDialogVisible"
-      title="编辑项目配置"
-      width="540px"
-      :close-on-click-modal="false"
-    >
+    <el-dialog v-model="editDialogVisible" title="编辑项目配置" width="540px" :close-on-click-modal="false">
       <el-form label-width="100px" v-loading="editSaving">
         <el-form-item label="业务单元 (BU)">
           <el-select
@@ -1659,12 +1887,7 @@ watch(overview, (v) => {
             style="width: 100%"
             @change="onBuChange"
           >
-            <el-option
-              v-for="b in buList"
-              :key="b.id"
-              :label="`${b.name} (${b.code})`"
-              :value="b.id"
-            />
+            <el-option v-for="b in buList" :key="b.id" :label="`${b.name} (${b.code})`" :value="b.id" />
           </el-select>
         </el-form-item>
 
@@ -1732,9 +1955,7 @@ watch(overview, (v) => {
 
       <template #footer>
         <el-button @click="editDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="editSaving" @click="saveEdit">
-          保存
-        </el-button>
+        <el-button type="primary" :loading="editSaving" @click="saveEdit">保存</el-button>
       </template>
     </el-dialog>
 
@@ -1812,7 +2033,8 @@ watch(overview, (v) => {
             <el-form-item label="投入比例">
               <el-input-number
                 v-model="memberDialog.form.allocationPct"
-                :min="0" :max="100"
+                :min="0"
+                :max="100"
                 controls-position="right"
                 style="width: 100%"
               />
@@ -1847,27 +2069,120 @@ watch(overview, (v) => {
   border-radius: 8px;
   padding: 18px 20px;
   color: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
-.kpi-card--blue   { background: linear-gradient(135deg, #409EFF, #2c7be5); }
-.kpi-card--green  { background: linear-gradient(135deg, #67C23A, #5daf34); }
-.kpi-card--orange { background: linear-gradient(135deg, #E6A23C, #d68910); }
-.kpi-card--red    { background: linear-gradient(135deg, #F56C6C, #e04545); }
-.kpi-card__label { font-size: 12px; opacity: .85; margin-bottom: 6px; }
-.kpi-card__value { font-size: 28px; font-weight: 600; }
+.kpi-card--blue {
+  background: linear-gradient(135deg, #409eff, #2c7be5);
+}
+.kpi-card--green {
+  background: linear-gradient(135deg, #67c23a, #5daf34);
+}
+.kpi-card--orange {
+  background: linear-gradient(135deg, #e6a23c, #d68910);
+}
+.kpi-card--red {
+  background: linear-gradient(135deg, #f56c6c, #e04545);
+}
+.kpi-card__label {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-bottom: 6px;
+}
+.kpi-card__value {
+  font-size: 28px;
+  font-weight: 600;
+}
 
-.pd-gantt-row { display: flex; align-items: center; min-height: 40px; border-bottom: 1px solid var(--pmo-border); }
-.pd-gantt-label { width: 280px; padding: 8px 12px; font-size: 13px; border-right: 1px solid var(--pmo-border); background: #fcfcfc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pd-gantt-timeline { position: relative; flex: 1; height: 40px; background: repeating-linear-gradient(to right, transparent 0, transparent 79px, rgba(0,0,0,0.04) 79px, rgba(0,0,0,0.04) 80px); }
-.pd-gantt-bar { position: absolute; top: 8px; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: flex-end; padding: 0 6px; color: white; font-size: 11px; font-weight: 600; }
-.pd-gantt-bar.plan { background: #e6f0ff; border: 1px dashed #909399; opacity: 0.6; }
-.pd-gantt-milestone { position: absolute; top: 4px; color: #f56c6c; font-size: 16px; transform: translateX(-50%); z-index: 2; cursor: help; }
+.pd-gantt-row {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  border-bottom: 1px solid var(--pmo-border);
+}
+.pd-gantt-label {
+  width: 280px;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-right: 1px solid var(--pmo-border);
+  background: #fcfcfc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pd-gantt-timeline {
+  position: relative;
+  flex: 1;
+  height: 40px;
+  background: repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent 79px,
+    rgba(0, 0, 0, 0.04) 79px,
+    rgba(0, 0, 0, 0.04) 80px
+  );
+}
+.pd-gantt-bar {
+  position: absolute;
+  top: 8px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 6px;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+}
+.pd-gantt-bar.plan {
+  background: #e6f0ff;
+  border: 1px dashed #909399;
+  opacity: 0.6;
+}
+.pd-gantt-milestone {
+  position: absolute;
+  top: 4px;
+  color: #f56c6c;
+  font-size: 16px;
+  transform: translateX(-50%);
+  z-index: 2;
+  cursor: help;
+}
 /* P3 修复:今日竖线指示器,让进行中项目的"今天"位置一眼可见 */
-.pd-gantt-today { position: absolute; top: 0; bottom: 0; width: 2px; background: #f56c6c; opacity: 0.7; z-index: 1; pointer-events: none; }
-.pd-gantt-today::before { content: '今日'; position: absolute; top: -16px; left: -12px; font-size: 10px; color: #f56c6c; background: white; padding: 0 2px; border-radius: 2px; }
+.pd-gantt-today {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #f56c6c;
+  opacity: 0.7;
+  z-index: 1;
+  pointer-events: none;
+}
+.pd-gantt-today::before {
+  content: '今日';
+  position: absolute;
+  top: -16px;
+  left: -12px;
+  font-size: 10px;
+  color: #f56c6c;
+  background: white;
+  padding: 0 2px;
+  border-radius: 2px;
+}
 
 /* WBS Dialog 手动样式 (方案 A) */
-.wbs-dialog-overlay { position: fixed; inset: 0; z-index: 2005; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(2px); }
+.wbs-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2005;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  backdrop-filter: blur(2px);
+}
 .wbs-dialog {
   background: var(--pmo-card, #ffffff);
   border-radius: 10px;
@@ -1876,13 +2191,21 @@ watch(overview, (v) => {
   max-height: calc(100vh - 32px);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 12px 48px 8px rgba(0, 0, 0, 0.18), 0 0 1px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 12px 48px 8px rgba(0, 0, 0, 0.18),
+    0 0 1px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   animation: wbsDlgIn 0.18s ease-out;
 }
 @keyframes wbsDlgIn {
-  from { transform: translateY(-12px) scale(0.98); opacity: 0; }
-  to   { transform: translateY(0) scale(1); opacity: 1; }
+  from {
+    transform: translateY(-12px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
 .wbs-dialog__header {
   display: flex;
@@ -1905,7 +2228,7 @@ watch(overview, (v) => {
   display: inline-block;
   width: 4px;
   height: 18px;
-  background: linear-gradient(180deg, #409EFF, #2c7be5);
+  background: linear-gradient(180deg, #409eff, #2c7be5);
   border-radius: 2px;
 }
 .wbs-dialog__close {
@@ -1916,12 +2239,27 @@ watch(overview, (v) => {
   color: #909399;
   cursor: pointer;
   padding: 0 4px;
-  transition: color 0.15s, transform 0.15s;
+  transition:
+    color 0.15s,
+    transform 0.15s;
 }
-.wbs-dialog__close:hover { color: #F56C6C; transform: rotate(90deg); }
-.wbs-dialog__body { padding: 20px 24px; overflow: auto; flex: 1 1 auto; background: #fafbfc; }
-.wbs-dialog__body .el-form-item { margin-bottom: 18px; }
-.wbs-dialog__body .el-form-item__label { font-weight: 500; color: #606266; }
+.wbs-dialog__close:hover {
+  color: #f56c6c;
+  transform: rotate(90deg);
+}
+.wbs-dialog__body {
+  padding: 20px 24px;
+  overflow: auto;
+  flex: 1 1 auto;
+  background: #fafbfc;
+}
+.wbs-dialog__body .el-form-item {
+  margin-bottom: 18px;
+}
+.wbs-dialog__body .el-form-item__label {
+  font-weight: 500;
+  color: #606266;
+}
 .wbs-dialog__footer {
   padding: 14px 24px;
   border-top: 1px solid var(--pmo-border, #e4e7ed);
@@ -1930,6 +2268,12 @@ watch(overview, (v) => {
   gap: 10px;
   background: #fcfcfd;
 }
-.dlg-fade-enter-active, .dlg-fade-leave-active { transition: opacity 0.2s ease; }
-.dlg-fade-enter-from, .dlg-fade-leave-to { opacity: 0; }
+.dlg-fade-enter-active,
+.dlg-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.dlg-fade-enter-from,
+.dlg-fade-leave-to {
+  opacity: 0;
+}
 </style>

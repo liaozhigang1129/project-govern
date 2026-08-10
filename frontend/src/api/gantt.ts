@@ -23,7 +23,7 @@ export interface Milestone {
   projectId: number
   name: string
   sequence: number
-  planDate: string                  // YYYY-MM-DD
+  planDate: string // YYYY-MM-DD
   actualDate: string | null
   status: MilestoneStatusRef | null
   weight: number
@@ -37,12 +37,14 @@ export interface Milestone {
 
 export const milestoneApi = {
   /** 某项目里程碑列表(JOIN FETCH status) */
-  list: (projectId: number) =>
-    api.get<Milestone[]>(`/milestones/by-project/${projectId}`),
+  list: (projectId: number) => api.get<Milestone[]>(`/milestones/by-project/${projectId}`),
 
   /** 详情(同 list,但只取单条) */
   get: (id: number) =>
-    api.get<Milestone>(`/milestones/by-project/0`).then(() => null).catch(() => null),
+    api
+      .get<Milestone>(`/milestones/by-project/0`)
+      .then(() => null)
+      .catch(() => null),
   // 上面这个 get 是占位,实际后端没有 /milestones/{id} 单独接口,前端用 list + filter
 
   /** 改期专用(单一职责)— 拖拽打这里 */
@@ -53,15 +55,21 @@ export const milestoneApi = {
   putStatus: (id: number, status: MilestoneStatusCode, actualDate?: string) =>
     api.put<Milestone>(`/milestones/${id}/status`, {
       status,
-      actualDate: actualDate ?? null
+      actualDate: actualDate ?? null,
     }),
 
   /** 局部更新(name / weight / owner / deliverable / remark) */
-  update: (id: number, body: Partial<{
-    name: string; planDate: string; weight: number;
-    ownerUserId: number; deliverable: string; remark: string
-  }>) =>
-    api.put<Milestone>(`/milestones/${id}`, body)
+  update: (
+    id: number,
+    body: Partial<{
+      name: string
+      planDate: string
+      weight: number
+      ownerUserId: number
+      deliverable: string
+      remark: string
+    }>,
+  ) => api.put<Milestone>(`/milestones/${id}`, body),
 }
 
 /* ============================================================
@@ -78,7 +86,7 @@ export interface Department {
 }
 
 export const departmentApi = {
-  list: () => api.get<Department[]>('/departments')
+  list: () => api.get<Department[]>('/departments'),
 }
 
 /* ============================================================
@@ -88,5 +96,5 @@ export const departmentApi = {
 export const userApi = {
   /** 对齐后端 /users 接口(可加 ?enabled=true 过滤) */
   list: (params: { enabled?: boolean; departmentId?: number } = {}) =>
-    api.get<import('./client').AppUser[]>('/users', { params })
+    api.get<import('./client').AppUser[]>('/users', { params }),
 }

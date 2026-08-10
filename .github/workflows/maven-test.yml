@@ -151,6 +151,15 @@ jobs:
         working-directory: frontend
         run: pnpm exec vue-tsc --noEmit
 
+      - name: 🧹 ESLint (error 必挡,warning 上限 1000)
+        working-directory: frontend
+        run: pnpm lint
+
+      - name: 💅 Prettier format check (warning only,本地 lint 后可选择跑 pnpm format)
+        working-directory: frontend
+        continue-on-error: true
+        run: pnpm format:check
+
       - name: 🏗️ Build
         working-directory: frontend
         run: pnpm build

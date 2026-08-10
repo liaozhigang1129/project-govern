@@ -66,12 +66,9 @@
       <Step5RiskResponse
         v-if="active === 4 && !!initiationId"
         :initiation-id="initiationId!"
-        @update:total-cost="v => (form.riskTotal = v)"
+        @update:total-cost="(v) => (form.riskTotal = v)"
       />
-      <Step6BudgetAndMargin
-        v-if="active === 5 && !!initiationId"
-        :initiation-id="initiationId!"
-      />
+      <Step6BudgetAndMargin v-if="active === 5 && !!initiationId" :initiation-id="initiationId!" />
 
       <el-empty
         v-if="active > 0 && !initiationId"
@@ -96,24 +93,32 @@
               :loading="savingBasic"
               :disabled="!initiationId || loadingBasic"
               @click="updateInitiationBasic"
-            >保存修改</el-button>
+            >
+              保存修改
+            </el-button>
           </template>
           <template v-else>
             <el-button v-if="active > 0" :disabled="active === 0" @click="active--">上一步</el-button>
             <!-- 新建模式:Step 1 显示「创建立项并进入下一步」 -->
             <el-button
               v-if="active === 0 && mode === 'create'"
-              type="primary" :loading="savingBasic" @click="createInitiation"
-            >创建立项并进入下一步</el-button>
+              type="primary"
+              :loading="savingBasic"
+              @click="createInitiation"
+            >
+              创建立项并进入下一步
+            </el-button>
             <!-- edit-supplement (补料) 模式回到 Step 1:也允许保存基础信息 -->
             <el-button
               v-else-if="active === 0 && mode === 'edit-supplement'"
-              type="primary" :loading="savingBasic" :disabled="!initiationId || loadingBasic"
+              type="primary"
+              :loading="savingBasic"
+              :disabled="!initiationId || loadingBasic"
               @click="updateInitiationBasic"
-            >保存修改</el-button>
-            <el-button
-              v-else type="primary" @click="next"
-            >{{ active === 5 ? '完成' : '下一步' }}</el-button>
+            >
+              保存修改
+            </el-button>
+            <el-button v-else type="primary" @click="next">{{ active === 5 ? '完成' : '下一步' }}</el-button>
           </template>
         </div>
       </div>
@@ -151,15 +156,17 @@ async function loadDictionaries() {
       api.get<ProjectTypeOption[]>('/dict/project-types'),
       api.get<ProjectLevelOption[]>('/dict/project-levels'),
       // /users 默认是分页接口, 用 /users/options 拉全量
-      api.get<{ id: number; username: string; fullName: string; primaryRoleCode: string }[]>('/users/options'),
+      api.get<{ id: number; username: string; fullName: string; primaryRoleCode: string }[]>(
+        '/users/options',
+      ),
     ])
     departments.value = dept ?? []
     projectTypes.value = types ?? []
     projectLevels.value = levels ?? []
     // 过滤 PM 角色 (PM / PMO_ADMIN), 业务方可手动改
     pmCandidates.value = (optionsRes ?? [])
-      .filter(u => u.primaryRoleCode === 'PM' || u.primaryRoleCode === 'PMO_ADMIN')
-      .map(u => ({
+      .filter((u) => u.primaryRoleCode === 'PM' || u.primaryRoleCode === 'PMO_ADMIN')
+      .map((u) => ({
         id: u.id,
         username: u.username,
         fullName: u.fullName,
@@ -200,8 +207,11 @@ const mode = computed<'create' | 'edit-basic' | 'edit-supplement'>(
 const step1Disabled = computed(() => false)
 
 const visible = ref(props.modelValue)
-watch(() => props.modelValue, v => (visible.value = v))
-watch(visible, v => emit('update:modelValue', v))
+watch(
+  () => props.modelValue,
+  (v) => (visible.value = v),
+)
+watch(visible, (v) => emit('update:modelValue', v))
 
 const active = ref(0)
 const savingBasic = ref(false)

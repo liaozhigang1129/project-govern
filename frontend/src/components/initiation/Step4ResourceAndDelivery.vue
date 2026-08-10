@@ -11,7 +11,9 @@
         </template>
 
         <el-alert
-          type="info" :closable="false" style="margin-bottom: 12px"
+          type="info"
+          :closable="false"
+          style="margin-bottom: 12px"
           title="从「人员」下拉选择系统用户:userId/fullName/部门角色/时薪自动带过来;也支持「按角色」批量派遣(留空人员)。"
         />
 
@@ -22,7 +24,9 @@
               <el-select
                 v-model="row.userId"
                 placeholder="搜索姓名/工号…"
-                filterable clearable remote
+                filterable
+                clearable
+                remote
                 :remote-method="searchUsers"
                 :loading="userLoading"
                 style="width: 100%"
@@ -36,10 +40,13 @@
                   :label="`${u.fullName} (${u.username})${u.jobTitle ? ' · ' + u.jobTitle : ''}`"
                 >
                   <div style="display: flex; justify-content: space-between; gap: 8px">
-                    <span>{{ u.fullName }} <small style="color:#909399">{{ u.username }}</small></span>
+                    <span>
+                      {{ u.fullName }}
+                      <small style="color: #909399">{{ u.username }}</small>
+                    </span>
                     <small style="color: #909399">
                       {{ u.primaryRoleCode || '—' }}
-                      <span v-if="u.defaultHourlyRate"> · ¥{{ u.defaultHourlyRate }}/h</span>
+                      <span v-if="u.defaultHourlyRate">· ¥{{ u.defaultHourlyRate }}/h</span>
                     </small>
                   </div>
                 </el-option>
@@ -51,7 +58,9 @@
           <el-table-column label="角色代码" width="120">
             <template #default="{ row }">
               <el-input
-                v-model="row.roleCode" size="small" placeholder="PM/DEV/QA"
+                v-model="row.roleCode"
+                size="small"
+                placeholder="PM/DEV/QA"
                 :disabled="!!row.userId"
               />
             </template>
@@ -61,8 +70,13 @@
           <el-table-column label="投入%" width="100">
             <template #default="{ row }">
               <el-input-number
-                v-model="row.allocationPct" :min="0" :max="100" :step="10"
-                size="small" :controls="false" style="width: 100%"
+                v-model="row.allocationPct"
+                :min="0"
+                :max="100"
+                :step="10"
+                size="small"
+                :controls="false"
+                style="width: 100%"
               />
             </template>
           </el-table-column>
@@ -71,8 +85,12 @@
           <el-table-column label="计划工时" width="110">
             <template #default="{ row }">
               <el-input-number
-                v-model="row.planHours" :min="0" :step="8"
-                size="small" :controls="false" style="width: 100%"
+                v-model="row.planHours"
+                :min="0"
+                :step="8"
+                size="small"
+                :controls="false"
+                style="width: 100%"
               />
             </template>
           </el-table-column>
@@ -81,8 +99,12 @@
           <el-table-column label="时薪(¥/h)" width="110">
             <template #default="{ row }">
               <el-input-number
-                v-model="row.hourlyRate" :min="0" :step="20"
-                size="small" :controls="false" style="width: 100%"
+                v-model="row.hourlyRate"
+                :min="0"
+                :step="20"
+                size="small"
+                :controls="false"
+                style="width: 100%"
               />
             </template>
           </el-table-column>
@@ -91,9 +113,13 @@
           <el-table-column label="起止" width="220">
             <template #default="{ row }">
               <el-date-picker
-                v-model="row.range" type="daterange" size="small"
+                v-model="row.range"
+                type="daterange"
+                size="small"
                 value-format="YYYY-MM-DD"
-                start-placeholder="开始" end-placeholder="结束" style="width: 100%"
+                start-placeholder="开始"
+                end-placeholder="结束"
+                style="width: 100%"
                 @change="onRangeChange(row, $event)"
               />
             </template>
@@ -102,7 +128,7 @@
           <!-- ⑦ 小计 (工时 × 时薪 × 投入%) -->
           <el-table-column label="小计(¥)" width="120" align="right">
             <template #default="{ row }">
-              <span style="color: #E6A23C; font-weight: 600">
+              <span style="color: #e6a23c; font-weight: 600">
                 {{ formatCost(row.costAmount) }}
               </span>
             </template>
@@ -110,8 +136,7 @@
 
           <el-table-column label="" width="60" align="center">
             <template #default="{ $index }">
-              <el-button size="small" link type="danger"
-                         :icon="Delete" @click="rows.splice($index, 1)" />
+              <el-button size="small" link type="danger" :icon="Delete" @click="rows.splice($index, 1)" />
             </template>
           </el-table-column>
         </el-table>
@@ -136,11 +161,15 @@
             <el-input-number
               :model-value="contractAmount"
               @update:model-value="onContractChange"
-              :min="0" :step="10000" :precision="2" :controls="false"
-              size="small" style="width: 160px"
+              :min="0"
+              :step="10000"
+              :precision="2"
+              :controls="false"
+              size="small"
+              style="width: 160px"
             />
             <el-tooltip content="修改后会同步到立项草稿,Step 6 自动重算毛利" placement="top">
-              <el-icon style="color: #409EFF"><Link /></el-icon>
+              <el-icon style="color: #409eff"><Link /></el-icon>
             </el-tooltip>
           </div>
         </div>
@@ -149,17 +178,22 @@
 
         <div class="cost-row">
           <span>👥 资源派遣小计 (Step 4)</span>
-          <span class="cost-val" style="color:#E6A23C">{{ formatCost(totalResource) }}</span>
+          <span class="cost-val" style="color: #e6a23c">{{ formatCost(totalResource) }}</span>
         </div>
         <div class="cost-row">
           <span>⚠️ 风险应对小计 (Step 5)</span>
-          <span class="cost-val" style="color:#E6A23C">{{ formatCost(riskCost) }}</span>
+          <span class="cost-val" style="color: #e6a23c">{{ formatCost(riskCost) }}</span>
         </div>
         <div class="cost-row">
           <span>📦 其他成本(差旅/采购)</span>
           <el-input-number
-            v-model="otherCost" :min="0" :step="1000" :precision="2"
-            size="small" :controls="false" style="width: 160px"
+            v-model="otherCost"
+            :min="0"
+            :step="1000"
+            :precision="2"
+            size="small"
+            :controls="false"
+            style="width: 160px"
           />
         </div>
 
@@ -167,12 +201,11 @@
 
         <div class="cost-row total">
           <span>总成本</span>
-          <span class="cost-val" style="color: #F56C6C">{{ formatCost(totalCost) }}</span>
+          <span class="cost-val" style="color: #f56c6c">{{ formatCost(totalCost) }}</span>
         </div>
         <div class="cost-row total">
           <span>毛利</span>
-          <span class="cost-val"
-                :style="{ color: margin >= 0 ? '#67C23A' : '#F56C6C' }">
+          <span class="cost-val" :style="{ color: margin >= 0 ? '#67C23A' : '#F56C6C' }">
             {{ formatCost(margin) }} ({{ marginPct.toFixed(2) }}%)
           </span>
         </div>
@@ -185,17 +218,26 @@
         />
 
         <el-alert
-          v-if="!consistencyOk" type="warning" :closable="false" style="margin-top: 12px"
+          v-if="!consistencyOk"
+          type="warning"
+          :closable="false"
+          style="margin-top: 12px"
           title="资源计划与 WBS 计划不一致:请确保资源覆盖到所有里程碑时间窗"
         />
         <el-alert
-          v-else type="success" :closable="false" style="margin-top: 12px"
+          v-else
+          type="success"
+          :closable="false"
+          style="margin-top: 12px"
           title="资源计划 ✓ 与 WBS 时间窗一致"
         />
 
         <el-button
-          type="success" :icon="Check" style="margin-top: 12px; width: 100%"
-          :loading="saving" @click="saveAll"
+          type="success"
+          :icon="Check"
+          style="margin-top: 12px; width: 100%"
+          :loading="saving"
+          @click="saveAll"
         >
           保存资源计划
         </el-button>
@@ -212,8 +254,8 @@ import api, { type ResourcePlan, type AppUser } from '@/api/client'
 
 const props = defineProps<{
   initiationId: number
-  contractAmount: number      // 从立项表联动过来
-  riskCost: number            // 从 Step 5 联动过来
+  contractAmount: number // 从立项表联动过来
+  riskCost: number // 从 Step 5 联动过来
   planRange: { start?: string; end?: string } | null
 }>()
 const emit = defineEmits<{
@@ -236,7 +278,7 @@ async function loadAllUsers() {
   userLoading.value = true
   try {
     const list = await api.get<UserOption[]>('/users/options')
-    userOptions.value = (list as any[]).map(u => ({
+    userOptions.value = (list as any[]).map((u) => ({
       id: u.id,
       username: u.username,
       fullName: u.fullName,
@@ -257,7 +299,7 @@ async function searchUsers(q: string) {
   userLoading.value = true
   try {
     const page = await api.get<any>(`/users?keyword=${encodeURIComponent(q)}&size=50&page=0`)
-    if (seq !== searchSeq) return  // 旧请求忽略
+    if (seq !== searchSeq) return // 旧请求忽略
     userOptions.value = (page.content ?? []).map((u: any) => ({
       id: u.id,
       username: u.username,
@@ -267,13 +309,16 @@ async function searchUsers(q: string) {
       defaultHourlyRate: u.defaultHourlyRate ?? 0,
       jobTitle: u.jobTitle,
     }))
-  } catch {/* 静默 */ }
-  finally { userLoading.value = false }
+  } catch {
+    /* 静默 */
+  } finally {
+    userLoading.value = false
+  }
 }
 
 function onUserPicked(row: any) {
   // 联动:userName / roleCode / hourlyRate
-  const u = userOptions.value.find(x => x.id === row.userId)
+  const u = userOptions.value.find((x) => x.id === row.userId)
   if (!u) return
   row.userName = u.fullName
   if (u.primaryRoleCode && !row.roleCode) {
@@ -297,32 +342,31 @@ const saving = ref(false)
 
 // 合同金额(本组件也允许改)
 const localContract = ref(props.contractAmount ?? 0)
-watch(() => props.contractAmount, v => {
-  if (v !== localContract.value) localContract.value = v ?? 0
-}, { immediate: true })
+watch(
+  () => props.contractAmount,
+  (v) => {
+    if (v !== localContract.value) localContract.value = v ?? 0
+  },
+  { immediate: true },
+)
 
 function onContractChange(v: number | undefined) {
   localContract.value = v ?? 0
   emit('contract-amount', localContract.value)
   // 立即同步到后端立项表,避免 Step 6 拿到旧值
-  api.put(`/initiations/${props.initiationId}`, { contractAmount: localContract.value })
+  api
+    .put(`/initiations/${props.initiationId}`, { contractAmount: localContract.value })
     .catch((e: any) => ElMessage.warning('合同金额同步到立项失败: ' + e.message))
 }
 
-const totalResource = computed(() =>
-  rows.value.reduce((a, r) => a + ((r as any).costAmount ?? 0), 0)
-)
-const totalCost = computed(() =>
-  totalResource.value + (props.riskCost ?? 0) + (otherCost.value ?? 0)
-)
+const totalResource = computed(() => rows.value.reduce((a, r) => a + ((r as any).costAmount ?? 0), 0))
+const totalCost = computed(() => totalResource.value + (props.riskCost ?? 0) + (otherCost.value ?? 0))
 const margin = computed(() => (localContract.value ?? 0) - totalCost.value)
-const marginPct = computed(() =>
-  localContract.value ? (margin.value / localContract.value) * 100 : 0
-)
+const marginPct = computed(() => (localContract.value ? (margin.value / localContract.value) * 100 : 0))
 
 const consistencyOk = computed(() => {
   if (!props.planRange?.start || !props.planRange?.end) return true
-  return rows.value.every(r => {
+  return rows.value.every((r) => {
     if (!r.startDate || !r.endDate) return false
     return r.startDate <= props.planRange!.end! && r.endDate >= props.planRange!.start!
   })
@@ -339,7 +383,7 @@ function recalcCosts() {
   emit('total-cost', totalResource.value)
 }
 watch(rows, recalcCosts, { deep: true, immediate: true })
-watch(totalResource, v => emit('total-cost', v))
+watch(totalResource, (v) => emit('total-cost', v))
 
 function formatCost(v: number | undefined) {
   if (!v) return '0.00'
@@ -371,10 +415,12 @@ async function loadExisting() {
     const list = await api.get<ResourcePlan[]>(`/initiations/${props.initiationId}/resource-plans`)
     rows.value = list.map((r: any) => ({
       ...r,
-      range: r.startDate && r.endDate ? [r.startDate, r.endDate] as [string, string] : undefined,
+      range: r.startDate && r.endDate ? ([r.startDate, r.endDate] as [string, string]) : undefined,
     }))
     recalcCosts()
-  } catch {/* first time */}
+  } catch {
+    /* first time */
+  }
 }
 
 async function saveAll() {
@@ -382,11 +428,13 @@ async function saveAll() {
   try {
     // 1) 同步合同金额到立项
     if (localContract.value !== props.contractAmount) {
-      await api.put(`/initiations/${props.initiationId}`, { contractAmount: localContract.value })
+      await api
+        .put(`/initiations/${props.initiationId}`, { contractAmount: localContract.value })
         .catch((e: any) => ElMessage.warning('合同金额同步失败: ' + e.message))
     }
     // 2) 全量清空(后端新加的 DELETE 无参端点)
-    await api.delete(`/initiations/${props.initiationId}/resource-plans`)
+    await api
+      .delete(`/initiations/${props.initiationId}/resource-plans`)
       .catch((e: any) => console.warn('[Step4] 全量清空失败:', e.message))
     // 3) 写新的
     for (const r of rows.value as any[]) {

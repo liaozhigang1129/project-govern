@@ -43,7 +43,7 @@ export async function fetchUnreadCount(): Promise<{ count: number }> {
 export async function fetchNotificationPage(
   status: NotificationStatus | 'ALL' = 'ALL',
   page = 0,
-  size = 20
+  size = 20,
 ): Promise<NotificationPage> {
   const params: Record<string, string | number> = { page, size }
   if (status !== 'ALL') params.status = status

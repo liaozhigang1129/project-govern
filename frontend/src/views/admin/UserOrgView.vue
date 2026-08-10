@@ -12,7 +12,7 @@
           </template>
 
           <div class="legend">
-            <el-tag size="small" type="success" effect="plain" style="margin-right:6px">
+            <el-tag size="small" type="success" effect="plain" style="margin-right: 6px">
               💡 拖拽用户 → 部门节点 = 分配部门
             </el-tag>
             <el-tag size="small" type="warning" effect="plain" v-if="missingCount > 0">
@@ -26,7 +26,8 @@
             :default-expand-all="false"
             :draggable="true"
             node-key="id"
-            @select="onDeptClick" @drop="onTreeDrop"
+            @select="onDeptClick"
+            @drop="onTreeDrop"
           />
         </el-card>
 
@@ -37,7 +38,7 @@
               <span>
                 <el-icon color="#E6A23C"><Warning /></el-icon>
                 未分配部门
-                <el-badge :value="missingCount" :max="999" type="warning" style="margin-left:6px" />
+                <el-badge :value="missingCount" :max="999" type="warning" style="margin-left: 6px" />
               </span>
               <el-button text type="primary" @click="openAssignMissingDialog">分配</el-button>
             </div>
@@ -98,12 +99,12 @@
             style="width: 100%"
             empty-text="此部门暂无用户"
             row-key="id"
-            
           >
             <el-table-column width="40" label="">
               <template #default="{ row }">
-                <el-icon class="drag-handle" :data-user-id="row.id"
-                  @mousedown="onDragHandleMouseDown">⋮⋮</el-icon>
+                <el-icon class="drag-handle" :data-user-id="row.id" @mousedown="onDragHandleMouseDown">
+                  ⋮⋮
+                </el-icon>
               </template>
             </el-table-column>
             <el-table-column prop="id" label="ID" width="60" />
@@ -128,8 +129,10 @@
                   effect="plain"
                   style="margin-left: 4px"
                   :title="code"
-                >{{ code }}</el-tag>
-                <span v-if="!row.primaryRoleName && !(row.roleCodes?.length)" style="color: #c0c4cc">-</span>
+                >
+                  {{ code }}
+                </el-tag>
+                <span v-if="!row.primaryRoleName && !row.roleCodes?.length" style="color: #c0c4cc">-</span>
               </template>
             </el-table-column>
             <el-table-column label="部门" min-width="240">
@@ -164,12 +167,7 @@
             </el-table-column>
             <el-table-column label="操作" width="120" fixed="right">
               <template #default="{ row }">
-                <el-button
-                  text
-                  type="primary"
-                  size="small"
-                  @click="onMoveOut(row)"
-                >移出本部门</el-button>
+                <el-button text type="primary" size="small" @click="onMoveOut(row)">移出本部门</el-button>
               </template>
             </el-table-column>
 
@@ -353,21 +351,21 @@ function onUserDragStart(e: DragEvent, userId: number) {
 }
 
 function onMoveOut(row: UserListItem) {
-  ElMessageBox.confirm(
-    `确认将「${row.fullName || row.username}」移出本部门?`,
-    '移出部门',
-    { type: 'warning' }
-  ).then(async () => {
-    try {
-      await departmentApi.assignUser(row.id, null)
-      ElMessage.success('已移出部门')
-      loadOrgUsers()
-      loadDeptTree()
-      countMissing()
-    } catch {
-      ElMessage.error('操作失败')
-    }
-  }).catch(() => {})
+  ElMessageBox.confirm(`确认将「${row.fullName || row.username}」移出本部门?`, '移出部门', {
+    type: 'warning',
+  })
+    .then(async () => {
+      try {
+        await departmentApi.assignUser(row.id, null)
+        ElMessage.success('已移出部门')
+        loadOrgUsers()
+        loadDeptTree()
+        countMissing()
+      } catch {
+        ElMessage.error('操作失败')
+      }
+    })
+    .catch(() => {})
 }
 
 function openAssignMissingDialog() {
@@ -451,7 +449,9 @@ provide('onUserDrop', onTreeDrop)
 </script>
 
 <style scoped>
-.org-page { padding: 16px; }
+.org-page {
+  padding: 16px;
+}
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -467,8 +467,13 @@ provide('onUserDrop', onTreeDrop)
   flex-wrap: wrap;
   gap: 4px;
 }
-.tree-card { height: calc(100vh - 120px); overflow-y: auto; }
-.user-card { min-height: calc(100vh - 120px); }
+.tree-card {
+  height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+.user-card {
+  min-height: calc(100vh - 120px);
+}
 :deep(.el-table__row) {
   cursor: default;
 }

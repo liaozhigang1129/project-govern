@@ -16,7 +16,7 @@ export interface RoleRef {
 export interface DepartmentRef {
   id: number
   name: string
-  fullPath?: string  // V4.15: 全路径 "总公司 / 一级 / 二级"
+  fullPath?: string // V4.15: 全路径 "总公司 / 一级 / 二级"
 }
 
 export interface UserListItem {
@@ -24,15 +24,15 @@ export interface UserListItem {
   username: string
   fullName: string
   email: string
-  phone: string | null      // 后端已脱敏成 138****8000 形式
+  phone: string | null // 后端已脱敏成 138****8000 形式
   jobTitle: string | null
   enabled: boolean
-  locked: boolean           // 后端 isLocked() 派生
+  locked: boolean // 后端 isLocked() 派生
   loginFailCount: number
   // V4.17: 后端 UserListItem 返 code/name 字符串 + 数组, 不是嵌套对象
   primaryRoleCode?: string | null
   primaryRoleName?: string | null
-  roleCodes?: string[]      // 已分配角色代码列表 (含主角色)
+  roleCodes?: string[] // 已分配角色代码列表 (含主角色)
   departmentId?: number | null
   departmentName?: string | null
   departmentPath?: string | null
@@ -60,21 +60,21 @@ export interface UserOption {
 }
 
 export interface UserQuery {
-  keyword?: string          // 模糊匹配 username/fullName/phone
-  roleCode?: string         // 主角色
+  keyword?: string // 模糊匹配 username/fullName/phone
+  roleCode?: string // 主角色
   departmentId?: number
   enabled?: boolean
   locked?: boolean
-  page?: number             // 0-based
-  size?: number             // 默认 20
-  sort?: string             // 默认 createdAt,desc
+  page?: number // 0-based
+  size?: number // 默认 20
+  sort?: string // 默认 createdAt,desc
 }
 
 export interface PageResult<T> {
   content: T[]
   totalElements: number
   totalPages: number
-  number: number            // 当前页
+  number: number // 当前页
   size: number
 }
 
@@ -122,40 +122,36 @@ export const userApi = {
   },
 
   /** 2. 详情 */
-  get: (id: number) =>
-    api.get<UserDetailVO>(`/users/${id}`),
+  get: (id: number) => api.get<UserDetailVO>(`/users/${id}`),
 
   /** 3. 新建 */
-  create: (body: UserCreateBody) =>
-    api.post<UserListItem>('/users', body),
+  create: (body: UserCreateBody) => api.post<UserListItem>('/users', body),
 
   /** 4. 更新 */
-  update: (id: number, body: UserUpdateBody) =>
-    api.put<UserListItem>(`/users/${id}`, body),
+  update: (id: number, body: UserUpdateBody) => api.put<UserListItem>(`/users/${id}`, body),
 
   /** 5. 启停 */
-  setEnabled: (id: number, enabled: boolean) =>
-    api.patch<UserListItem>(`/users/${id}/enabled`, { enabled }),
+  setEnabled: (id: number, enabled: boolean) => api.patch<UserListItem>(`/users/${id}/enabled`, { enabled }),
 
   /** 6. 解锁 */
-  unlock: (id: number) =>
-    api.post<UserListItem>(`/users/${id}/unlock`),
+  unlock: (id: number) => api.post<UserListItem>(`/users/${id}/unlock`),
 
   /** 7. 管理员重置密码 */
-  resetPassword: (id: number, newPassword: string, opts?: { mustChangeOnNextLogin?: boolean; notifyByEmail?: boolean }) =>
-    api.post(`/users/${id}/password:reset`, { newPassword, ...opts }),
+  resetPassword: (
+    id: number,
+    newPassword: string,
+    opts?: { mustChangeOnNextLogin?: boolean; notifyByEmail?: boolean },
+  ) => api.post(`/users/${id}/password:reset`, { newPassword, ...opts }),
 
   /** 8. 离职 */
   offboard: (id: number, transferTo: number | null, reason: string, offboardDate?: string) =>
     api.post(`/users/${id}/offboard`, { transferTo, reason, offboardDate }),
 
   /** 9. 复职 */
-  reinstate: (id: number) =>
-    api.post<UserListItem>(`/users/${id}/reinstate`),
+  reinstate: (id: number) => api.post<UserListItem>(`/users/${id}/reinstate`),
 
   /** 10. 简表 (下拉用) */
-  options: () =>
-    api.get<UserOption[]>('/users/options'),
+  options: () => api.get<UserOption[]>('/users/options'),
 
   /** 11. 自己改密码 (需要当前密码) */
   changeOwnPassword: (oldPassword: string, newPassword: string) =>
@@ -170,7 +166,14 @@ export const userApi = {
       userId: number
       primaryRoleId: number | null
       primaryRoleCode: string | null
-      roles: Array<{ id: number; code: string; name: string; enabled: boolean; builtin: boolean; primary: boolean }>
+      roles: Array<{
+        id: number
+        code: string
+        name: string
+        enabled: boolean
+        builtin: boolean
+        primary: boolean
+      }>
     }>(`/users/${userId}/roles`),
 
   /** 全量替换某用户的角色分配 (roleIds 必填, 主角色 = 列表第一个) */
@@ -199,6 +202,8 @@ export const userApi = {
   // V4.14 按部门树筛选
   // ============================================================
   /** 按部门 ID 列表筛选 (用于"按组织"展示, includeSubDepts=true 时同时含子部门) */
-  listByDepartments: (departmentIds: number[], opts: { keyword?: string; page?: number; size?: number; sort?: string } = {}) =>
-    api.post<PageResult<UserListItem>>('/users/by-departments', { departmentIds, ...opts }),
+  listByDepartments: (
+    departmentIds: number[],
+    opts: { keyword?: string; page?: number; size?: number; sort?: string } = {},
+  ) => api.post<PageResult<UserListItem>>('/users/by-departments', { departmentIds, ...opts }),
 }

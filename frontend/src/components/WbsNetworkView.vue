@@ -39,17 +39,21 @@ const loading = ref(false)
 // ============================================================
 function statusColor(status: string, progressPct: number): string {
   switch (status) {
-    case 'COMPLETED': return '#67c23a'   // 绿
+    case 'COMPLETED':
+      return '#67c23a' // 绿
     case 'IN_PROGRESS': {
       // 进度比例: 浅色 → 深色
-      if (progressPct >= 70) return '#409eff'  // 蓝, 接近完成
-      if (progressPct >= 30) return '#5dade2'  // 中蓝
-      return '#85c1e9'                          // 浅蓝
+      if (progressPct >= 70) return '#409eff' // 蓝, 接近完成
+      if (progressPct >= 30) return '#5dade2' // 中蓝
+      return '#85c1e9' // 浅蓝
     }
-    case 'BLOCKED':    return '#f56c6c'   // 红
-    case 'CANCELLED':  return '#c0c4cc'   // 灰
+    case 'BLOCKED':
+      return '#f56c6c' // 红
+    case 'CANCELLED':
+      return '#c0c4cc' // 灰
     case 'NOT_STARTED':
-    default:           return '#dcdfe6'   // 浅灰
+    default:
+      return '#dcdfe6' // 浅灰
   }
 }
 
@@ -74,11 +78,10 @@ const kpi = computed(() => {
   // 项目总工期: 关键路径上的任务工期之和 (CPM 算法的项目工期)
   const critSet = new Set(d.criticalTaskIds ?? [])
   const totalDays = d.nodes
-    .filter(n => critSet.has(n.taskId))
+    .filter((n) => critSet.has(n.taskId))
     .reduce((sum, n) => sum + (n.planDurationDays ?? 0), 0)
   const totalTasks = d.nodes.length
-  const criticalPct = totalTasks === 0 ? 0
-    : Math.round((criticalCount / totalTasks) * 100)
+  const criticalPct = totalTasks === 0 ? 0 : Math.round((criticalCount / totalTasks) * 100)
   return { criticalCount, totalTasks, criticalPct, totalDays }
 })
 
@@ -89,7 +92,7 @@ const chartOption = computed(() => {
   if (!data.value || data.value.nodes.length === 0) return {}
 
   // 节点最大工期, 用于 size 缩放基准
-  const maxDur = Math.max(1, ...data.value.nodes.map(n => n.planDurationDays ?? 1))
+  const maxDur = Math.max(1, ...data.value.nodes.map((n) => n.planDurationDays ?? 1))
 
   const nodes = data.value.nodes.map((n: WbsNetworkNode) => {
     const isCritical = n.critical
@@ -105,7 +108,7 @@ const chartOption = computed(() => {
       symbolSize: size,
       symbol: n.milestone ? 'diamond' : 'circle',
       // 类别: 0=普通, 1=里程碑, 2=关键路径
-      category: isCritical ? 2 : (n.milestone ? 1 : 0),
+      category: isCritical ? 2 : n.milestone ? 1 : 0,
       // 富标签 (支持多行)
       value: n.name,
       // 节点原始数据 (tooltip 用)
@@ -137,7 +140,7 @@ const chartOption = computed(() => {
     }
   })
 
-  const links = data.value.edges.map(e => ({
+  const links = data.value.edges.map((e) => ({
     source: String(e.fromTaskId),
     target: String(e.toTaskId),
     lineStyle: {
@@ -157,8 +160,8 @@ const chartOption = computed(() => {
       trigger: 'item',
       formatter: (params: any) => {
         if (params.dataType === 'edge' || params.dataType === 'line') {
-          const src = data.value!.nodes.find(n => String(n.taskId) === params.data.source)
-          const tgt = data.value!.nodes.find(n => String(n.taskId) === params.data.target)
+          const src = data.value!.nodes.find((n) => String(n.taskId) === params.data.source)
+          const tgt = data.value!.nodes.find((n) => String(n.taskId) === params.data.target)
           const crit = params.data._isCritical ? '🔴 关键路径' : '⚪ 普通'
           return `
             <b>紧前关系</b><br/>
@@ -189,7 +192,7 @@ const chartOption = computed(() => {
     legend: {
       data: [
         { name: '普通任务', icon: 'circle' },
-        { name: '里程碑',   icon: 'diamond' },
+        { name: '里程碑', icon: 'diamond' },
         { name: '关键路径', icon: 'circle' },
       ],
       top: 0,
@@ -204,7 +207,7 @@ const chartOption = computed(() => {
         focusNodeAdjacency: true,
         categories: [
           { name: '普通任务', itemStyle: { color: '#dcdfe6' } },
-          { name: '里程碑',   itemStyle: { color: '#e6a23c' } },
+          { name: '里程碑', itemStyle: { color: '#e6a23c' } },
           { name: '关键路径', itemStyle: { color: '#f56c6c' } },
         ],
         force: {
@@ -308,12 +311,17 @@ defineExpose({ load })
     <!-- 任务列表 (折叠, 点击切换) -->
     <el-collapse v-if="data" class="wbs-network-list">
       <el-collapse-item title="📋 关键路径任务清单" name="critical">
-        <el-table :data="data.nodes.filter(n => n.critical)" size="small" border>
+        <el-table :data="data.nodes.filter((n) => n.critical)" size="small" border>
           <el-table-column prop="wbsCode" label="WBS" width="90" />
           <el-table-column prop="name" label="任务名" />
           <el-table-column prop="status" label="状态" width="100">
             <template #default="{ row }">
-              <el-tag :type="row.status === 'COMPLETED' ? 'success' : (row.status === 'IN_PROGRESS' ? 'primary' : 'info')" size="small">
+              <el-tag
+                :type="
+                  row.status === 'COMPLETED' ? 'success' : row.status === 'IN_PROGRESS' ? 'primary' : 'info'
+                "
+                size="small"
+              >
                 {{ statusLabel(row.status) }}
               </el-tag>
             </template>
@@ -335,7 +343,11 @@ defineExpose({ load })
 </template>
 
 <style scoped>
-.wbs-network { display: flex; flex-direction: column; gap: 12px; }
+.wbs-network {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
 .wbs-network-kpi {
   display: grid;
@@ -351,9 +363,21 @@ defineExpose({ load })
   background: #fef0f0;
   border: 1px solid #fbc4c4;
 }
-.wbs-network-kpi-label { font-size: 11px; color: #909399; }
-.wbs-network-kpi-value { font-size: 22px; font-weight: 600; color: #303133; margin-top: 2px; }
-.wbs-network-kpi-pct { font-size: 13px; color: #909399; font-weight: normal; }
+.wbs-network-kpi-label {
+  font-size: 11px;
+  color: #909399;
+}
+.wbs-network-kpi-value {
+  font-size: 22px;
+  font-weight: 600;
+  color: #303133;
+  margin-top: 2px;
+}
+.wbs-network-kpi-pct {
+  font-size: 13px;
+  color: #909399;
+  font-weight: normal;
+}
 
 .wbs-network-chart {
   border: 1px solid #ebeef5;
@@ -362,7 +386,9 @@ defineExpose({ load })
   min-height: 520px;
 }
 
-.wbs-network-list { margin-top: 4px; }
+.wbs-network-list {
+  margin-top: 4px;
+}
 .wbs-network-list-empty {
   padding: 20px;
   text-align: center;

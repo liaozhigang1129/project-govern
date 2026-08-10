@@ -14,11 +14,7 @@
  */
 import { computed, ref, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import GanttView, {
-  type GanttResponse,
-  type GanttBar,
-  type GanttMilestone,
-} from '@/components/GanttView.vue'
+import GanttView, { type GanttResponse, type GanttBar, type GanttMilestone } from '@/components/GanttView.vue'
 import { getWbsGantt, type WbsGanttRow, type WbsGanttResponse } from '@/api/wbs'
 
 const props = defineProps<{
@@ -40,19 +36,21 @@ const ganttData = computed<GanttResponse | null>(() => {
   const bars: GanttBar[] = d.rows.map((r: WbsGanttRow) => {
     // 关键路径 / 里程碑标识
     const milestones: GanttMilestone[] = r.milestone
-      ? [{
-          id: r.taskId,                  // 借任务 id 当 milestone id
-          name: `${r.wbsCode} ${r.name}`,
-          planDate: r.planEnd ?? r.planStart ?? '',
-          actualDate: r.actualEnd ?? null,
-          status: r.status as string,
-          weight: r.weight || 5,
-          phaseId: null,
-          phaseName: null,
-        }]
+      ? [
+          {
+            id: r.taskId, // 借任务 id 当 milestone id
+            name: `${r.wbsCode} ${r.name}`,
+            planDate: r.planEnd ?? r.planStart ?? '',
+            actualDate: r.actualEnd ?? null,
+            status: r.status as string,
+            weight: r.weight || 5,
+            phaseId: null,
+            phaseName: null,
+          },
+        ]
       : []
     return {
-      projectId: r.taskId,            // 借 id 当 projectId (GanttView 内部用, 唯一即可)
+      projectId: r.taskId, // 借 id 当 projectId (GanttView 内部用, 唯一即可)
       projectCode: r.wbsCode,
       projectName: r.name,
       planStart: r.planStart,
@@ -95,11 +93,10 @@ watch(() => props.projectId, load)
   <div class="wbs-gantt">
     <!-- 头部小工具条 -->
     <div class="wbs-gantt-toolbar">
-      <el-tag size="small" type="info" effect="plain">
-        📊 WBS 任务甘特图 (复用 GanttView, 0 改源)
-      </el-tag>
+      <el-tag size="small" type="info" effect="plain">📊 WBS 任务甘特图 (复用 GanttView, 0 改源)</el-tag>
       <span class="wbs-gantt-stat">
-        可绘制任务: <b>{{ data?.taskCount ?? 0 }}</b>
+        可绘制任务:
+        <b>{{ data?.taskCount ?? 0 }}</b>
       </span>
       <el-button size="small" @click="load" :loading="loading">刷新</el-button>
     </div>
@@ -122,10 +119,19 @@ watch(() => props.projectId, load)
 </template>
 
 <style scoped>
-.wbs-gantt { display: flex; flex-direction: column; gap: 8px; }
-.wbs-gantt-toolbar {
-  display: flex; align-items: center; gap: 12px;
-  font-size: 13px; color: #606266;
+.wbs-gantt {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
-.wbs-gantt-stat b { color: #303133; }
+.wbs-gantt-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: #606266;
+}
+.wbs-gantt-stat b {
+  color: #303133;
+}
 </style>

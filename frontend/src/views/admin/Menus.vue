@@ -19,7 +19,7 @@ import { menuApi, type SysMenuItem, type SysMenuCreateBody, type SysMenuUpdateBo
 // ============================================================
 const loading = ref(false)
 const includeDisabled = ref(false)
-const flatItems = ref<SysMenuItem[]>([])       // 后端原始扁平数据
+const flatItems = ref<SysMenuItem[]>([]) // 后端原始扁平数据
 const parentOptions = ref<SysMenuItem[]>([])
 
 const dlg = ref({
@@ -63,9 +63,9 @@ interface TreeNode extends SysMenuItem {
 }
 const treeData = computed<TreeNode[]>(() => {
   const map = new Map<number, TreeNode>()
-  flatItems.value.forEach(m => map.set(m.id, { ...m, children: [] }))
+  flatItems.value.forEach((m) => map.set(m.id, { ...m, children: [] }))
   const roots: TreeNode[] = []
-  flatItems.value.forEach(m => {
+  flatItems.value.forEach((m) => {
     const node = map.get(m.id)!
     if (m.parentId && map.has(m.parentId)) {
       map.get(m.parentId)!.children!.push(node)
@@ -74,11 +74,10 @@ const treeData = computed<TreeNode[]>(() => {
     }
   })
   // 同级排序: sortOrder asc, 然后 id asc
-  const sortFn = (a: TreeNode, b: TreeNode) =>
-    a.sortOrder - b.sortOrder || a.id - b.id
+  const sortFn = (a: TreeNode, b: TreeNode) => a.sortOrder - b.sortOrder || a.id - b.id
   const deepSort = (arr: TreeNode[]) => {
     arr.sort(sortFn)
-    arr.forEach(n => n.children && deepSort(n.children))
+    arr.forEach((n) => n.children && deepSort(n.children))
   }
   deepSort(roots)
   return roots
@@ -90,8 +89,8 @@ const totalCount = computed(() => flatItems.value.length)
 // 父菜单下拉候选: 仅 DIR/PAGE 都可, 但 PAGE 不常见 — 这里允许所有非自身节点
 const dirParentOptions = computed(() =>
   parentOptions.value
-    .filter(m => m.menuType === 'DIR' || m.menuType === 'PAGE')
-    .sort((a, b) => (a.parentName ?? '').localeCompare(b.parentName ?? '') || a.sortOrder - b.sortOrder)
+    .filter((m) => m.menuType === 'DIR' || m.menuType === 'PAGE')
+    .sort((a, b) => (a.parentName ?? '').localeCompare(b.parentName ?? '') || a.sortOrder - b.sortOrder),
 )
 
 // ============================================================
@@ -103,10 +102,16 @@ function openCreate(parentId: number | null = null) {
     mode: 'create',
     submitting: false,
     form: {
-      id: 0, code: '', name: '',
-      parentId, path: '', icon: '',
-      sortOrder: 100, menuType: 'PAGE',
-      enabled: true, description: '',
+      id: 0,
+      code: '',
+      name: '',
+      parentId,
+      path: '',
+      icon: '',
+      sortOrder: 100,
+      menuType: 'PAGE',
+      enabled: true,
+      description: '',
     },
   }
 }
@@ -133,8 +138,14 @@ function openEdit(row: SysMenuItem) {
 
 async function submit() {
   const f = dlg.value.form
-  if (!f.code.trim()) { ElMessage.warning('请填写菜单 code'); return }
-  if (!f.name.trim()) { ElMessage.warning('请填写菜单名'); return }
+  if (!f.code.trim()) {
+    ElMessage.warning('请填写菜单 code')
+    return
+  }
+  if (!f.name.trim()) {
+    ElMessage.warning('请填写菜单名')
+    return
+  }
   dlg.value.submitting = true
   try {
     if (dlg.value.mode === 'create') {
@@ -180,12 +191,10 @@ async function submit() {
 async function toggleEnabled(row: SysMenuItem) {
   const op = row.enabled ? '停用' : '启用'
   try {
-    await ElMessageBox.confirm(
-      `确认${op}菜单 "${row.name}" (${row.code})?`,
-      `${op}确认`,
-      { type: 'warning' }
-    )
-  } catch { return }
+    await ElMessageBox.confirm(`确认${op}菜单 "${row.name}" (${row.code})?`, `${op}确认`, { type: 'warning' })
+  } catch {
+    return
+  }
   try {
     await menuApi.setEnabled(row.id, !row.enabled)
     ElMessage.success(`${op}成功`)
@@ -216,12 +225,12 @@ async function onDelete(row: SysMenuItem) {
     return
   }
   try {
-    await ElMessageBox.confirm(
-      `确认删除菜单 "${row.name}" (${row.code})? 此操作不可恢复!`,
-      '删除确认',
-      { type: 'error' }
-    )
-  } catch { return }
+    await ElMessageBox.confirm(`确认删除菜单 "${row.name}" (${row.code})? 此操作不可恢复!`, '删除确认', {
+      type: 'error',
+    })
+  } catch {
+    return
+  }
   try {
     await menuApi.delete(row.id)
     ElMessage.success('已删除')
@@ -272,7 +281,7 @@ onMounted(load)
         stripe
         style="width: 100%"
         empty-text="无菜单"
-        :row-class-name="(data: any) => !data.row.enabled ? 'menu-disabled' : ''"
+        :row-class-name="(data: any) => (!data.row.enabled ? 'menu-disabled' : '')"
       >
         <el-table-column label="菜单名 / code" min-width="340">
           <template #default="{ row }">
@@ -335,9 +344,7 @@ onMounted(load)
         <el-table-column label="操作" width="320" fixed="right">
           <template #default="{ row }">
             <el-button size="small" link type="primary" @click="openEdit(row)">编辑</el-button>
-            <el-button size="small" link type="primary" @click="addChild(row)">
-              新建子菜单
-            </el-button>
+            <el-button size="small" link type="primary" @click="addChild(row)">新建子菜单</el-button>
             <el-button
               v-if="row.builtin"
               size="small"
@@ -347,12 +354,7 @@ onMounted(load)
             >
               {{ row.enabled ? '停用' : '启用' }}
             </el-button>
-            <el-button
-              size="small"
-              link type="danger"
-              :disabled="row.builtin"
-              @click="onDelete(row)"
-            >
+            <el-button size="small" link type="danger" :disabled="row.builtin" @click="onDelete(row)">
               删除
             </el-button>
           </template>
@@ -372,15 +374,12 @@ onMounted(load)
             v-model="dlg.form.code"
             :disabled="dlg.mode === 'edit'"
             placeholder="大���字母/数字/下划线, 以字母开头, 2-64 字符"
-            maxlength="64" show-word-limit
+            maxlength="64"
+            show-word-limit
           />
         </el-form-item>
         <el-form-item label="菜单名" required>
-          <el-input
-            v-model="dlg.form.name"
-            placeholder="中文/英文均可"
-            maxlength="64"
-          />
+          <el-input v-model="dlg.form.name" placeholder="中文/英文均可" maxlength="64" />
         </el-form-item>
         <el-form-item label="菜单类型" required>
           <el-radio-group v-model="dlg.form.menuType">
@@ -393,12 +392,16 @@ onMounted(load)
         </el-form-item>
         <el-form-item label="父菜单">
           <el-select
-            v-model="dlg.form.parentId" placeholder="顶层 (无父)" clearable filterable
+            v-model="dlg.form.parentId"
+            placeholder="顶层 (无父)"
+            clearable
+            filterable
             style="width: 100%"
           >
             <el-option label="— 顶层 (无父) —" :value="null" />
             <el-option
-              v-for="m in dirParentOptions" :key="m.id"
+              v-for="m in dirParentOptions"
+              :key="m.id"
               :label="`${m.parentName ? m.parentName + ' / ' : ''}${m.name} (${m.code})`"
               :value="m.id"
               :disabled="dlg.mode === 'edit' && m.id === dlg.form.id"
@@ -406,11 +409,7 @@ onMounted(load)
           </el-select>
         </el-form-item>
         <el-form-item label="路由路径">
-          <el-input
-            v-model="dlg.form.path"
-            placeholder="例 /admin/menus (目录可空)"
-            maxlength="128"
-          />
+          <el-input v-model="dlg.form.path" placeholder="例 /admin/menus (目录可空)" maxlength="128" />
         </el-form-item>
         <el-form-item label="图标">
           <el-input
@@ -420,9 +419,7 @@ onMounted(load)
           />
         </el-form-item>
         <el-form-item label="排序号">
-          <el-input-number
-            v-model="dlg.form.sortOrder" :min="0" :max="9999" :step="10"
-          />
+          <el-input-number v-model="dlg.form.sortOrder" :min="0" :max="9999" :step="10" />
           <span style="margin-left: 8px; color: #909399; font-size: 12px">数字越小越靠前</span>
         </el-form-item>
         <el-form-item label="启用">
@@ -433,8 +430,12 @@ onMounted(load)
         </el-form-item>
         <el-form-item label="说明">
           <el-input
-            v-model="dlg.form.description" type="textarea" :rows="2"
-            placeholder="选填" maxlength="256" show-word-limit
+            v-model="dlg.form.description"
+            type="textarea"
+            :rows="2"
+            placeholder="选填"
+            maxlength="256"
+            show-word-limit
           />
         </el-form-item>
       </el-form>
@@ -449,14 +450,54 @@ onMounted(load)
 <script lang="ts">
 // icon 名 → 组件 映射 (常用 30 个, 其他未匹配时显示默认 Menu)
 import {
-  Bell, Box, Calendar, Check, ChatDotRound, DataBoard, DataLine,
-  Document, Flag, Histogram, House, List, MagicStick, Menu, Money, Moon,
-  OfficeBuilding, Setting, Tools, TrendCharts, User, UserFilled, Warning,
+  Bell,
+  Box,
+  Calendar,
+  Check,
+  ChatDotRound,
+  DataBoard,
+  DataLine,
+  Document,
+  Flag,
+  Histogram,
+  House,
+  List,
+  MagicStick,
+  Menu,
+  Money,
+  Moon,
+  OfficeBuilding,
+  Setting,
+  Tools,
+  TrendCharts,
+  User,
+  UserFilled,
+  Warning,
 } from '@element-plus/icons-vue'
 const iconMap: Record<string, any> = {
-  Bell, Box, Calendar, Check, ChatDotRound, DataBoard, DataLine,
-  Document, Flag, Histogram, House, List, MagicStick, Menu, Money, Moon,
-  OfficeBuilding, Setting, Tools, TrendCharts, User, UserFilled, Warning,
+  Bell,
+  Box,
+  Calendar,
+  Check,
+  ChatDotRound,
+  DataBoard,
+  DataLine,
+  Document,
+  Flag,
+  Histogram,
+  House,
+  List,
+  MagicStick,
+  Menu,
+  Money,
+  Moon,
+  OfficeBuilding,
+  Setting,
+  Tools,
+  TrendCharts,
+  User,
+  UserFilled,
+  Warning,
 }
 export function iconName(name: string) {
   return iconMap[name] ?? Menu
@@ -464,10 +505,15 @@ export function iconName(name: string) {
 </script>
 
 <style scoped>
-.page { padding: 16px; }
+.page {
+  padding: 16px;
+}
 code {
-  background: #f5f7fa; padding: 1px 6px; border-radius: 3px;
-  font-size: 12px; color: #606266;
+  background: #f5f7fa;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+  color: #606266;
 }
 :deep(.menu-disabled) {
   background: #f5f7fa !important;

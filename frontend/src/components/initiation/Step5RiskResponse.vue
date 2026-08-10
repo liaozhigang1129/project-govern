@@ -2,7 +2,8 @@
   <!-- Step 5 — 风险应对 -->
   <div>
     <el-alert
-      type="info" :closable="false"
+      type="info"
+      :closable="false"
       title="基于 Step 2 AI 识别 / Step 3 调整后的风险,填报应对方案与成本。"
       style="margin-bottom: 16px"
     />
@@ -41,8 +42,13 @@
         <el-table-column label="应对成本" width="140">
           <template #default="{ row }">
             <el-input-number
-              v-model="row.responseCost" :min="0" :step="1000" :precision="2"
-              size="small" :controls="false" style="width: 100%"
+              v-model="row.responseCost"
+              :min="0"
+              :step="1000"
+              :precision="2"
+              size="small"
+              :controls="false"
+              style="width: 100%"
             />
           </template>
         </el-table-column>
@@ -62,7 +68,10 @@
     </el-card>
 
     <div class="footer-bar">
-      <span>风险应对总成本: <b style="color: #E6A23C; font-size: 18px">¥ {{ formatCost(total) }}</b></span>
+      <span>
+        风险应对总成本:
+        <b style="color: #e6a23c; font-size: 18px">¥ {{ formatCost(total) }}</b>
+      </span>
       <el-button type="primary" :icon="Check" :loading="saving" @click="saveAll">保存风险应对</el-button>
     </div>
   </div>
@@ -93,9 +102,7 @@ const STATUSES = [
 const rows = ref<RiskResponse[]>([])
 const saving = ref(false)
 
-const total = computed(() =>
-  rows.value.reduce((a, r) => a + (r.responseCost ?? 0), 0)
-)
+const total = computed(() => rows.value.reduce((a, r) => a + (r.responseCost ?? 0), 0))
 emit('update:totalCost', total.value)
 
 function formatCost(v: number) {
@@ -104,15 +111,21 @@ function formatCost(v: number) {
 
 function addRow() {
   rows.value.push({
-    riskTitle: '', riskLevel: 'MEDIUM', riskSuggestion: '',
-    responseAction: '', responseCost: 0, status: 'PLANNED',
+    riskTitle: '',
+    riskLevel: 'MEDIUM',
+    riskSuggestion: '',
+    responseAction: '',
+    responseCost: 0,
+    status: 'PLANNED',
   })
 }
 
 async function loadExisting() {
   try {
     rows.value = await api.get<RiskResponse[]>(`/initiations/${props.initiationId}/risks`)
-  } catch {/* first time */}
+  } catch {
+    /* first time */
+  }
 }
 
 async function saveAll() {

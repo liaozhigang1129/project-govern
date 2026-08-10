@@ -12,11 +12,24 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import {
-  getRisksByProject, getActiveRisks, getRisk, saveRisk, deleteRisk,
-  getRiskResponses, saveRiskResponse, deleteRiskResponse,
-  getRiskHistory, getRiskHealth, getRiskMatrix,
-  type RiskItem, type RiskRequest, type RiskResponseItem, type RiskResponseRequest,
-  type RiskHistoryItem, type RiskHealthSummary, type RiskMatrix,
+  getRisksByProject,
+  getActiveRisks,
+  getRisk,
+  saveRisk,
+  deleteRisk,
+  getRiskResponses,
+  saveRiskResponse,
+  deleteRiskResponse,
+  getRiskHistory,
+  getRiskHealth,
+  getRiskMatrix,
+  type RiskItem,
+  type RiskRequest,
+  type RiskResponseItem,
+  type RiskResponseRequest,
+  type RiskHistoryItem,
+  type RiskHealthSummary,
+  type RiskMatrix,
 } from '@/api/risk'
 
 export const useRiskStore = defineStore('risk', () => {
@@ -61,9 +74,7 @@ export const useRiskStore = defineStore('risk', () => {
     if (isLoading(k)) return
     setLoading(k, true)
     try {
-      const data = activeOnly
-        ? await getActiveRisks(projectId)
-        : await getRisksByProject(projectId)
+      const data = activeOnly ? await getActiveRisks(projectId) : await getRisksByProject(projectId)
       ;(activeOnly ? activeByProject : listByProject).value.set(projectId, data)
       // 顺手回填 byId
       for (const r of data) byId.value.set(r.id, r)
@@ -90,13 +101,13 @@ export const useRiskStore = defineStore('risk', () => {
     // 写完刷所属项目的 list (idempotent: 覆盖)
     const projectMap = listByProject.value.get(saved.projectId)
     if (projectMap) {
-      const idx = projectMap.findIndex(r => r.id === saved.id)
+      const idx = projectMap.findIndex((r) => r.id === saved.id)
       if (idx >= 0) projectMap[idx] = saved
       else projectMap.unshift(saved)
     }
     const activeMap = activeByProject.value.get(saved.projectId)
     if (activeMap) {
-      const idx = activeMap.findIndex(r => r.id === saved.id)
+      const idx = activeMap.findIndex((r) => r.id === saved.id)
       // 状态非活跃 (CLOSED/ACCEPTED) → 移出活跃列表
       if (saved.status === 'CLOSED' || saved.status === 'ACCEPTED') {
         if (idx >= 0) activeMap.splice(idx, 1)
@@ -115,9 +126,13 @@ export const useRiskStore = defineStore('risk', () => {
     await deleteRisk(id)
     byId.value.delete(id)
     listByProject.value.get(projectId)?.splice(
-      listByProject.value.get(projectId)!.findIndex(r => r.id === id), 1)
+      listByProject.value.get(projectId)!.findIndex((r) => r.id === id),
+      1,
+    )
     activeByProject.value.get(projectId)?.splice(
-      activeByProject.value.get(projectId)!.findIndex(r => r.id === id), 1)
+      activeByProject.value.get(projectId)!.findIndex((r) => r.id === id),
+      1,
+    )
     healthByProject.value.delete(projectId)
     matrixByProject.value.delete(projectId)
   }
@@ -141,7 +156,7 @@ export const useRiskStore = defineStore('risk', () => {
   async function saveResponse(riskId: number, req: RiskResponseRequest) {
     const saved = await saveRiskResponse(riskId, req)
     const list = responsesByRisk.value.get(riskId) ?? []
-    const idx = list.findIndex(x => x.id === saved.id)
+    const idx = list.findIndex((x) => x.id === saved.id)
     if (idx >= 0) list[idx] = saved
     else list.push(saved)
     responsesByRisk.value.set(riskId, list)
@@ -152,7 +167,7 @@ export const useRiskStore = defineStore('risk', () => {
     await deleteRiskResponse(responseId)
     const list = responsesByRisk.value.get(riskId)
     if (list) {
-      const idx = list.findIndex(x => x.id === responseId)
+      const idx = list.findIndex((x) => x.id === responseId)
       if (idx >= 0) list.splice(idx, 1)
     }
   }
@@ -217,18 +232,28 @@ export const useRiskStore = defineStore('risk', () => {
 
   return {
     // state
-    listByProject, activeByProject, byId,
-    healthByProject, matrixByProject,
-    responsesByRisk, historyByRisk,
+    listByProject,
+    activeByProject,
+    byId,
+    healthByProject,
+    matrixByProject,
+    responsesByRisk,
+    historyByRisk,
     loading,
     // 风险
-    loadList, loadOne, save, remove,
+    loadList,
+    loadOne,
+    save,
+    remove,
     // 应对行动
-    loadResponses, saveResponse, removeResponse,
+    loadResponses,
+    saveResponse,
+    removeResponse,
     // 历史
     loadHistory,
     // KPI
-    loadHealth, loadMatrix,
+    loadHealth,
+    loadMatrix,
     // 工具
     reset,
     isLoading,

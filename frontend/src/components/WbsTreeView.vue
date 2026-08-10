@@ -56,17 +56,20 @@ const selectedTask = ref<WbsTaskNode | null>(null)
 // ============================================================
 // 状态 → 颜色 映射
 // ============================================================
-const STATUS_TAG: Record<string, { type: 'info' | 'primary' | 'success' | 'warning' | 'danger'; label: string }> = {
-  NOT_STARTED: { type: 'info',    label: '未开始' },
+const STATUS_TAG: Record<
+  string,
+  { type: 'info' | 'primary' | 'success' | 'warning' | 'danger'; label: string }
+> = {
+  NOT_STARTED: { type: 'info', label: '未开始' },
   IN_PROGRESS: { type: 'primary', label: '进行中' },
-  BLOCKED:     { type: 'danger',  label: '阻塞' },
-  COMPLETED:   { type: 'success', label: '已完成' },
-  CANCELLED:   { type: 'info',    label: '已取消' },
+  BLOCKED: { type: 'danger', label: '阻塞' },
+  COMPLETED: { type: 'success', label: '已完成' },
+  CANCELLED: { type: 'info', label: '已取消' },
 }
 const TASK_TYPE_ICON: Record<string, string> = {
-  SUMMARY:     '📁',
-  EXECUTION:   '📋',
-  MILESTONE:   '◆',
+  SUMMARY: '📁',
+  EXECUTION: '📋',
+  MILESTONE: '◆',
   DELIVERABLE: '📦',
 }
 
@@ -83,7 +86,7 @@ async function load() {
     tree.value = treeData
     summary.value = summaryData
     // 默认展开根节点
-    defaultExpanded.value = treeData.map(n => n.id)
+    defaultExpanded.value = treeData.map((n) => n.id)
   } catch (e: any) {
     ElMessage.error(`加载 WBS 失败: ${e.message}`)
   } finally {
@@ -121,7 +124,7 @@ async function onDelete(task: WbsTaskNode) {
     await ElMessageBox.confirm(
       `确认删除任务「${task.name}」(编码 ${task.wbsCode})?子任务不会级联删除,需要单独删。`,
       '删除确认',
-      { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' }
+      { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' },
     )
   } catch {
     return
@@ -178,8 +181,8 @@ function onAddChild(parent: WbsTaskNode | null) {
 // ============================================================
 function progressColor(pct: number): string {
   if (pct >= 100) return '#67c23a'
-  if (pct >= 60)  return '#409eff'
-  if (pct >= 30)  return '#e6a23c'
+  if (pct >= 60) return '#409eff'
+  if (pct >= 30) return '#e6a23c'
   return '#909399'
 }
 
@@ -191,94 +194,151 @@ function renderNode(h: any, ctx: any) {
   const status = STATUS_TAG[node.status] || { type: 'info', label: node.status }
 
   // 主体: [图标] [编码] [名称] [状态] [进度条] [权重] [操作]
-  return h('div', {
-    class: 'wbs-node',
-    style: { display: 'flex', alignItems: 'center', width: '100%', gap: '8px' },
-  }, [
-    // 图标
-    h('span', { style: { fontSize: '14px', flex: '0 0 auto' } },
-      TASK_TYPE_ICON[node.taskType] || '📋'),
+  return h(
+    'div',
+    {
+      class: 'wbs-node',
+      style: { display: 'flex', alignItems: 'center', width: '100%', gap: '8px' },
+    },
+    [
+      // 图标
+      h('span', { style: { fontSize: '14px', flex: '0 0 auto' } }, TASK_TYPE_ICON[node.taskType] || '📋'),
 
-    // 编码
-    h('span', {
-      style: {
-        fontFamily: 'monospace',
-        fontSize: '12px',
-        color: '#909399',
-        flex: '0 0 auto',
-        minWidth: '50px',
-      },
-    }, node.wbsCode),
+      // 编码
+      h(
+        'span',
+        {
+          style: {
+            fontFamily: 'monospace',
+            fontSize: '12px',
+            color: '#909399',
+            flex: '0 0 auto',
+            minWidth: '50px',
+          },
+        },
+        node.wbsCode,
+      ),
 
-    // 名称(可点击)
-    h('span', {
-      style: {
-        flex: '1 1 auto',
-        fontWeight: node.critical ? 600 : 400,
-        color: node.critical ? '#f56c6c' : '#303133',
-        cursor: 'pointer',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-      },
-      onClick: (e: Event) => { e.stopPropagation(); onNodeClick(node) },
-    }, node.name),
+      // 名称(可点击)
+      h(
+        'span',
+        {
+          style: {
+            flex: '1 1 auto',
+            fontWeight: node.critical ? 600 : 400,
+            color: node.critical ? '#f56c6c' : '#303133',
+            cursor: 'pointer',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          },
+          onClick: (e: Event) => {
+            e.stopPropagation()
+            onNodeClick(node)
+          },
+        },
+        node.name,
+      ),
 
-    // 权重标签
-    h('el-tag', {
-      type: 'info',
-      size: 'small',
-      effect: 'plain',
-      style: { flex: '0 0 auto' },
-    }, () => `w=${node.weight}`),
+      // 权重标签
+      h(
+        'el-tag',
+        {
+          type: 'info',
+          size: 'small',
+          effect: 'plain',
+          style: { flex: '0 0 auto' },
+        },
+        () => `w=${node.weight}`,
+      ),
 
-    // 状态
-    h('el-tag', {
-      type: status.type,
-      size: 'small',
-      effect: 'dark',
-      style: { flex: '0 0 auto' },
-    }, () => status.label),
+      // 状态
+      h(
+        'el-tag',
+        {
+          type: status.type,
+          size: 'small',
+          effect: 'dark',
+          style: { flex: '0 0 auto' },
+        },
+        () => status.label,
+      ),
 
-    // 进度条
-    h('el-progress', {
-      percentage: node.progressPct,
-      color: progressColor(node.progressPct),
-      strokeWidth: 8,
-      textInside: false,
-      style: { flex: '0 0 100px' },
-      showText: false,
-    }),
+      // 进度条
+      h('el-progress', {
+        percentage: node.progressPct,
+        color: progressColor(node.progressPct),
+        strokeWidth: 8,
+        textInside: false,
+        style: { flex: '0 0 100px' },
+        showText: false,
+      }),
 
-    // 进度数字
-    h('span', {
-      style: {
-        fontSize: '12px',
-        color: '#606266',
-        flex: '0 0 36px',
-        textAlign: 'right',
-      },
-    }, `${node.progressPct}%`),
+      // 进度数字
+      h(
+        'span',
+        {
+          style: {
+            fontSize: '12px',
+            color: '#606266',
+            flex: '0 0 36px',
+            textAlign: 'right',
+          },
+        },
+        `${node.progressPct}%`,
+      ),
 
-    // 操作按钮
-    h('div', {
-      class: 'wbs-node-actions',
-      style: { flex: '0 0 auto', display: 'flex', gap: '4px' },
-    }, [
-      h('el-button', {
-        type: 'primary', size: 'small', link: true,
-        onClick: (e: Event) => { e.stopPropagation(); onAddChild(node) },
-      }, () => '＋子任务'),
-      h('el-button', {
-        type: 'primary', size: 'small', link: true,
-        onClick: (e: Event) => { e.stopPropagation(); onEdit(node) },
-      }, () => '编辑'),
-      h('el-button', {
-        type: 'danger', size: 'small', link: true,
-        onClick: (e: Event) => { e.stopPropagation(); onDelete(node) },
-      }, () => '删除'),
-    ]),
-  ])
+      // 操作按钮
+      h(
+        'div',
+        {
+          class: 'wbs-node-actions',
+          style: { flex: '0 0 auto', display: 'flex', gap: '4px' },
+        },
+        [
+          h(
+            'el-button',
+            {
+              type: 'primary',
+              size: 'small',
+              link: true,
+              onClick: (e: Event) => {
+                e.stopPropagation()
+                onAddChild(node)
+              },
+            },
+            () => '＋子任务',
+          ),
+          h(
+            'el-button',
+            {
+              type: 'primary',
+              size: 'small',
+              link: true,
+              onClick: (e: Event) => {
+                e.stopPropagation()
+                onEdit(node)
+              },
+            },
+            () => '编辑',
+          ),
+          h(
+            'el-button',
+            {
+              type: 'danger',
+              size: 'small',
+              link: true,
+              onClick: (e: Event) => {
+                e.stopPropagation()
+                onDelete(node)
+              },
+            },
+            () => '删除',
+          ),
+        ],
+      ),
+    ],
+  )
 }
 
 // ============================================================
@@ -288,13 +348,13 @@ const summaryCards = computed(() => {
   if (!summary.value) return []
   const s = summary.value
   return [
-    { label: '任务总数',     value: s.taskCount,            color: '#303133' },
-    { label: '已完成',       value: s.completedCount,       color: '#67c23a' },
-    { label: '进行中',       value: s.inProgressCount,      color: '#409eff' },
-    { label: '阻塞',         value: s.blockedCount,         color: '#f56c6c' },
-    { label: '未开始',       value: s.notStartedCount,      color: '#909399' },
-    { label: '关键任务',     value: s.criticalCount,        color: '#e6a23c' },
-    { label: '里程碑',       value: s.milestoneCount,       color: '#9c27b0' },
+    { label: '任务总数', value: s.taskCount, color: '#303133' },
+    { label: '已完成', value: s.completedCount, color: '#67c23a' },
+    { label: '进行中', value: s.inProgressCount, color: '#409eff' },
+    { label: '阻塞', value: s.blockedCount, color: '#f56c6c' },
+    { label: '未开始', value: s.notStartedCount, color: '#909399' },
+    { label: '关键任务', value: s.criticalCount, color: '#e6a23c' },
+    { label: '里程碑', value: s.milestoneCount, color: '#9c27b0' },
   ]
 })
 
@@ -337,12 +397,8 @@ defineExpose({ load, selectedTask })
           <div class="wbs-summary-label">工时燃尽</div>
         </div>
         <div class="wbs-summary-cell wbs-summary-actions">
-          <el-button type="primary" :loading="snapping" @click="doSnapshot">
-            触发 EVM 快照
-          </el-button>
-          <el-button type="success" plain @click="onAddChild(null)">
-            ＋ 新建顶层任务
-          </el-button>
+          <el-button type="primary" :loading="snapping" @click="doSnapshot">触发 EVM 快照</el-button>
+          <el-button type="success" plain @click="onAddChild(null)">＋ 新建顶层任务</el-button>
         </div>
       </div>
     </el-card>
@@ -361,22 +417,22 @@ defineExpose({ load, selectedTask })
           @node-click="onNodeClick"
         />
       </template>
-      <el-empty
-        v-else
-        description="该项目暂无 WBS 任务"
-        :image-size="80"
-      >
-        <el-button type="primary" @click="onAddChild(null)">
-          ＋ 新建第一个任务
-        </el-button>
+      <el-empty v-else description="该项目暂无 WBS 任务" :image-size="80">
+        <el-button type="primary" @click="onAddChild(null)">＋ 新建第一个任务</el-button>
       </el-empty>
     </el-card>
   </div>
 </template>
 
 <style scoped>
-.wbs-view { display: flex; flex-direction: column; gap: 12px; }
-.wbs-summary :deep(.el-card__body) { padding: 12px 16px; }
+.wbs-view {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.wbs-summary :deep(.el-card__body) {
+  padding: 12px 16px;
+}
 .wbs-summary-row {
   display: flex;
   align-items: center;

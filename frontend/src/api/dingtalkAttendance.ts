@@ -20,14 +20,14 @@ export interface DingTalkAttendanceDaily {
   userName: string | null
   departmentId: number | null
   pmoUserId: number | null
-  workDate: string              // YYYY-MM-DD
-  workDuration: number | null   // V4.34: 分钟, onDutyActual -> offDutyActual 差值
+  workDate: string // YYYY-MM-DD
+  workDuration: number | null // V4.34: 分钟, onDutyActual -> offDutyActual 差值
 
   // 上班
   onDutyPlan: string | null
   onDutyActual: string | null
-  onDutyResult: string          // Normal / Late / Early / SeriousLate / NotSigned
-  onDutySource: string          // MAP / ATM / WIFI / OTHER
+  onDutyResult: string // Normal / Late / Early / SeriousLate / NotSigned
+  onDutySource: string // MAP / ATM / WIFI / OTHER
   onDutyLocation: string
   onDutyLocationMethod: string
   onDutyLocationResult: string
@@ -45,14 +45,14 @@ export interface DingTalkAttendanceDaily {
   checkCount: number
   isMakeup: boolean
   isAbnormal: boolean
-  abnormalTypes: string         // "Late;Early" 多个用分号
+  abnormalTypes: string // "Late;Early" 多个用分号
 
   // 项目 (来自 timesheet_entry JOIN)
-  projectIds: string            // "1,3,7"
-  projectNames: string          // "A,B,C"
+  projectIds: string // "1,3,7"
+  projectNames: string // "A,B,C"
 
   // 详情抽屉 key
-  rawRecordIds: string          // JSON 数组字符串: ["biz1","biz2"]
+  rawRecordIds: string // JSON 数组字符串: ["biz1","biz2"]
   dingtalkUpdatedAt: string | null
   syncedAt: string | null
   deleted: boolean
@@ -71,7 +71,7 @@ export interface DingTalkAttendanceRaw {
   departmentId: number | null
   pmoUserId: number | null
   workDate: string
-  checkType: string             // OnDuty / OffDuty
+  checkType: string // OnDuty / OffDuty
   source: string
   timeResult: string
   locationMethod: string
@@ -132,7 +132,7 @@ export interface AttendanceStats {
   total: number
   thisMonth: number
   abnormalThisMonth: number
-  abnormalRate: number          // 0-100 整数百分比
+  abnormalRate: number // 0-100 整数百分比
 }
 
 export const dingtalkAttendanceApi = {
@@ -143,8 +143,7 @@ export const dingtalkAttendanceApi = {
     }),
 
   /** 2. 同步状态 */
-  getState: () =>
-    api.get<DingTalkAttendanceSyncState>('/admin/dingtalk/attendance/sync/state'),
+  getState: () => api.get<DingTalkAttendanceSyncState>('/admin/dingtalk/attendance/sync/state'),
 
   /** 3. 同步日志 */
   listLogs: (page = 0, size = 20) =>
@@ -157,7 +156,11 @@ export const dingtalkAttendanceApi = {
     api.get<{ code: number; message: string; data: AttendanceStats }>('/admin/dingtalk/attendance/stats'),
 
   /** 5. 考勤列表 (V4.33: 一行 = 一个 user-day, V4.33+ 加筛选) */
-  list: (page = 0, size = 20, filters?: { dateFrom?: string; dateTo?: string; useridKeyword?: string; isAbnormal?: boolean }) =>
+  list: (
+    page = 0,
+    size = 20,
+    filters?: { dateFrom?: string; dateTo?: string; useridKeyword?: string; isAbnormal?: boolean },
+  ) =>
     api.get<PageResult<DingTalkAttendanceDaily>>('/admin/dingtalk/attendance', {
       params: { page, size, ...(filters || {}) },
     }),
@@ -165,11 +168,16 @@ export const dingtalkAttendanceApi = {
   /** 6. V4.33 详情抽屉: 拿某天聚合行的原始打卡 (走老表冻结只读) */
   fetchRawByRecordIds: (ids: string[]) => {
     if (!ids || ids.length === 0) {
-      return Promise.resolve({ code: 0, message: 'ok', data: [] as DingTalkAttendanceRaw[], timestamp: Date.now() })
+      return Promise.resolve({
+        code: 0,
+        message: 'ok',
+        data: [] as DingTalkAttendanceRaw[],
+        timestamp: Date.now(),
+      })
     }
     return api.get<{ code: number; message: string; data: DingTalkAttendanceRaw[]; timestamp: number }>(
       '/admin/dingtalk/attendance/raw',
-      { params: { ids: ids.join(',') } }
+      { params: { ids: ids.join(',') } },
     )
   },
 }

@@ -24,7 +24,7 @@
         @node-click="onNodeClick"
         @node-drop="onNodeDrop"
       >
-        <template #default="{ node, data }">
+        <template #default="{ data }">
           <span
             class="tree-node"
             :class="{ droppable: true }"
@@ -107,9 +107,10 @@ const filteredTree = computed(() => {
 function filterTree(nodes: DepartmentNode[], kw: string): DepartmentNode[] {
   const out: DepartmentNode[] = []
   for (const n of nodes) {
-    const matchSelf = n.name.toLowerCase().includes(kw) ||
-                      (n.code || '').toLowerCase().includes(kw) ||
-                      String(n.dingtalkDeptId ?? '').includes(kw)
+    const matchSelf =
+      n.name.toLowerCase().includes(kw) ||
+      (n.code || '').toLowerCase().includes(kw) ||
+      String(n.dingtalkDeptId ?? '').includes(kw)
     const matchedChildren = n.children ? filterTree(n.children, kw) : []
     if (matchSelf || matchedChildren.length) {
       out.push({ ...n, children: matchedChildren })
@@ -181,7 +182,9 @@ function onNodeExternalDrop(e: DragEvent, data: DepartmentNode) {
 }
 
 function onNodeDragOver(e: DragEvent) {
-  e.dataTransfer && (e.dataTransfer.dropEffect = 'move')
+  if (e.dataTransfer) {
+    e.dataTransfer.dropEffect = 'move'
+  }
 }
 
 defineExpose({ handleExternalDrop, treeRef })

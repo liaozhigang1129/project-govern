@@ -27,11 +27,11 @@ export interface RoleCostDefaultItem {
 export interface HourlyRateItem {
   id: number
   roleCode: string
-  userId: number | null       // null = 角色档,非空 = 单人 override
+  userId: number | null // null = 角色档,非空 = 单人 override
   userName: string | null
   rate: number
-  effectiveMonth: string      // 'YYYY-MM'
-  endMonth: string | null     // null = 仍生效
+  effectiveMonth: string // 'YYYY-MM'
+  endMonth: string | null // null = 仍生效
   remark: string | null
   createdBy: number | null
   createdAt: string | null
@@ -43,8 +43,8 @@ export interface HourlyRateUpsertBody {
   roleCode: string
   userId?: number | null
   rate: number
-  effectiveMonth: string      // 'YYYY-MM'
-  endMonth?: string | null    // 'YYYY-MM' 或 null
+  effectiveMonth: string // 'YYYY-MM'
+  endMonth?: string | null // 'YYYY-MM' 或 null
   remark?: string
 }
 
@@ -86,7 +86,7 @@ export interface RateSourceBreakdown {
 export interface UserMonthCostResponse {
   userId: number
   userName: string
-  month: string                  // 'YYYY-MM'
+  month: string // 'YYYY-MM'
   totalHours: number
   totalCost: number
   primaryRoleCode: string | null
@@ -98,7 +98,7 @@ export interface UserMonthCostResponse {
 export interface UserDayCostResponse {
   userId: number
   userName: string
-  date: string                   // 'YYYY-MM-DD'
+  date: string // 'YYYY-MM-DD'
   hours: number
   cost: number
   rate: number
@@ -120,8 +120,7 @@ export const costApi = {
   // ----------------------------------------------------------
   // 6 角色档默认价
   // ----------------------------------------------------------
-  listRoleDefaults: () =>
-    call<RoleCostDefaultItem[]>(api.get('/cost/role-defaults')),
+  listRoleDefaults: () => call<RoleCostDefaultItem[]>(api.get('/cost/role-defaults')),
 
   updateRoleDefault: (body: RoleDefaultUpdateBody) =>
     call<RoleCostDefaultItem>(api.put('/cost/role-defaults', body)),
@@ -132,8 +131,7 @@ export const costApi = {
   listHourlyRates: (params: { userId?: number } = {}) =>
     call<HourlyRateItem[]>(api.get('/cost/hourly-rates', { params })),
 
-  getHourlyRate: (id: number) =>
-    call<HourlyRateItem>(api.get(`/cost/hourly-rates/${id}`)),
+  getHourlyRate: (id: number) => call<HourlyRateItem>(api.get(`/cost/hourly-rates/${id}`)),
 
   createHourlyRate: (body: HourlyRateUpsertBody) =>
     call<HourlyRateItem>(api.post('/cost/hourly-rates', body)),
@@ -142,12 +140,9 @@ export const costApi = {
     call<HourlyRateItem>(api.put(`/cost/hourly-rates/${id}`, body)),
 
   closeHourlyRate: (id: number, atMonth: string /* YYYY-MM */) =>
-    call<HourlyRateItem>(
-      api.post(`/cost/hourly-rates/${id}/close`, null, { params: { atMonth } }),
-    ),
+    call<HourlyRateItem>(api.post(`/cost/hourly-rates/${id}/close`, null, { params: { atMonth } })),
 
-  deleteHourlyRate: (id: number) =>
-    call<void>(api.delete(`/cost/hourly-rates/${id}`)),
+  deleteHourlyRate: (id: number) => call<void>(api.delete(`/cost/hourly-rates/${id}`)),
 
   // ----------------------------------------------------------
   // CSV 上传 / 模板下载
@@ -204,9 +199,7 @@ export const costApi = {
    * month 可选 (YYYY-MM): 不传则返回全历史
    */
   dimension: (params: { dim: 'PROJECT' | 'PHASE' | 'DEPT'; month?: string }) =>
-    call<CostDimensionResponse>(
-      api.get('/cost/dimension', { params }),
-    ),
+    call<CostDimensionResponse>(api.get('/cost/dimension', { params })),
 }
 
 /** F2 多维成本行 (T3/T4) */
@@ -222,9 +215,9 @@ export interface CostDimensionRow {
   hours: number
   cost: number
   budget: number | null
-  costRate: number     // 人均时薪 = cost / hours
+  costRate: number // 人均时薪 = cost / hours
   headcount: number
-  costPct: number      // 占比 (0-100)
+  costPct: number // 占比 (0-100)
 }
 
 /** F2 多维成本响应 */
@@ -234,10 +227,10 @@ export interface CostDimensionResponse {
   totalHours: number
   totalCost: number
   totalHeadcount: number
-  activeProjects: number           // 活跃项目数
-  avgCostPerUser: number           // 人均成本
-  budgetCoveragePct: number       // 预算覆盖率 (%)
-  avgHourlyRate: number            // 平均时薪 (¥/h)
+  activeProjects: number // 活跃项目数
+  avgCostPerUser: number // 人均成本
+  budgetCoveragePct: number // 预算覆盖率 (%)
+  avgHourlyRate: number // 平均时薪 (¥/h)
   rows: CostDimensionRow[]
 }
 

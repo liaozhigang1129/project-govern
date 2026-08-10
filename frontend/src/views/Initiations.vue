@@ -2,11 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh } from '@element-plus/icons-vue'
-import api, {
-  type ApprovalRecord,
-  type DecideRequest,
-  type Initiation,
-} from '@/api/client'
+import api, { type ApprovalRecord, type DecideRequest, type Initiation } from '@/api/client'
 import { useAuthStore } from '@/stores/auth'
 import InitiationWizard from '@/components/initiation/InitiationWizard.vue'
 
@@ -65,7 +61,7 @@ async function load() {
     if (filters.value.departmentId) params.departmentId = filters.value.departmentId
     if (filters.value.startDate) params.startDate = filters.value.startDate
     if (filters.value.endDate) params.endDate = filters.value.endDate
-    
+
     list.value = await api.get('/initiations', { params })
   } finally {
     loading.value = false
@@ -166,9 +162,7 @@ const isTerminal = computed(() => {
   return code === 'EXEC_APPROVED' || code === 'REJECTED'
 })
 const isApplicant = computed(() => auth.user?.id === detail.value?.applicantId)
-const canResubmit = computed(() =>
-  detail.value?.status?.code === 'SUPPLEMENT' && isApplicant.value
-)
+const canResubmit = computed(() => detail.value?.status?.code === 'SUPPLEMENT' && isApplicant.value)
 
 // --- 审批决定弹窗 ---
 const decideDialog = ref(false)
@@ -201,7 +195,8 @@ async function resubmit() {
   if (!detail.value) return
   await ElMessageBox.confirm(
     `确认「重新提交」此立项?状态将回到 PENDING,等待 ${detail.value.currentStep ?? '当前审批人'} 重审。`,
-    '提示', { type: 'info' },
+    '提示',
+    { type: 'info' },
   ).catch(() => null)
   if (!detail.value) return
   resubmitLoading.value = true
@@ -216,24 +211,30 @@ async function resubmit() {
 
 function statusType(code?: string) {
   switch (code) {
-    case 'EXEC_APPROVED': return 'success'
-    case 'REJECTED': return 'danger'
+    case 'EXEC_APPROVED':
+      return 'success'
+    case 'REJECTED':
+      return 'danger'
     case 'PENDING':
     case 'DEPT_APPROVED':
-    case 'PMO_APPROVED': return 'warning'
-    case 'SUPPLEMENT': return 'info'
-    default: return 'info'
+    case 'PMO_APPROVED':
+      return 'warning'
+    case 'SUPPLEMENT':
+      return 'info'
+    default:
+      return 'info'
   }
 }
 
 // --- 删除立项 ---
 const deleteLoading = ref(false)
 async function confirmDelete(row: Initiation) {
-  const text = row.status?.code === 'EXEC_APPROVED'
-    ? `「${row.code}」已终审通过,无法删除。`
-    : row.projectId
-    ? `「${row.code}」已关联项目 (P-#${row.projectId}),请先删除项目。`
-    : `确认删除「${row.code} · ${row.title}」?删除后无法恢复。`
+  const text =
+    row.status?.code === 'EXEC_APPROVED'
+      ? `「${row.code}」已终审通过,无法删除。`
+      : row.projectId
+        ? `「${row.code}」已关联项目 (P-#${row.projectId}),请先删除项目。`
+        : `确认删除「${row.code} · ${row.title}」?删除后无法恢复。`
   await ElMessageBox.confirm(text, '删除立项', {
     type: 'warning',
     confirmButtonText: '确认删除',
@@ -250,8 +251,7 @@ async function confirmDelete(row: Initiation) {
   }
 }
 
-const canDelete = (row: Initiation) =>
-  row.status?.code !== 'EXEC_APPROVED' && row.projectId == null
+const canDelete = (row: Initiation) => row.status?.code !== 'EXEC_APPROVED' && row.projectId == null
 function decisionType(d: string) {
   if (d === 'APPROVED') return 'success'
   if (d === 'REJECTED') return 'danger'
@@ -296,7 +296,12 @@ function fmt(dt?: string) {
         <el-form-item label="部门">
           <el-select v-model="filters.departmentId" placeholder="全部部门" clearable style="width: 180px">
             <el-option label="全部部门" value="" />
-            <el-option v-for="dept in departments" :key="dept.id" :label="`${dept.code} - ${dept.name}`" :value="String(dept.id)" />
+            <el-option
+              v-for="dept in departments"
+              :key="dept.id"
+              :label="`${dept.code} - ${dept.name}`"
+              :value="String(dept.id)"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="提交时间">
@@ -331,8 +336,12 @@ function fmt(dt?: string) {
         </div>
       </template>
       <el-table
-        v-loading="loading" :data="list" stripe row-key="id"
-        @row-click="openDetail" style="cursor: pointer"
+        v-loading="loading"
+        :data="list"
+        stripe
+        row-key="id"
+        @row-click="openDetail"
+        style="cursor: pointer"
       >
         <el-table-column prop="code" label="编号" width="170" />
         <el-table-column prop="title" label="标题" min-width="200" show-overflow-tooltip />
@@ -354,15 +363,13 @@ function fmt(dt?: string) {
         </el-table-column>
         <el-table-column label="操作" width="200" align="center" @click.stop>
           <template #default="{ row }">
-            <el-button size="small" type="primary" link @click.stop="openEdit(row)">
-              修改
-            </el-button>
-            <el-button size="small" type="primary" link @click.stop="openWizard(row)">
-              补料
-            </el-button>
+            <el-button size="small" type="primary" link @click.stop="openEdit(row)">修改</el-button>
+            <el-button size="small" type="primary" link @click.stop="openWizard(row)">补料</el-button>
             <el-button
               v-if="canDelete(row)"
-              size="small" type="danger" link
+              size="small"
+              type="danger"
+              link
               :loading="deleteLoading"
               @click.stop="confirmDelete(row)"
             >
@@ -423,8 +430,10 @@ function fmt(dt?: string) {
         <el-empty v-if="records.length === 0" description="暂无审批记录" :image-size="60" />
         <el-timeline v-else>
           <el-timeline-item
-            v-for="r in records" :key="r.id"
-            :type="decisionType(r.decision)" :timestamp="fmt(r.decidedAt)"
+            v-for="r in records"
+            :key="r.id"
+            :type="decisionType(r.decision)"
+            :timestamp="fmt(r.decidedAt)"
           >
             <el-tag :type="decisionType(r.decision)" size="small">{{ decisionLabel(r.decision) }}</el-tag>
             <span style="margin-left: 8px; color: #909399; font-size: 12px">
@@ -438,7 +447,8 @@ function fmt(dt?: string) {
           <div style="margin-bottom: 8px; color: #909399; font-size: 12px">
             <span v-if="isApplicant">身份:申请人</span>
             <span v-else>身份:审批人 ({{ auth.user?.role }})</span>
-            · 当前步骤 <b>{{ detail.currentStep }}</b>
+            · 当前步骤
+            <b>{{ detail.currentStep }}</b>
           </div>
           <el-button v-if="!isApplicant" type="success" @click="openDecide('APPROVED')">通过</el-button>
           <el-button v-if="!isApplicant" type="warning" @click="openDecide('SUPPLEMENT')">打回补料</el-button>
@@ -448,7 +458,8 @@ function fmt(dt?: string) {
           </el-button>
         </div>
         <el-alert
-          v-else style="margin-top: 16px"
+          v-else
+          style="margin-top: 16px"
           :title="detail.status?.code === 'EXEC_APPROVED' ? '已批准,项目已自动创建' : '已驳回,流程结束'"
           :type="detail.status?.code === 'EXEC_APPROVED' ? 'success' : 'error'"
           :closable="false"
@@ -461,18 +472,29 @@ function fmt(dt?: string) {
       <el-form :model="decideForm" label-width="80px">
         <el-form-item label="意见">
           <el-input
-            v-model="decideForm.comment" type="textarea" :rows="3"
-            :placeholder="decideForm.decision === 'APPROVED' ? '可选,留个备注'
-              : (decideForm.decision === 'SUPPLEMENT' ? '请说明要补什么材料' : '请说明驳回原因')"
+            v-model="decideForm.comment"
+            type="textarea"
+            :rows="3"
+            :placeholder="
+              decideForm.decision === 'APPROVED'
+                ? '可选,留个备注'
+                : decideForm.decision === 'SUPPLEMENT'
+                  ? '请说明要补什么材料'
+                  : '请说明驳回原因'
+            "
           />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="decideDialog = false">取消</el-button>
         <el-button
-          type="primary" :loading="decideLoading" @click="submitDecide"
+          type="primary"
+          :loading="decideLoading"
+          @click="submitDecide"
           :disabled="decideForm.decision !== 'APPROVED' && !decideForm.comment?.trim()"
-        >确认</el-button>
+        >
+          确认
+        </el-button>
       </template>
     </el-dialog>
   </div>

@@ -60,7 +60,7 @@ const deptList = ref<DepartmentRef[]>([])
 // items.value 包含当前页 20 条
 // selectedIds 含所有已勾选用户 id (跨页累计)
 const selectedIds = ref<number[]>([])
-const tableRef = ref()    // el-table ref, 用于跨页勾选同步
+const tableRef = ref() // el-table ref, 用于跨页勾选同步
 
 // 切换整页勾选 (工具栏"全选当前页" / "全选全部" / "清空")
 async function toggleAllOnPage(on: boolean) {
@@ -76,7 +76,7 @@ async function toggleAllOnPage(on: boolean) {
     }
   })
   if (!on) {
-    selectedIds.value = selectedIds.value.filter(id => !items.value.some((u: any) => u.id === id))
+    selectedIds.value = selectedIds.value.filter((id) => !items.value.some((u: any) => u.id === id))
   }
 }
 
@@ -88,7 +88,7 @@ async function selectAllMatched() {
     const all = (big?.content ?? []) as any[]
     // 2) 写 selectedIds
     const existing = new Set(selectedIds.value)
-    all.forEach(u => existing.add(u.id))
+    all.forEach((u) => existing.add(u.id))
     selectedIds.value = Array.from(existing)
     // 3) 让 el-table 同步显示 (当前页)
     await toggleAllOnPage(true)
@@ -121,11 +121,15 @@ function generatePassword() {
   const lo = 'abcdefghjkmnpqrstuvwxyz'
   const di = '23456789'
   const all = up + lo + di
-  let s = up[Math.floor(Math.random() * up.length)] +
-          lo[Math.floor(Math.random() * lo.length)] +
-          di[Math.floor(Math.random() * di.length)]
+  let s =
+    up[Math.floor(Math.random() * up.length)] +
+    lo[Math.floor(Math.random() * lo.length)] +
+    di[Math.floor(Math.random() * di.length)]
   for (let i = 3; i < 12; i++) s += all[Math.floor(Math.random() * all.length)]
-  return s.split('').sort(() => Math.random() - 0.5).join('')
+  return s
+    .split('')
+    .sort(() => Math.random() - 0.5)
+    .join('')
 }
 
 // 对话框 — 角色授权 (V4.16)
@@ -164,7 +168,7 @@ function openBatchAssignRole() {
   }
 }
 function onRoleSaved() {
-  load()  // 重新加载列表
+  load() // 重新加载列表
 }
 
 // 对话框 — 离职
@@ -188,13 +192,11 @@ async function loadDicts() {
   try {
     const [roles, depts] = await Promise.all([
       // 真正用 /roles 接口拿 (L1-2 角色管理新增)
-      roleApi.list(true).then(list =>
-        list.map(r => ({ id: r.id, code: r.code, name: r.name } as RoleRef))
-      ),
+      roleApi
+        .list(true)
+        .then((list) => list.map((r) => ({ id: r.id, code: r.code, name: r.name }) as RoleRef)),
       // 真正用 /departments 接口拿 (L1-3 部门管理新增)
-      departmentApi.options().then(list =>
-        list.map(d => ({ id: d.id, name: d.name } as DepartmentRef))
-      ),
+      departmentApi.options().then((list) => list.map((d) => ({ id: d.id, name: d.name }) as DepartmentRef)),
     ])
     roleList.value = roles ?? []
     deptList.value = depts ?? []
@@ -318,7 +320,7 @@ async function pollSyncResult(logId: number | undefined, maxAttempts = 30): Prom
     desc: `正在拉取钉钉通讯录(0/${maxAttempts}s)`,
   }
   for (let i = 0; i < maxAttempts; i++) {
-    await new Promise(r => setTimeout(r, 1000))
+    await new Promise((r) => setTimeout(r, 1000))
     syncResult.value = {
       type: 'info',
       title: '同步中…',
@@ -346,7 +348,7 @@ async function pollSyncResult(logId: number | undefined, maxAttempts = 30): Prom
 function showSyncResult(log: any) {
   if (!log) return
   const ok = log.status === 'SUCCESS'
-  const isMock = (log.totalDepts === 0 && log.totalUsers === 0)
+  const isMock = log.totalDepts === 0 && log.totalUsers === 0
   if (log.status === 'TIMEOUT') {
     syncResult.value = {
       type: 'warning',
@@ -422,12 +424,12 @@ const items = computed(() => data.value?.content ?? [])
 async function toggleEnabled(row: UserListItem) {
   const op = row.enabled ? '停用' : '启用'
   try {
-    await ElMessageBox.confirm(
-      `确认${op}用户 “${row.fullName}” (${row.username})?`,
-      `${op}确认`,
-      { type: 'warning' }
-    )
-  } catch { return }
+    await ElMessageBox.confirm(`确认${op}用户 “${row.fullName}” (${row.username})?`, `${op}确认`, {
+      type: 'warning',
+    })
+  } catch {
+    return
+  }
   try {
     await userApi.setEnabled(row.id, !row.enabled)
     ElMessage.success(`${op}成功`)
@@ -471,7 +473,11 @@ async function submitResetPassword() {
       notifyByEmail: pwdDialog.value.notifyEmail,
     })
     ElMessage.success(`密码已重置 (新密码已复制到剪贴板): ${pwdDialog.value.newPassword}`)
-    try { await navigator.clipboard.writeText(pwdDialog.value.newPassword) } catch {}
+    try {
+      await navigator.clipboard.writeText(pwdDialog.value.newPassword)
+    } catch {
+      /* 用户取消授权,降级为手动复制 */
+    }
     pwdDialog.value.visible = false
     load()
   } catch (e: any) {
@@ -501,7 +507,9 @@ async function openOffboard(row: UserListItem) {
   }
   try {
     transferOptions.value = await userApi.options()
-  } catch {}
+  } catch {
+    /* 用户取消授权,降级为手动复制 */
+  }
 }
 
 async function submitOffboard() {
@@ -558,239 +566,222 @@ onMounted(() => {
 
       <!-- ============= 视图 1: 按筛选 ============= -->
       <template v-if="viewMode === 'list'">
-      <!-- 搜索栏 -->
-      <el-form :inline="true" :model="query" @submit.prevent>
-        <el-form-item label="关键字">
-          <el-input
-            v-model="query.keyword"
-            placeholder="账号/姓名/手机"
-            clearable
-            style="width: 180px"
-            @keyup.enter="onSearch"
-          />
-        </el-form-item>
-        <el-form-item label="主角色">
-          <el-select v-model="query.roleCode" placeholder="全部" clearable style="width: 140px">
-            <el-option v-for="r in roleList" :key="r.code" :label="r.name" :value="r.code" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="部门">
-          <el-select v-model="query.departmentId" placeholder="全部" clearable style="width: 160px">
-            <el-option v-for="d in deptList" :key="d.id" :label="d.name" :value="d.id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="query.enabled" placeholder="全部" clearable style="width: 110px">
-            <el-option :value="true" label="启用" />
-            <el-option :value="false" label="停用" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="锁定">
-          <el-select v-model="query.locked" placeholder="全部" clearable style="width: 110px">
-            <el-option :value="true" label="已锁定" />
-            <el-option :value="false" label="未锁定" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" :icon="'Search'" @click="onSearch">查询</el-button>
-          <el-button @click="onReset">重置</el-button>
-          <el-button
-            type="success"
-            :loading="syncLoading"
-            :icon="'Connection'"
-            @click="onSyncDingTalk"
-            style="margin-left: 8px"
-          >
-            同步钉钉
-          </el-button>
-          <el-button
-            type="primary"
-            :loading="exportLoading"
-            :icon="'Download'"
-            @click="onExportExcel"
-            style="margin-left: 8px"
-            data-testid="users-export-btn"
-          >
-            导出 Excel
-          </el-button>
-          <el-button
-            type="warning"
-            style="margin-left: 8px"
-            @click="openBatchAssignRole"
-          >
-            批量授权角色
-            <el-badge
-              v-if="selectedIds.length > 0"
-              :value="selectedIds.length"
-              style="margin-left: 4px"
+        <!-- 搜索栏 -->
+        <el-form :inline="true" :model="query" @submit.prevent>
+          <el-form-item label="关键字">
+            <el-input
+              v-model="query.keyword"
+              placeholder="账号/姓名/手机"
+              clearable
+              style="width: 180px"
+              @keyup.enter="onSearch"
             />
-          </el-button>
-          <!-- V4.19: 批量勾选工具 (按当前搜索条件全选) -->
-          <el-dropdown
-            style="margin-left: 8px"
-            @command="(c: string) => {
-              if (c === 'page') toggleAllOnPage(true)
-              else if (c === 'clear') clearSelection()
-              else if (c === 'all') selectAllMatched()
-            }"
-          >
-            <el-button>
-              批量勾选 <el-icon class="el-icon--right"><CaretBottom /></el-icon>
+          </el-form-item>
+          <el-form-item label="主角色">
+            <el-select v-model="query.roleCode" placeholder="全部" clearable style="width: 140px">
+              <el-option v-for="r in roleList" :key="r.code" :label="r.name" :value="r.code" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="部门">
+            <el-select v-model="query.departmentId" placeholder="全部" clearable style="width: 160px">
+              <el-option v-for="d in deptList" :key="d.id" :label="d.name" :value="d.id" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="状态">
+            <el-select v-model="query.enabled" placeholder="全部" clearable style="width: 110px">
+              <el-option :value="true" label="启用" />
+              <el-option :value="false" label="停用" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="锁定">
+            <el-select v-model="query.locked" placeholder="全部" clearable style="width: 110px">
+              <el-option :value="true" label="已锁定" />
+              <el-option :value="false" label="未锁定" />
+            </el-select>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" :icon="'Search'" @click="onSearch">查询</el-button>
+            <el-button @click="onReset">重置</el-button>
+            <el-button
+              type="success"
+              :loading="syncLoading"
+              :icon="'Connection'"
+              @click="onSyncDingTalk"
+              style="margin-left: 8px"
+            >
+              同步钉钉
             </el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item command="page">
-                  全选当前页 ({{ items.length }})
-                </el-dropdown-item>
-                <el-dropdown-item command="all" :disabled="loading">
-                  全选所有匹配 (按当前筛选, 最多 1000)
-                </el-dropdown-item>
-                <el-dropdown-item command="clear" divided :disabled="selectedIds.length === 0">
-                  清空勾选 ({{ selectedIds.length }})
-                </el-dropdown-item>
-              </el-dropdown-menu>
+            <el-button
+              type="primary"
+              :loading="exportLoading"
+              :icon="'Download'"
+              @click="onExportExcel"
+              style="margin-left: 8px"
+              data-testid="users-export-btn"
+            >
+              导出 Excel
+            </el-button>
+            <el-button type="warning" style="margin-left: 8px" @click="openBatchAssignRole">
+              批量授权角色
+              <el-badge v-if="selectedIds.length > 0" :value="selectedIds.length" style="margin-left: 4px" />
+            </el-button>
+            <!-- V4.19: 批量勾选工具 (按当前搜索条件全选) -->
+            <el-dropdown
+              style="margin-left: 8px"
+              @command="
+                (c: string) => {
+                  if (c === 'page') toggleAllOnPage(true)
+                  else if (c === 'clear') clearSelection()
+                  else if (c === 'all') selectAllMatched()
+                }
+              "
+            >
+              <el-button>
+                批量勾选
+                <el-icon class="el-icon--right"><CaretBottom /></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="page">全选当前页 ({{ items.length }})</el-dropdown-item>
+                  <el-dropdown-item command="all" :disabled="loading">
+                    全选所有匹配 (按当前筛选, 最多 1000)
+                  </el-dropdown-item>
+                  <el-dropdown-item command="clear" divided :disabled="selectedIds.length === 0">
+                    清空勾选 ({{ selectedIds.length }})
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </el-form-item>
+        </el-form>
+
+        <!-- 同步进度 / 最近一次结果 -->
+        <el-alert
+          v-if="syncResult"
+          :type="syncResult.type"
+          :title="syncResult.title"
+          :description="syncResult.desc"
+          show-icon
+          :closable="true"
+          @close="syncResult = null"
+          style="margin-bottom: 12px"
+        >
+          <template #default v-if="syncResult.viewUrl">
+            <el-button size="small" type="primary" link @click="openSyncLog(syncResult)">
+              {{ syncResult.viewLabel || '打开同步日志' }}
+            </el-button>
+          </template>
+        </el-alert>
+
+        <!-- 表格 (V4.19: 复选框列 + 跨页累计) -->
+        <el-table
+          ref="tableRef"
+          v-loading="loading"
+          :data="items"
+          border
+          stripe
+          row-key="id"
+          style="width: 100%"
+          empty-text="无用户"
+          @selection-change="(rows: any[]) => (selectedIds = rows.map((r) => r.id))"
+        >
+          <el-table-column type="selection" width="44" :reserve-selection="true" />
+          <el-table-column prop="id" label="ID" width="60" />
+          <el-table-column prop="username" label="账号" min-width="100" />
+          <el-table-column prop="fullName" label="姓名" min-width="100" />
+          <el-table-column label="角色" min-width="180">
+            <template #default="{ row }">
+              <el-tooltip
+                v-if="row.roleCodes?.length"
+                :content="`已分配 ${row.roleCodes.length} 个角色: ${row.roleCodes.join(', ')}`"
+                placement="top"
+              >
+                <el-tag size="small" type="primary">
+                  {{ row.primaryRoleName || row.primaryRoleCode || '—' }}
+                </el-tag>
+                <el-tag
+                  v-for="code in (row.roleCodes || []).filter((c: string) => c !== row.primaryRoleCode)"
+                  :key="code"
+                  size="small"
+                  type="info"
+                  effect="plain"
+                  style="margin-left: 4px"
+                >
+                  {{ code }}
+                </el-tag>
+              </el-tooltip>
+              <el-tag v-else size="small" type="info" effect="plain">未分配</el-tag>
             </template>
-          </el-dropdown>
-        </el-form-item>
-      </el-form>
-
-      <!-- 同步进度 / 最近一次结果 -->
-      <el-alert
-        v-if="syncResult"
-        :type="syncResult.type"
-        :title="syncResult.title"
-        :description="syncResult.desc"
-        show-icon
-        :closable="true"
-        @close="syncResult = null"
-        style="margin-bottom: 12px"
-      >
-        <template #default v-if="syncResult.viewUrl">
-          <el-button size="small" type="primary" link @click="openSyncLog(syncResult)">
-            {{ syncResult.viewLabel || '打开同步日志' }}
-          </el-button>
-        </template>
-      </el-alert>
-
-      <!-- 表格 (V4.19: 复选框列 + 跨页累计) -->
-      <el-table
-        ref="tableRef"
-        v-loading="loading"
-        :data="items"
-        border
-        stripe
-        row-key="id"
-        style="width: 100%"
-        empty-text="无用户"
-        @selection-change="(rows: any[]) => selectedIds = rows.map(r => r.id)"
-      >
-        <el-table-column type="selection" width="44" :reserve-selection="true" />
-        <el-table-column prop="id" label="ID" width="60" />
-        <el-table-column prop="username" label="账号" min-width="100" />
-        <el-table-column prop="fullName" label="姓名" min-width="100" />
-        <el-table-column label="角色" min-width="180">
-          <template #default="{ row }">
-            <el-tooltip
-              v-if="row.roleCodes?.length"
-              :content="`已分配 ${row.roleCodes.length} 个角色: ${row.roleCodes.join(', ')}`"
-              placement="top"
-            >
-              <el-tag size="small" type="primary">
-                {{ row.primaryRoleName || row.primaryRoleCode || '—' }}
-              </el-tag>
-              <el-tag
-                v-for="code in (row.roleCodes || []).filter((c: string) => c !== row.primaryRoleCode)"
-                :key="code"
-                size="small"
-                type="info"
-                effect="plain"
-                style="margin-left: 4px"
-              >
-                {{ code }}
-              </el-tag>
-            </el-tooltip>
-            <el-tag v-else size="small" type="info" effect="plain">未分配</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="部门" min-width="200">
-          <template #default="{ row }">
-            <div v-if="row.departmentName" style="line-height: 1.3">
-              <div style="font-weight: 500">{{ row.departmentName }}</div>
-              <div
-                v-if="row.departmentPath && row.departmentPath !== row.departmentName"
-                style="font-size: 11px; color: #909399; margin-top: 2px"
-                :title="row.departmentPath"
-              >
-                {{ row.departmentPath }}
+          </el-table-column>
+          <el-table-column label="部门" min-width="200">
+            <template #default="{ row }">
+              <div v-if="row.departmentName" style="line-height: 1.3">
+                <div style="font-weight: 500">{{ row.departmentName }}</div>
+                <div
+                  v-if="row.departmentPath && row.departmentPath !== row.departmentName"
+                  style="font-size: 11px; color: #909399; margin-top: 2px"
+                  :title="row.departmentPath"
+                >
+                  {{ row.departmentPath }}
+                </div>
               </div>
-            </div>
-            <span v-else style="color: #c0c4cc">-</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="phone" label="手机" min-width="120" />
-        <el-table-column prop="email" label="邮箱" min-width="180" show-overflow-tooltip />
-        <el-table-column label="状态" width="120">
-          <template #default="{ row }">
-            <el-tag v-if="row.enabled" type="success" size="small">启用</el-tag>
-            <el-tag v-else type="info" size="small">停用</el-tag>
-            <el-tag v-if="row.locked" type="danger" size="small" style="margin-left: 4px">
-              🔒 {{ row.loginFailCount }}次
-            </el-tag>
-            <el-tag v-if="row.mustChangePassword" type="warning" size="small" style="margin-left: 4px">
-              需改密
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="最后登录" min-width="150">
-          <template #default="{ row }">
-            <div style="font-size: 12px">{{ fmtTime(row.lastLoginAt) }}</div>
-            <div style="font-size: 11px; color: #909399">{{ row.lastLoginIp ?? '' }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="320" fixed="right">
-          <template #default="{ row }">
-            <el-button size="small" link type="primary" @click="openAssignRole(row)">
-              授权角色
-            </el-button>
-            <el-button v-if="row.locked" size="small" link type="warning" @click="onUnlock(row)">
-              解锁
-            </el-button>
-            <el-button
-              size="small"
-              link
-              :type="row.enabled ? 'danger' : 'success'"
-              @click="toggleEnabled(row)"
-            >
-              {{ row.enabled ? '停用' : '启用' }}
-            </el-button>
-            <el-button size="small" link type="primary" @click="openResetPassword(row)">
-              重置密码
-            </el-button>
-            <el-button
-              v-if="row.enabled"
-              size="small"
-              link
-              type="danger"
-              @click="openOffboard(row)"
-            >
-              离职
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+              <span v-else style="color: #c0c4cc">-</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="phone" label="手机" min-width="120" />
+          <el-table-column prop="email" label="邮箱" min-width="180" show-overflow-tooltip />
+          <el-table-column label="状态" width="120">
+            <template #default="{ row }">
+              <el-tag v-if="row.enabled" type="success" size="small">启用</el-tag>
+              <el-tag v-else type="info" size="small">停用</el-tag>
+              <el-tag v-if="row.locked" type="danger" size="small" style="margin-left: 4px">
+                🔒 {{ row.loginFailCount }}次
+              </el-tag>
+              <el-tag v-if="row.mustChangePassword" type="warning" size="small" style="margin-left: 4px">
+                需改密
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="最后登录" min-width="150">
+            <template #default="{ row }">
+              <div style="font-size: 12px">{{ fmtTime(row.lastLoginAt) }}</div>
+              <div style="font-size: 11px; color: #909399">{{ row.lastLoginIp ?? '' }}</div>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="320" fixed="right">
+            <template #default="{ row }">
+              <el-button size="small" link type="primary" @click="openAssignRole(row)">授权角色</el-button>
+              <el-button v-if="row.locked" size="small" link type="warning" @click="onUnlock(row)">
+                解锁
+              </el-button>
+              <el-button
+                size="small"
+                link
+                :type="row.enabled ? 'danger' : 'success'"
+                @click="toggleEnabled(row)"
+              >
+                {{ row.enabled ? '停用' : '启用' }}
+              </el-button>
+              <el-button size="small" link type="primary" @click="openResetPassword(row)">重置密码</el-button>
+              <el-button v-if="row.enabled" size="small" link type="danger" @click="openOffboard(row)">
+                离职
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
 
-      <!-- 分页 -->
-      <div style="display: flex; justify-content: flex-end; margin-top: 16px">
-        <el-pagination
-          :current-page="(query.page ?? 0) + 1"
-          :page-size="query.size ?? 20"
-          :total="total"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          @current-change="onPageChange"
-          @size-change="onSizeChange"
-        />
-      </div>
+        <!-- 分页 -->
+        <div style="display: flex; justify-content: flex-end; margin-top: 16px">
+          <el-pagination
+            :current-page="(query.page ?? 0) + 1"
+            :page-size="query.size ?? 20"
+            :total="total"
+            :page-sizes="[10, 20, 50, 100]"
+            layout="total, sizes, prev, pager, next, jumper"
+            @current-change="onPageChange"
+            @size-change="onSizeChange"
+          />
+        </div>
       </template>
 
       <!-- 视图: 按组织 (双栏, 拖拽分配) -->
@@ -798,60 +789,35 @@ onMounted(() => {
     </el-card>
 
     <!-- 重置密码对话框 -->
-    <el-dialog
-      v-model="pwdDialog.visible"
-      :title="`重置密码 — ${pwdDialog.username}`"
-      width="480px"
-    >
+    <el-dialog v-model="pwdDialog.visible" :title="`重置密码 — ${pwdDialog.username}`" width="480px">
       <el-form label-width="100px">
         <el-form-item label="新密码">
           <el-input v-model="pwdDialog.newPassword" show-password />
         </el-form-item>
         <el-form-item>
-          <el-button size="small" @click="pwdDialog.newPassword = generatePassword()">
-            🎲 重新生成
-          </el-button>
-          <el-button size="small" @click="copyPwd">
-            📋 复制
-          </el-button>
+          <el-button size="small" @click="pwdDialog.newPassword = generatePassword()">🎲 重新生成</el-button>
+          <el-button size="small" @click="copyPwd">📋 复制</el-button>
         </el-form-item>
         <el-form-item label="下次登录">
           <el-switch v-model="pwdDialog.mustChange" />
-          <span style="margin-left: 8px; color: #909399; font-size: 12px">
-            强制用户下次登录后必须改密
-          </span>
+          <span style="margin-left: 8px; color: #909399; font-size: 12px">强制用户下次登录后必须改密</span>
         </el-form-item>
         <el-form-item label="邮件通知">
           <el-switch v-model="pwdDialog.notifyEmail" />
-          <span style="margin-left: 8px; color: #909399; font-size: 12px">
-            把新密码发到用户邮箱
-          </span>
+          <span style="margin-left: 8px; color: #909399; font-size: 12px">把新密码发到用户邮箱</span>
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="pwdDialog.visible = false">取消</el-button>
-        <el-button
-          type="primary"
-          :loading="pwdDialog.submitting"
-          @click="submitResetPassword"
-        >
+        <el-button type="primary" :loading="pwdDialog.submitting" @click="submitResetPassword">
           确认重置
         </el-button>
       </template>
     </el-dialog>
 
     <!-- 离职对话框 -->
-    <el-dialog
-      v-model="offboardDialog.visible"
-      :title="`离职 — ${offboardDialog.username}`"
-      width="520px"
-    >
-      <el-alert
-        type="warning"
-        :closable="false"
-        show-icon
-        style="margin-bottom: 16px"
-      >
+    <el-dialog v-model="offboardDialog.visible" :title="`离职 — ${offboardDialog.username}`" width="520px">
+      <el-alert type="warning" :closable="false" show-icon style="margin-bottom: 16px">
         离职后账号将立即被停用并踢下线。其名下的项目 / WBS 任务可交接给其他用户。
       </el-alert>
       <el-form label-width="100px">
@@ -864,7 +830,7 @@ onMounted(() => {
             style="width: 100%"
           >
             <el-option
-              v-for="u in transferOptions.filter(o => o.id !== offboardDialog.userId)"
+              v-for="u in transferOptions.filter((o) => o.id !== offboardDialog.userId)"
               :key="u.id"
               :label="`${u.fullName} (${u.username})`"
               :value="u.id"
@@ -882,11 +848,7 @@ onMounted(() => {
       </el-form>
       <template #footer>
         <el-button @click="offboardDialog.visible = false">取消</el-button>
-        <el-button
-          type="danger"
-          :loading="offboardDialog.submitting"
-          @click="submitOffboard"
-        >
+        <el-button type="danger" :loading="offboardDialog.submitting" @click="submitOffboard">
           确认离职
         </el-button>
       </template>
@@ -906,5 +868,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.page { padding: 16px; }
+.page {
+  padding: 16px;
+}
 </style>

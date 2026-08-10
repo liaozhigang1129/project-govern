@@ -65,7 +65,9 @@
         <el-form-item label="合同金额">
           <el-input-number
             v-model="form.contractAmount"
-            :min="0" :step="10000" :precision="2"
+            :min="0"
+            :step="10000"
+            :precision="2"
             style="width: 100%"
             controls-position="right"
           />
@@ -156,7 +158,10 @@
         <el-form-item label="预估毛利率 (%)">
           <el-input-number
             v-model="form.expectedGrossMarginPct"
-            :min="0" :max="100" :step="1" :precision="2"
+            :min="0"
+            :max="100"
+            :step="1"
+            :precision="2"
             style="width: 100%"
             controls-position="right"
             placeholder="0~100"
@@ -170,7 +175,8 @@
         <el-form-item label="入场时间">
           <el-date-picker
             v-model="form.plannedStart"
-            type="date" value-format="YYYY-MM-DD"
+            type="date"
+            value-format="YYYY-MM-DD"
             placeholder="kickoff 日期"
             style="width: 100%"
           />
@@ -180,7 +186,8 @@
         <el-form-item label="项目结束时间">
           <el-date-picker
             v-model="form.plannedEnd"
-            type="date" value-format="YYYY-MM-DD"
+            type="date"
+            value-format="YYYY-MM-DD"
             placeholder="项目验收目标日"
             style="width: 100%"
           />
@@ -190,7 +197,8 @@
         <el-form-item label="计划上线时间">
           <el-date-picker
             v-model="form.plannedLaunchDate"
-            type="date" value-format="YYYY-MM-DD"
+            type="date"
+            value-format="YYYY-MM-DD"
             placeholder="UAT/灰度→全量目标日"
             style="width: 100%"
           />
@@ -203,21 +211,17 @@
 
     <el-form-item label="背景">
       <el-input
-        v-model="form.background" type="textarea" :rows="2"
+        v-model="form.background"
+        type="textarea"
+        :rows="2"
         placeholder="为什么要做这个项目 / 解决什么业务问题"
       />
     </el-form-item>
     <el-form-item label="目标">
-      <el-input
-        v-model="form.goals" type="textarea" :rows="2"
-        placeholder="可衡量的成功标准 (KPI / OKR)"
-      />
+      <el-input v-model="form.goals" type="textarea" :rows="2" placeholder="可衡量的成功标准 (KPI / OKR)" />
     </el-form-item>
     <el-form-item label="范围">
-      <el-input
-        v-model="form.scope" type="textarea" :rows="2"
-        placeholder="做什么 / 不做什么 (含/不含)"
-      />
+      <el-input v-model="form.scope" type="textarea" :rows="2" placeholder="做什么 / 不做什么 (含/不含)" />
     </el-form-item>
   </el-form>
 </template>

@@ -50,11 +50,13 @@ _axios.interceptors.response.use(
             showClose: true,
           })
         })
-      } catch { /* ElMessage 不可用时静默 */ }
+      } catch {
+        /* ElMessage 不可用时静默 */
+      }
     }
     const msg = err.response?.data?.message ?? err.message
     return Promise.reject(new Error(msg))
-  }
+  },
 )
 
 /**
@@ -156,9 +158,9 @@ export interface DictRef {
   id: number
   code: string
   name: string
-  colorHex?: string   // 仅 HealthLevel 用
-  parentId?: number   // 字典引用:仅 PL(指向 BU) / RP(指向 PL) 用,前端级联下拉过滤用
-  version?: string    // 字典引用:仅 RP 用(产品版本号)
+  colorHex?: string // 仅 HealthLevel 用
+  parentId?: number // 字典引用:仅 PL(指向 BU) / RP(指向 PL) 用,前端级联下拉过滤用
+  version?: string // 字典引用:仅 RP 用(产品版本号)
 }
 
 /**
@@ -174,9 +176,9 @@ export interface ProjectCard {
   type?: DictRef
   status?: DictRef
   health?: DictRef
-  bu?: DictRef                   // 业务单元
-  pl?: DictRef                   // 产品线(parentId=buId,前端级联用)
-  relatedProduct?: DictRef       // 关联产品(parentId=plId,version 是产品版本)
+  bu?: DictRef // 业务单元
+  pl?: DictRef // 产品线(parentId=buId,前端级联用)
+  relatedProduct?: DictRef // 关联产品(parentId=plId,version 是产品版本)
   pmUserId?: number
   pmUserName?: string
   planStartDate?: string
@@ -310,7 +312,7 @@ export interface SowFile {
   contentType?: string
   uploadedBy: number
   uploadedAt: string
-  downloadUrl?: string  // 后端 /sow/{sowId}/download 绝对路径
+  downloadUrl?: string // 后端 /sow/{sowId}/download 绝对路径
 }
 
 /** AI WBS 工作包草稿项 */
@@ -439,8 +441,8 @@ export interface BudgetFreeze {
 /** 项目成员角色字典 — 对齐后端 /dict/member-roles 返回 */
 export interface MemberRole {
   id: number
-  code: string                 // PM / ASSISTANT / ARCH / BA / DEV / QA / CFG
-  name: string                 // 项目经理 / 项目助理 / ...
+  code: string // PM / ASSISTANT / ARCH / BA / DEV / QA / CFG
+  name: string // 项目经理 / 项目助理 / ...
   description?: string
   sortOrder: number
 }
@@ -449,24 +451,24 @@ export interface MemberRole {
 export interface ProjectMember {
   id: number
   projectId: number
-  userId?: number              // 内部系统用户(可空=外部人员)
-  memberName: string           // 姓名(内部 user 取 fullName,外部手填)
-  external: boolean            // TRUE=外部人员
-  joinDate: string             // 参与开始日期 (YYYY-MM-DD)
-  leaveDate?: string           // 参与结束日期(可空=仍在项目中)
-  allocationPct: number        // 投入比例 0-100
+  userId?: number // 内部系统用户(可空=外部人员)
+  memberName: string // 姓名(内部 user 取 fullName,外部手填)
+  external: boolean // TRUE=外部人员
+  joinDate: string // 参与开始日期 (YYYY-MM-DD)
+  leaveDate?: string // 参与结束日期(可空=仍在项目中)
+  allocationPct: number // 投入比例 0-100
   remark?: string
   role: { id: number; code: string; name: string }
 }
 
 /** 新增/编辑项目成员 请求体 — 对齐后端 ProjectMemberRequest */
 export interface ProjectMemberInput {
-  roleCode: string             // 必填,字典 code
+  roleCode: string // 必填,字典 code
   userId?: number
-  memberName?: string          // 内部 user 时可空(后端从 fullName 自动填),外部必填
+  memberName?: string // 内部 user 时可空(后端从 fullName 自动填),外部必填
   external?: boolean
-  joinDate: string             // 必填 YYYY-MM-DD
+  joinDate: string // 必填 YYYY-MM-DD
   leaveDate?: string
-  allocationPct?: number       // 默认 100
+  allocationPct?: number // 默认 100
   remark?: string
 }

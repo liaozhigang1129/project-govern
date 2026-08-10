@@ -80,8 +80,8 @@ const userColumns = computed(() => {
   // 同时并入已加载的 AppUser (保持顺序: 先出现的分配)
   const result: { id: number; name: string }[] = []
   for (const id of ids) {
-    const u = users.value.find(u => u.id === id)
-    result.push({ id, name: u ? (u.fullName || u.username) : `#${id}` })
+    const u = users.value.find((u) => u.id === id)
+    result.push({ id, name: u ? u.fullName || u.username : `#${id}` })
   }
   return result.sort((a, b) => a.id - b.id)
 })
@@ -103,10 +103,10 @@ function cellFor(taskId: number, userId: number): WbsAssignment | null {
 // 角色标签
 // ============================================================
 const ROLE_LABEL: Record<string, { label: string; color: string }> = {
-  LEAD:     { label: '负责', color: '#f56c6c' },
-  DOER:     { label: '执行', color: '#409eff' },
+  LEAD: { label: '负责', color: '#f56c6c' },
+  DOER: { label: '执行', color: '#409eff' },
   REVIEWER: { label: '评审', color: '#67c23a' },
-  QA:       { label: '测试', color: '#e6a23c' },
+  QA: { label: '测试', color: '#e6a23c' },
   OBSERVER: { label: '观察', color: '#909399' },
 }
 
@@ -130,7 +130,7 @@ function userTotalHours(uid: number): number {
 }
 
 const grandTotalHours = computed(() =>
-  assignments.value.reduce((s, a) => s + (Number(a.plannedHours) || 0), 0)
+  assignments.value.reduce((s, a) => s + (Number(a.plannedHours) || 0), 0),
 )
 
 // ============================================================
@@ -196,27 +196,32 @@ function onCellClick(t: WbsTaskNode, uid: number) {
 
 function onAddNew(t: WbsTaskNode) {
   // 给任务加新分配, 让用户先选 user
-  ElMessageBox.prompt(
-    `为任务 ${t.wbsCode} ${t.name} 添加新分配, 请输入 userId`,
-    '新增分配',
-    { inputPattern: /^\d+$/, inputErrorMessage: '请输入数字 userId', confirmButtonText: '下一步', cancelButtonText: '取消' }
-  ).then(({ value }) => {
-    const uid = Number(value)
-    dialog.value = {
-      visible: true,
-      mode: 'create',
-      assignment: null,
-      form: {
-        wbsTaskId: t.id,
-        wbsCode: t.wbsCode,
-        userId: uid,
-        role: 'DOER',
-        plannedHours: 0,
-        startDate: null,
-        endDate: null,
-      },
-    }
-  }).catch(() => { /* 取消 */ })
+  ElMessageBox.prompt(`为任务 ${t.wbsCode} ${t.name} 添加新分配, 请输入 userId`, '新增分配', {
+    inputPattern: /^\d+$/,
+    inputErrorMessage: '请输入数字 userId',
+    confirmButtonText: '下一步',
+    cancelButtonText: '取消',
+  })
+    .then(({ value }) => {
+      const uid = Number(value)
+      dialog.value = {
+        visible: true,
+        mode: 'create',
+        assignment: null,
+        form: {
+          wbsTaskId: t.id,
+          wbsCode: t.wbsCode,
+          userId: uid,
+          role: 'DOER',
+          plannedHours: 0,
+          startDate: null,
+          endDate: null,
+        },
+      }
+    })
+    .catch(() => {
+      /* 取消 */
+    })
 }
 
 async function onSave() {
@@ -251,9 +256,13 @@ async function onDelete() {
   if (!dialog.value.assignment) return
   try {
     await ElMessageBox.confirm('确认删除该分配?', '删除', {
-      type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消',
+      type: 'warning',
+      confirmButtonText: '删除',
+      cancelButtonText: '取消',
     })
-  } catch { return }
+  } catch {
+    return
+  }
   try {
     await deleteAssignment(dialog.value.assignment.id)
     ElMessage.success('已删除')
@@ -284,10 +293,22 @@ defineExpose({ load })
     <template v-else>
       <!-- 汇总 -->
       <div class="asn-summary">
-        <span>任务数: <b>{{ tasks.length }}</b></span>
-        <span>人员数: <b>{{ userColumns.length }}</b></span>
-        <span>分配条数: <b>{{ assignments.length }}</b></span>
-        <span>计划工时合计: <b>{{ grandTotalHours }}h</b></span>
+        <span>
+          任务数:
+          <b>{{ tasks.length }}</b>
+        </span>
+        <span>
+          人员数:
+          <b>{{ userColumns.length }}</b>
+        </span>
+        <span>
+          分配条数:
+          <b>{{ assignments.length }}</b>
+        </span>
+        <span>
+          计划工时合计:
+          <b>{{ grandTotalHours }}h</b>
+        </span>
       </div>
 
       <!-- 矩阵 -->
@@ -296,12 +317,7 @@ defineExpose({ load })
           <thead>
             <tr>
               <th class="asn-th-task">WBS 任务 \ 人员</th>
-              <th
-                v-for="u in userColumns"
-                :key="u.id"
-                class="asn-th-user"
-                :title="`userId=${u.id}`"
-              >
+              <th v-for="u in userColumns" :key="u.id" class="asn-th-user" :title="`userId=${u.id}`">
                 {{ u.name }}
                 <div class="asn-th-hours">{{ userTotalHours(u.id) }}h</div>
               </th>
@@ -344,7 +360,17 @@ defineExpose({ load })
       <div class="asn-legend">
         <span>角色:</span>
         <span v-for="(r, k) in ROLE_LABEL" :key="k" class="asn-legend-item">
-          <span class="asn-role" :style="{ background: r.color, display: 'inline-block', width: '14px', height: '14px', borderRadius: '3px', verticalAlign: 'middle' }"></span>
+          <span
+            class="asn-role"
+            :style="{
+              background: r.color,
+              display: 'inline-block',
+              width: '14px',
+              height: '14px',
+              borderRadius: '3px',
+              verticalAlign: 'middle',
+            }"
+          ></span>
           {{ r.label }}
         </span>
       </div>
@@ -409,44 +435,92 @@ defineExpose({ load })
 </template>
 
 <style scoped>
-.asn-matrix { display: flex; flex-direction: column; gap: 12px; }
+.asn-matrix {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
 .asn-summary {
-  display: flex; gap: 24px; font-size: 13px; color: #606266;
+  display: flex;
+  gap: 24px;
+  font-size: 13px;
+  color: #606266;
 }
-.asn-summary b { color: #303133; }
+.asn-summary b {
+  color: #303133;
+}
 
-.asn-scroll { overflow-x: auto; }
+.asn-scroll {
+  overflow-x: auto;
+}
 .asn-table {
   border-collapse: collapse;
   width: 100%;
   font-size: 12px;
 }
-.asn-table th, .asn-table td {
+.asn-table th,
+.asn-table td {
   border: 1px solid #ebeef5;
   padding: 6px 8px;
   text-align: center;
   white-space: nowrap;
 }
-.asn-th-task { background: #f5f7fa; min-width: 200px; text-align: left; position: sticky; left: 0; z-index: 2; }
-.asn-th-user { background: #f5f7fa; min-width: 80px; }
-.asn-th-hours { font-size: 11px; color: #909399; font-weight: normal; margin-top: 2px; }
-.asn-th-sum   { background: #fdf6ec; min-width: 80px; }
-.asn-th-add   { background: #f5f7fa; width: 36px; }
+.asn-th-task {
+  background: #f5f7fa;
+  min-width: 200px;
+  text-align: left;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+.asn-th-user {
+  background: #f5f7fa;
+  min-width: 80px;
+}
+.asn-th-hours {
+  font-size: 11px;
+  color: #909399;
+  font-weight: normal;
+  margin-top: 2px;
+}
+.asn-th-sum {
+  background: #fdf6ec;
+  min-width: 80px;
+}
+.asn-th-add {
+  background: #f5f7fa;
+  width: 36px;
+}
 
 .asn-td-task {
   text-align: left;
   background: #fafafa;
-  position: sticky; left: 0; z-index: 1;
+  position: sticky;
+  left: 0;
+  z-index: 1;
   max-width: 240px;
-  overflow: hidden; text-overflow: ellipsis;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.asn-task-name { margin-left: 6px; color: #606266; }
+.asn-task-name {
+  margin-left: 6px;
+  color: #606266;
+}
 
-.asn-td-cell { cursor: pointer; min-width: 80px; }
-.asn-td-cell:hover { background: #ecf5ff; }
-.asn-td-cell.filled { background: #f0f9eb; }
-.asn-td-cell.filled:hover { background: #e1f3d8; }
+.asn-td-cell {
+  cursor: pointer;
+  min-width: 80px;
+}
+.asn-td-cell:hover {
+  background: #ecf5ff;
+}
+.asn-td-cell.filled {
+  background: #f0f9eb;
+}
+.asn-td-cell.filled:hover {
+  background: #e1f3d8;
+}
 
 .asn-role {
   display: inline-block;
@@ -456,17 +530,38 @@ defineExpose({ load })
   border-radius: 3px;
   margin-bottom: 2px;
 }
-.asn-hours { font-size: 11px; color: #606266; }
-.asn-plus  { color: #c0c4cc; font-size: 14px; }
-
-.asn-td-sum { background: #fdf6ec; font-weight: 600; }
-.asn-td-add {
-  background: #fafafa; cursor: pointer; color: #409eff;
+.asn-hours {
+  font-size: 11px;
+  color: #606266;
 }
-.asn-td-add:hover { background: #ecf5ff; }
+.asn-plus {
+  color: #c0c4cc;
+  font-size: 14px;
+}
+
+.asn-td-sum {
+  background: #fdf6ec;
+  font-weight: 600;
+}
+.asn-td-add {
+  background: #fafafa;
+  cursor: pointer;
+  color: #409eff;
+}
+.asn-td-add:hover {
+  background: #ecf5ff;
+}
 
 .asn-legend {
-  display: flex; gap: 12px; font-size: 12px; color: #606266; align-items: center;
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #606266;
+  align-items: center;
 }
-.asn-legend-item { display: flex; gap: 4px; align-items: center; }
+.asn-legend-item {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
 </style>

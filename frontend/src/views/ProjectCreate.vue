@@ -56,8 +56,8 @@ const form = reactive({
 
 // ===== 项目组成员(随项目一起创建) =====
 interface MemberRow extends ProjectMemberInput {
-  _key: number         // 表格行 key(本地生成,无意义)
-  _userLabel?: string  // 内部用户显示名(只用于表格展示)
+  _key: number // 表格行 key(本地生成,无意义)
+  _userLabel?: string // 内部用户显示名(只用于表格展示)
 }
 let memberKeySeq = 1
 const members = ref<MemberRow[]>([])
@@ -67,11 +67,11 @@ const submitting = ref(false)
 // ===== 级联下拉数据 =====
 const filteredPlList = computed(() => {
   if (!form.buId) return plListAll.value
-  return plListAll.value.filter(pl => pl.bu?.id === form.buId)
+  return plListAll.value.filter((pl) => pl.bu?.id === form.buId)
 })
 const filteredRpList = computed(() => {
   if (!form.plId) return rpList.value
-  return rpList.value.filter(rp => rp.pl?.id === form.plId)
+  return rpList.value.filter((rp) => rp.pl?.id === form.plId)
 })
 
 // ===== 加载所有字典 + 用户 =====
@@ -83,7 +83,15 @@ async function loadDictionaries() {
       api.get<BusinessUnit[]>('/dict/bus'),
       api.get<ProductLine[]>('/dict/pls'),
       api.get<RelatedProduct[]>('/dict/related-products'),
-      api.get<{ id: number; username: string; fullName: string; primaryRoleCode: string; departmentId: number | null }[]>('/users/options'),
+      api.get<
+        {
+          id: number
+          username: string
+          fullName: string
+          primaryRoleCode: string
+          departmentId: number | null
+        }[]
+      >('/users/options'),
       api.get<MemberRole[]>('/dict/member-roles'),
     ])
     typeList.value = types ?? []
@@ -91,7 +99,7 @@ async function loadDictionaries() {
     buList.value = bus ?? []
     plListAll.value = pls ?? []
     rpList.value = rps ?? []
-    userList.value = (users ?? []).map(u => ({
+    userList.value = (users ?? []).map((u) => ({
       id: u.id,
       username: u.username,
       fullName: u.fullName,
@@ -144,7 +152,7 @@ function isValidBuPlRpChain(): boolean {
 function addMember() {
   members.value.push({
     _key: memberKeySeq++,
-    roleCode: 'DEV',  // 默认给「开发工程师」,最常见
+    roleCode: 'DEV', // 默认给「开发工程师」,最常见
     external: false,
     allocationPct: 100,
     joinDate: form.planStartDate ?? new Date().toISOString().slice(0, 10),
@@ -159,12 +167,12 @@ async function removeMember(row: MemberRow) {
   } catch {
     return
   }
-  members.value = members.value.filter(m => m._key !== row._key)
+  members.value = members.value.filter((m) => m._key !== row._key)
 }
 
 function onMemberUserChange(row: MemberRow) {
   if (row.userId) {
-    const u = userList.value.find(x => x.id === row.userId)
+    const u = userList.value.find((x) => x.id === row.userId)
     if (u) row._userLabel = `${u.fullName} (${u.username})`
   } else {
     row._userLabel = undefined
@@ -172,7 +180,7 @@ function onMemberUserChange(row: MemberRow) {
 }
 
 function validateMembers(): boolean {
-  if (members.value.length === 0) return true  // 成员是可选的
+  if (members.value.length === 0) return true // 成员是可选的
 
   // 校验:内部成员必须有 userId,外部必须有 memberName,所有必须有 joinDate
   for (let i = 0; i < members.value.length; i++) {
@@ -261,7 +269,7 @@ async function submit() {
 
     // ===== 项目组成员(随项目一次性创建) =====
     if (members.value.length > 0) {
-      payload.members = members.value.map(m => {
+      payload.members = members.value.map((m) => {
         const out: Record<string, any> = {
           roleCode: m.roleCode,
           joinDate: m.joinDate,
@@ -310,15 +318,8 @@ onMounted(loadDictionaries)
       description="带 * 为必填。BU → PL → 关联产品 为级联关系,后端会做一致性校验。日期格式为 YYYY-MM-DD。表单已拆分为多个 Tab,可分步填写。"
     />
 
-    <el-form
-      ref="formRef"
-      :model="form"
-      :rules="rules"
-      label-width="120px"
-      v-loading="submitting"
-    >
+    <el-form ref="formRef" :model="form" :rules="rules" label-width="120px" v-loading="submitting">
       <el-tabs v-model="activeTab" type="border-card">
-
         <!-- ============ Tab 1: 基本信息 ============ -->
         <el-tab-pane name="basic" label="① 基本信息">
           <el-card header="基本信息" style="margin-bottom: 16px">
@@ -330,7 +331,12 @@ onMounted(loadDictionaries)
               </el-col>
               <el-col :span="12">
                 <el-form-item label="项目名称" prop="name">
-                  <el-input v-model="form.name" placeholder="请输入项目名称" maxlength="128" show-word-limit />
+                  <el-input
+                    v-model="form.name"
+                    placeholder="请输入项目名称"
+                    maxlength="128"
+                    show-word-limit
+                  />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
@@ -552,12 +558,7 @@ onMounted(loadDictionaries)
               />
             </el-form-item>
             <el-form-item label="项目目标">
-              <el-input
-                v-model="form.goals"
-                type="textarea"
-                :rows="3"
-                placeholder="达成什么目标(选填)"
-              />
+              <el-input v-model="form.goals" type="textarea" :rows="3" placeholder="达成什么目标(选填)" />
             </el-form-item>
             <el-form-item label="项目范围">
               <el-input
@@ -597,22 +598,11 @@ onMounted(loadDictionaries)
               description="支持的角色:项目经理 / 项目助理 / 架构师 / 需求分析师 / 开发工程师 / 测试工程师 / 配置管理员。成员可为系统内部用户(选 userId)或外部人员(勾选外部+填姓名)。"
             />
 
-            <el-table
-              v-if="members.length"
-              :data="members"
-              border
-              size="default"
-              style="width: 100%"
-            >
+            <el-table v-if="members.length" :data="members" border size="default" style="width: 100%">
               <el-table-column label="角色" width="160">
                 <template #default="{ row }">
                   <el-select v-model="row.roleCode" placeholder="选择角色" size="small" style="width: 100%">
-                    <el-option
-                      v-for="r in roleList"
-                      :key="r.code"
-                      :label="r.name"
-                      :value="r.code"
-                    />
+                    <el-option v-for="r in roleList" :key="r.code" :label="r.name" :value="r.code" />
                   </el-select>
                 </template>
               </el-table-column>
@@ -636,12 +626,7 @@ onMounted(loadDictionaries)
                         :value="u.id"
                       />
                     </el-select>
-                    <el-input
-                      v-else
-                      v-model="row.memberName"
-                      placeholder="外部人员姓名"
-                      size="small"
-                    />
+                    <el-input v-else v-model="row.memberName" placeholder="外部人员姓名" size="small" />
                     <el-checkbox v-model="row.external" size="small">外部人员</el-checkbox>
                   </div>
                 </template>
@@ -694,21 +679,12 @@ onMounted(loadDictionaries)
 
               <el-table-column label="操作" width="70" align="center" fixed="right">
                 <template #default="{ row }">
-                  <el-button
-                    type="danger"
-                    size="small"
-                    link
-                    @click="removeMember(row)"
-                  >移除</el-button>
+                  <el-button type="danger" size="small" link @click="removeMember(row)">移除</el-button>
                 </template>
               </el-table-column>
             </el-table>
 
-            <el-empty
-              v-else
-              description="暂无成员 — 暂未添加任何项目组成员(选填)"
-              :image-size="80"
-            >
+            <el-empty v-else description="暂无成员 — 暂未添加任何项目组成员(选填)" :image-size="80">
               <el-button type="primary" plain @click="addMember">
                 <el-icon style="margin-right: 4px"><span>＋</span></el-icon>
                 添加第一名成员

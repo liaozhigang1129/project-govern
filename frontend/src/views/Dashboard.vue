@@ -44,14 +44,16 @@ onMounted(async () => {
 const statusChartOpt = computed(() => ({
   tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
   legend: { bottom: 0, left: 'center' },
-  series: [{
-    type: 'pie',
-    radius: ['35%', '60%'],
-    avoidLabelOverlap: true,
-    itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 },
-    label: { show: true, formatter: '{b}\n{d}%' },
-    data: Object.entries(statusDist.value).map(([name, value]) => ({ name, value })),
-  }],
+  series: [
+    {
+      type: 'pie',
+      radius: ['35%', '60%'],
+      avoidLabelOverlap: true,
+      itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 },
+      label: { show: true, formatter: '{b}\n{d}%' },
+      data: Object.entries(statusDist.value).map(([name, value]) => ({ name, value })),
+    },
+  ],
 }))
 
 const healthChartOpt = computed(() => {
@@ -63,16 +65,19 @@ const healthChartOpt = computed(() => {
   return {
     tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
     legend: { bottom: 0, left: 'center' },
-    series: [{
-      type: 'pie',
-      radius: ['40%', '70%'],
-      itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
-      label: { show: true, formatter: '{b}\n{d}%' },
-      data: Object.entries(healthDist.value).map(([name, value]) => ({
-        name, value,
-        itemStyle: { color: colorMap[name] ?? '#909399' },
-      })),
-    }],
+    series: [
+      {
+        type: 'pie',
+        radius: ['40%', '70%'],
+        itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+        label: { show: true, formatter: '{b}\n{d}%' },
+        data: Object.entries(healthDist.value).map(([name, value]) => ({
+          name,
+          value,
+          itemStyle: { color: colorMap[name] ?? '#909399' },
+        })),
+      },
+    ],
   }
 })
 
@@ -81,9 +86,9 @@ const buChartOpt = computed(() => {
   if (buDist.value.length === 0) return {}
 
   const buColors = ['#409EFF', '#67C23A', '#E6A23C', '#F56C6C', '#909399', '#b37feb']
-  const categories = buDist.value.map(r => r.buName)
-  const counts = buDist.value.map(r => r.projectCount)
-  const avgs = buDist.value.map(r => r.avgProgress)
+  const categories = buDist.value.map((r) => r.buName)
+  const counts = buDist.value.map((r) => r.projectCount)
+  const avgs = buDist.value.map((r) => r.avgProgress)
 
   return {
     tooltip: {
@@ -122,9 +127,9 @@ const buChartOpt = computed(() => {
 const plChartOpt = computed(() => {
   if (plDist.value.length === 0) return {}
 
-  const categories = plDist.value.map(r => `${r.plName} (${r.buName})`)
-  const counts = plDist.value.map(r => r.projectCount)
-  const avgs = plDist.value.map(r => r.avgProgress)
+  const categories = plDist.value.map((r) => `${r.plName} (${r.buName})`)
+  const counts = plDist.value.map((r) => r.projectCount)
+  const avgs = plDist.value.map((r) => r.avgProgress)
 
   return {
     tooltip: {
@@ -199,11 +204,7 @@ const plChartOpt = computed(() => {
           <template #header>
             <span>项目状态分布</span>
           </template>
-          <v-chart
-            v-if="Object.keys(statusDist).length"
-            :option="statusChartOpt"
-            style="height: 300px"
-          />
+          <v-chart v-if="Object.keys(statusDist).length" :option="statusChartOpt" style="height: 300px" />
           <el-empty v-else description="暂无数据" :image-size="80" />
         </el-card>
       </el-col>
@@ -212,11 +213,7 @@ const plChartOpt = computed(() => {
           <template #header>
             <span>项目健康度</span>
           </template>
-          <v-chart
-            v-if="Object.keys(healthDist).length"
-            :option="healthChartOpt"
-            style="height: 300px"
-          />
+          <v-chart v-if="Object.keys(healthDist).length" :option="healthChartOpt" style="height: 300px" />
           <el-empty v-else description="暂无数据" :image-size="80" />
         </el-card>
       </el-col>
@@ -229,11 +226,7 @@ const plChartOpt = computed(() => {
           <template #header>
             <span>按业务单元 (BU) 分布</span>
           </template>
-          <v-chart
-            v-if="buDist.length"
-            :option="buChartOpt"
-            style="height: 300px"
-          />
+          <v-chart v-if="buDist.length" :option="buChartOpt" style="height: 300px" />
           <el-empty v-else description="暂无数据" :image-size="80" />
         </el-card>
       </el-col>
@@ -242,11 +235,7 @@ const plChartOpt = computed(() => {
           <template #header>
             <span>按产品线 (PL) 分布</span>
           </template>
-          <v-chart
-            v-if="plDist.length"
-            :option="plChartOpt"
-            style="height: 300px"
-          />
+          <v-chart v-if="plDist.length" :option="plChartOpt" style="height: 300px" />
           <el-empty v-else description="暂无数据" :image-size="80" />
         </el-card>
       </el-col>

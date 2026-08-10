@@ -41,13 +41,14 @@ const keyword = ref('')
 const filteredRecords = computed(() => {
   const kw = keyword.value.trim().toLowerCase()
   if (!kw) return records.value
-  return records.value.filter((r: any) =>
-    (r.userName || '').toLowerCase().includes(kw) ||
-    (r.userid || '').toLowerCase().includes(kw) ||
-    (r.checkType || '').toLowerCase().includes(kw) ||
-    (r.timeResult || '').toLowerCase().includes(kw) ||
-    (r.locationResult || '').toLowerCase().includes(kw) ||
-    (r.workDate || '').toLowerCase().includes(kw)
+  return records.value.filter(
+    (r: any) =>
+      (r.userName || '').toLowerCase().includes(kw) ||
+      (r.userid || '').toLowerCase().includes(kw) ||
+      (r.checkType || '').toLowerCase().includes(kw) ||
+      (r.timeResult || '').toLowerCase().includes(kw) ||
+      (r.locationResult || '').toLowerCase().includes(kw) ||
+      (r.workDate || '').toLowerCase().includes(kw),
   )
 })
 
@@ -109,11 +110,14 @@ const dateRange = ref<[Date, Date]>([daysAgo(ATTENDANCE_RECOMMEND_DAYS), today()
 const syncingButton = ref(false)
 // V4.36: 实时同步进度 (当前日志 id + 累计 fetched/created/updated/days)
 const currentSyncLogId = ref<number | null>(null)
-const currentSyncProgress = ref<{ fetched: number; created: number; updated: number; days: number }>(
-  { fetched: 0, created: 0, updated: 0, days: 0 }
-)
+const currentSyncProgress = ref<{ fetched: number; created: number; updated: number; days: number }>({
+  fetched: 0,
+  created: 0,
+  updated: 0,
+  days: 0,
+})
 const canTrigger = computed(() => !syncingButton.value && !(state.value as any)?.running)
-const runningCount = computed(() => logs.value.filter(l => l.status === 'RUNNING').length)
+const runningCount = computed(() => logs.value.filter((l) => l.status === 'RUNNING').length)
 
 async function loadState() {
   try {
@@ -133,34 +137,31 @@ async function loadStats() {
   }
 }
 
-function pollLog(logId: number, maxAttempts = 60): Promise<DingTalkAttendanceSyncLog | null> {
-  return new Promise(async (resolve) => {
-    for (let i = 0; i < maxAttempts; i++) {
-      await new Promise(r => setTimeout(r, 1500))
-      try {
-        const data = await dingtalkAttendanceApi.listLogs(0, 5)
-        const log = data.content.find(x => x.id === logId)
-        if (log) {
-          // V4.36: 实时刷新进度 (同步进行中拉取最新 fetched/created)
-          if (currentSyncLogId.value === logId) {
-            currentSyncProgress.value = {
-              fetched: log.fetched,
-              created: log.createdCount,
-              updated: log.updatedCount,
-              days: currentSyncProgress.value.days,
-            }
-          }
-          if (log.status !== 'RUNNING') {
-            resolve(log)
-            return
+async function pollLog(logId: number, maxAttempts = 60): Promise<DingTalkAttendanceSyncLog | null> {
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise((r) => setTimeout(r, 1500))
+    try {
+      const data = await dingtalkAttendanceApi.listLogs(0, 5)
+      const log = data.content.find((x) => x.id === logId)
+      if (log) {
+        // V4.36: 实时刷新进度 (同步进行中拉取最新 fetched/created)
+        if (currentSyncLogId.value === logId) {
+          currentSyncProgress.value = {
+            fetched: log.fetched,
+            created: log.createdCount,
+            updated: log.updatedCount,
+            days: currentSyncProgress.value.days,
           }
         }
-      } catch {
-        // 忽略单次失败
+        if (log.status !== 'RUNNING') {
+          return log
+        }
       }
+    } catch {
+      // 忽略单次失败
     }
-    resolve(null)
-  })
+  }
+  return null
 }
 
 async function trigger() {
@@ -178,11 +179,13 @@ async function trigger() {
   try {
     await ElMessageBox.confirm(
       `即将同步 ${fmt(fromD)} 至 ${fmt(toD)} (共 ${days} 天) 的考勤数据。\n` +
-      `后端会自动按 7 天分片拉取,请耐心等待。`,
+        `后端会自动按 7 天分片拉取,请耐心等待。`,
       '确认同步',
-      { type: 'warning' }
+      { type: 'warning' },
     )
-  } catch { return }
+  } catch {
+    return
+  }
 
   syncingButton.value = true
   currentSyncLogId.value = null
@@ -199,7 +202,7 @@ async function trigger() {
       ElMessage.warning('同步超时未完成,稍后查看日志')
     } else if (finalLog.status === 'SUCCESS') {
       ElMessage.success(
-        `同步成功: 拉取 ${finalLog.fetched} / 新增 ${finalLog.createdCount} / 更新 ${finalLog.updatedCount} / 失效 ${finalLog.deletedCount}`
+        `同步成功: 拉取 ${finalLog.fetched} / 新增 ${finalLog.createdCount} / 更新 ${finalLog.updatedCount} / 失效 ${finalLog.deletedCount}`,
       )
     } else {
       ElMessage.error(`同步失败: ${finalLog.errorMessage ?? '未知错误'}`)
@@ -248,26 +251,46 @@ function fmtDate(t: string | null | undefined): string {
 
 function statusTag(s: string | null | undefined): 'success' | 'warning' | 'danger' | 'info' {
   switch (s) {
-    case 'SUCCESS': return 'success'
-    case 'FAILED': return 'danger'
-    case 'RUNNING': return 'warning'
-    default: return 'info'
+    case 'SUCCESS':
+      return 'success'
+    case 'FAILED':
+      return 'danger'
+    case 'RUNNING':
+      return 'warning'
+    default:
+      return 'info'
   }
 }
 
 function resultTag(r: string | null | undefined): 'success' | 'warning' | 'danger' | 'info' {
   switch (r) {
-    case 'Normal': return 'success'
-    case 'Late': case 'Early': return 'warning'
-    case 'SeriousLate': return 'danger'
-    case 'NotSigned': return 'info'
-    default: return 'info'
+    case 'Normal':
+      return 'success'
+    case 'Late':
+    case 'Early':
+      return 'warning'
+    case 'SeriousLate':
+      return 'danger'
+    case 'NotSigned':
+      return 'info'
+    default:
+      return 'info'
   }
 }
 function resultText(r: string | null | undefined): string {
-  return ({
-    Normal: '正常', Late: '迟到', Early: '早退', SeriousLate: '严重迟到', NotSigned: '缺卡'
-  } as Record<string, string>)[r ?? ''] ?? (r ?? '-')
+  return (
+    (
+      {
+        Normal: '正常',
+        Late: '迟到',
+        Early: '早退',
+        SeriousLate: '严重迟到',
+        NotSigned: '缺卡',
+      } as Record<string, string>
+    )[r ?? ''] ??
+    r ??
+    '-'
+  )
 }
 
 // ============...[truncated]
@@ -285,7 +308,10 @@ function startAutoRefresh() {
 }
 
 function stopAutoRefresh() {
-  if (timer) { clearInterval(timer); timer = null }
+  if (timer) {
+    clearInterval(timer)
+    timer = null
+  }
 }
 
 onMounted(async () => {
@@ -295,7 +321,9 @@ onMounted(async () => {
 
 onUnmounted(stopAutoRefresh)
 
-watch([page, size], () => { loadList() })
+watch([page, size], () => {
+  loadList()
+})
 </script>
 
 <template>
@@ -314,7 +342,13 @@ watch([page, size], () => { loadList() })
           style="width: 280px"
         />
         <el-button :icon="Refresh" @click="loadList" :loading="loading">刷新列表</el-button>
-        <el-button type="primary" :icon="VideoPlay" @click="trigger" :loading="syncingButton" :disabled="!canTrigger">
+        <el-button
+          type="primary"
+          :icon="VideoPlay"
+          @click="trigger"
+          :loading="syncingButton"
+          :disabled="!canTrigger"
+        >
           同步考勤
         </el-button>
       </div>
@@ -359,38 +393,70 @@ watch([page, size], () => { loadList() })
     </el-row>
 
     <!-- V4.36: 同步进行中进度条 (替代原 '请耐心等待' 静态文案) -->
-    <el-alert
-      v-if="syncingButton"
-      type="warning"
-      :closable="false"
-      style="margin-bottom: 12px"
-      show-icon
-    >
+    <el-alert v-if="syncingButton" type="warning" :closable="false" style="margin-bottom: 12px" show-icon>
       <template #title>
-        同步进行中 (日志 #{{ currentSyncLogId }}) — 已拉取 {{ currentSyncProgress.fetched }} 条,
-        新增 {{ currentSyncProgress.created }} / 更新 {{ currentSyncProgress.updated }},
-        共 {{ currentSyncProgress.days }} 天 (后端自动按 7 天分片)
+        同步进行中 (日志 #{{ currentSyncLogId }}) — 已拉取 {{ currentSyncProgress.fetched }} 条, 新增
+        {{ currentSyncProgress.created }} / 更新 {{ currentSyncProgress.updated }}, 共
+        {{ currentSyncProgress.days }} 天 (后端自动按 7 天分片)
       </template>
     </el-alert>
 
     <el-alert type="info" :closable="false" style="margin-bottom: 12px">
-      定时任务: 每周日 03:00 自动同步最近 14 天 (2 周) 的考勤数据,来自 system_config integration.dingtalk.attendance_cron。
-      手动同步默认近 7 天 (符合钉钉 listRecord 单次 ≤ 7 天的限制,后端已自动分片)。后台异步执行,完成前页面保持轮询。
+      定时任务: 每周日 03:00 自动同步最近 14 天 (2 周) 的考勤数据,来自 system_config
+      integration.dingtalk.attendance_cron。 手动同步默认近 7 天 (符合钉钉 listRecord 单次 ≤ 7
+      天的限制,后端已自动分片)。后台异步执行,完成前页面保持轮询。
     </el-alert>
 
     <el-tabs>
       <!-- 考勤列表 -->
       <el-tab-pane label="考勤记录">
         <div style="margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
-          <el-input v-model="keyword" placeholder="搜索姓名 / userid / 日期 / 异常 / 项目 / 结果" :prefix-icon="Search" clearable style="width: 320px" />
-          <el-date-picker v-model="filterDateFrom" type="date" placeholder="起始日期" value-format="YYYY-MM-DD" style="width: 150px" @change="page=1; loadList()" />
-          <el-date-picker v-model="filterDateTo" type="date" placeholder="结束日期" value-format="YYYY-MM-DD" style="width: 150px" @change="page=1; loadList()" />
-          <el-input v-model="filterUseridKeyword" placeholder="userid/姓名" clearable style="width: 180px" @keyup.enter="page=1; loadList()" />
-          <el-select v-model="filterIsAbnormal" placeholder="异常" clearable style="width: 110px" @change="page=1; loadList()">
+          <el-input
+            v-model="keyword"
+            placeholder="搜索姓名 / userid / 日期 / 异常 / 项目 / 结果"
+            :prefix-icon="Search"
+            clearable
+            style="width: 320px"
+          />
+          <el-date-picker
+            v-model="filterDateFrom"
+            type="date"
+            placeholder="起始日期"
+            value-format="YYYY-MM-DD"
+            style="width: 150px"
+            @change="page = 1; loadList()"
+          />
+          <el-date-picker
+            v-model="filterDateTo"
+            type="date"
+            placeholder="结束日期"
+            value-format="YYYY-MM-DD"
+            style="width: 150px"
+            @change="page = 1; loadList()"
+          />
+          <el-input
+            v-model="filterUseridKeyword"
+            placeholder="userid/姓名"
+            clearable
+            style="width: 180px"
+            @keyup.enter="page = 1; loadList()"
+          />
+          <el-select
+            v-model="filterIsAbnormal"
+            placeholder="异常"
+            clearable
+            style="width: 110px"
+            @change="page = 1; loadList()"
+          >
             <el-option label="仅异常" :value="true" />
             <el-option label="仅正常" :value="false" />
           </el-select>
-          <el-button type="primary" @click="page=1; loadList()">查询</el-button>
+          <el-button
+            type="primary"
+            @click="page = 1; loadList()"
+          >
+            查询
+          </el-button>
           <el-button @click="resetFilters">重置</el-button>
         </div>
         <el-table
@@ -407,19 +473,29 @@ watch([page, size], () => { loadList() })
           <el-table-column prop="userid" label="钉钉 userid" min-width="140" />
           <el-table-column label="上班" min-width="170">
             <template #default="{ row }">
-              <el-tag :type="resultTag(row.onDutyResult)" size="small">{{ resultText(row.onDutyResult) }}</el-tag>
+              <el-tag :type="resultTag(row.onDutyResult)" size="small">
+                {{ resultText(row.onDutyResult) }}
+              </el-tag>
               <span style="margin-left: 6px">{{ fmtTime(row.onDutyActual) }}</span>
             </template>
           </el-table-column>
           <el-table-column label="下班" min-width="170">
             <template #default="{ row }">
-              <el-tag :type="resultTag(row.offDutyResult)" size="small">{{ resultText(row.offDutyResult) }}</el-tag>
+              <el-tag :type="resultTag(row.offDutyResult)" size="small">
+                {{ resultText(row.offDutyResult) }}
+              </el-tag>
               <span style="margin-left: 6px">{{ fmtTime(row.offDutyActual) }}</span>
             </template>
           </el-table-column>
           <el-table-column label="时长" min-width="80" align="center">
             <template #default="{ row }">
-              <span v-if="row.workDuration != null" :style="{ color: row.workDuration > 16 * 60 ? '#f56c6c' : (row.workDuration < 60 ? '#e6a23c' : '#67c23a') }">
+              <span
+                v-if="row.workDuration != null"
+                :style="{
+                  color:
+                    row.workDuration > 16 * 60 ? '#f56c6c' : row.workDuration < 60 ? '#e6a23c' : '#67c23a',
+                }"
+              >
                 {{ formatDuration(row.workDuration) }}
               </span>
               <span v-else style="color: #c0c4cc">-</span>
@@ -453,8 +529,8 @@ watch([page, size], () => { loadList() })
             <template #default="{ row }">{{ fmtTime(row.syncedAt) }}</template>
           </el-table-column>
           <el-table-column label="操作" width="70" align="center">
-            <template #default="{ row }">
-              <el-button link type="primary" size="small" @click="(row: any) => {}">详情</el-button>
+            <template #default>
+              <el-button link type="primary" size="small">详情</el-button>
             </template>
           </el-table-column>
         </el-table>

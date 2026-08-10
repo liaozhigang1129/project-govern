@@ -28,13 +28,13 @@ export type RiskStatus = RiskItem['status']
 export interface RiskItemFull {
   id: number
   projectId: number
-  code: string                   // R-001
+  code: string // R-001
   title: string
   description: string | null
   category: 'TECHNICAL' | 'SCHEDULE' | 'COST' | 'QUALITY' | 'EXTERNAL' | 'ORGANIZATIONAL' | 'OTHER'
-  probability: number            // 1-5
-  impact: number                 // 1-5
-  score: number                  // 1-25 (probability × impact)
+  probability: number // 1-5
+  impact: number // 1-5
+  score: number // 1-25 (probability × impact)
   level: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
   status: 'OPEN' | 'MITIGATING' | 'CLOSED' | 'OCCURRED' | 'ACCEPTED'
   ownerUserId: number | null
@@ -108,9 +108,16 @@ export interface RiskResponseRequest {
 export interface RiskHistoryItem {
   id: number
   riskId: number
-  action: 'CREATED' | 'STATUS_CHANGED' | 'SCORE_CHANGED' | 'OWNER_CHANGED'
-        | 'LEVEL_CHANGED' | 'COMMENTED' | 'RESPONSE_ADDED' | 'RESPONSE_DONE'
-        | 'DELETED'                                          // V2.7 新增, 软删专用
+  action:
+    | 'CREATED'
+    | 'STATUS_CHANGED'
+    | 'SCORE_CHANGED'
+    | 'OWNER_CHANGED'
+    | 'LEVEL_CHANGED'
+    | 'COMMENTED'
+    | 'RESPONSE_ADDED'
+    | 'RESPONSE_DONE'
+    | 'DELETED' // V2.7 新增, 软删专用
   fieldName: string | null
   oldValue: string | null
   newValue: string | null

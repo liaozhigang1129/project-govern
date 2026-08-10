@@ -27,7 +27,7 @@ async function loadProjects() {
   try {
     const r: any = await api.get('/projects?page=0&size=200')
     // 后端 /api/projects 直接返回 array, 不是 Page 包装
-    projectList.value = Array.isArray(r) ? r : (r.content || r.data?.content || r.data || [])
+    projectList.value = Array.isArray(r) ? r : r.content || r.data?.content || r.data || []
     console.log('[RiskMatrix] loaded projects:', projectList.value.length)
   } catch (e) {
     ElMessage.error('加载项目列表失败: ' + (e as any).message)
@@ -72,9 +72,7 @@ onMounted(async () => {
             :value="p.id"
           />
         </el-select>
-        <el-button :icon="Refresh" :disabled="!projectId" style="margin-left: 8px">
-          刷新
-        </el-button>
+        <el-button :icon="Refresh" :disabled="!projectId" style="margin-left: 8px">刷新</el-button>
       </template>
     </el-page-header>
 

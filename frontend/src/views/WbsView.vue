@@ -76,11 +76,7 @@ function onGanttTaskClick(taskId: number) {
             </el-tag>
           </span>
           <div style="display: flex; gap: 8px">
-            <el-button
-              type="success"
-              plain
-              @click="router.push(`/projects/${projectId}/assignments`)"
-            >
+            <el-button type="success" plain @click="router.push(`/projects/${projectId}/assignments`)">
               👥 资源分配矩阵
             </el-button>
           </div>
@@ -110,12 +106,7 @@ function onGanttTaskClick(taskId: number) {
       <div v-if="viewMode === 'tree'" class="wbs-page-grid">
         <!-- 左: 树 -->
         <div class="wbs-tree-col">
-          <WbsTreeView
-            ref="treeRef"
-            :project-id="projectId"
-            @select="onSelect"
-            @edit="onEdit"
-          />
+          <WbsTreeView ref="treeRef" :project-id="projectId" @select="onSelect" @edit="onEdit" />
         </div>
 
         <!-- 右: 详情面板 -->
@@ -124,30 +115,60 @@ function onGanttTaskClick(taskId: number) {
             <template #header>
               <div style="display: flex; justify-content: space-between; align-items: center">
                 <span>
-                  <b>{{ selected.wbsCode }}</b> · {{ selected.name }}
+                  <b>{{ selected.wbsCode }}</b>
+                  · {{ selected.name }}
                 </span>
-                <el-button size="small" type="primary" @click="onEdit(selected)">
-                  编辑
-                </el-button>
+                <el-button size="small" type="primary" @click="onEdit(selected)">编辑</el-button>
               </div>
             </template>
 
             <el-descriptions :column="1" border size="small">
               <el-descriptions-item label="状态">
-                <el-tag size="small" :type="selected.status === 'COMPLETED' ? 'success' : selected.status === 'IN_PROGRESS' ? 'primary' : 'info'">
+                <el-tag
+                  size="small"
+                  :type="
+                    selected.status === 'COMPLETED'
+                      ? 'success'
+                      : selected.status === 'IN_PROGRESS'
+                        ? 'primary'
+                        : 'info'
+                  "
+                >
                   {{ selected.status }}
                 </el-tag>
               </el-descriptions-item>
               <el-descriptions-item label="类型">
                 {{ selected.taskType }}
-                <el-tag v-if="selected.critical" type="danger" size="small" effect="dark" style="margin-left: 6px">关键</el-tag>
-                <el-tag v-if="selected.milestone" type="warning" size="small" effect="dark" style="margin-left: 6px">里程碑</el-tag>
+                <el-tag
+                  v-if="selected.critical"
+                  type="danger"
+                  size="small"
+                  effect="dark"
+                  style="margin-left: 6px"
+                >
+                  关键
+                </el-tag>
+                <el-tag
+                  v-if="selected.milestone"
+                  type="warning"
+                  size="small"
+                  effect="dark"
+                  style="margin-left: 6px"
+                >
+                  里程碑
+                </el-tag>
               </el-descriptions-item>
               <el-descriptions-item label="进度">
                 <el-progress
                   :percentage="selected.progressPct"
                   :stroke-width="14"
-                  :color="selected.progressPct >= 100 ? '#67c23a' : selected.progressPct >= 60 ? '#409eff' : '#e6a23c'"
+                  :color="
+                    selected.progressPct >= 100
+                      ? '#67c23a'
+                      : selected.progressPct >= 60
+                        ? '#409eff'
+                        : '#e6a23c'
+                  "
                 />
               </el-descriptions-item>
               <el-descriptions-item label="权重 (1-10)">
@@ -169,7 +190,9 @@ function onGanttTaskClick(taskId: number) {
                   size="small"
                   effect="plain"
                   style="margin-right: 4px"
-                >#{{ pid }}</el-tag>
+                >
+                  #{{ pid }}
+                </el-tag>
               </el-descriptions-item>
               <el-descriptions-item label="交付物" v-if="selected.deliverable">
                 {{ selected.deliverable }}
@@ -182,28 +205,18 @@ function onGanttTaskClick(taskId: number) {
               </el-descriptions-item>
             </el-descriptions>
           </el-card>
-          <el-empty
-            v-else
-            description="点击左侧树节点查看详情"
-            :image-size="80"
-          />
+          <el-empty v-else description="点击左侧树节点查看详情" :image-size="80" />
         </div>
       </div>
 
       <!-- 甘特图视图 (P3.3) -->
       <div v-else-if="viewMode === 'gantt'">
-        <WbsGanttView
-          :project-id="projectId"
-          @task-click="onGanttTaskClick"
-        />
+        <WbsGanttView :project-id="projectId" @task-click="onGanttTaskClick" />
       </div>
 
       <!-- 网络图视图 (P3.2 + P3.3 关键路径) -->
       <div v-else-if="viewMode === 'network'">
-        <WbsNetworkView
-          :project-id="projectId"
-          @task-click="onGanttTaskClick"
-        />
+        <WbsNetworkView :project-id="projectId" @task-click="onGanttTaskClick" />
       </div>
     </el-card>
 
@@ -218,12 +231,19 @@ function onGanttTaskClick(taskId: number) {
 </template>
 
 <style scoped>
-.wbs-page { display: flex; flex-direction: column; gap: 12px; }
+.wbs-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 .wbs-page-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 12px;
   align-items: start;
 }
-.wbs-detail-col { position: sticky; top: 12px; }
+.wbs-detail-col {
+  position: sticky;
+  top: 12px;
+}
 </style>

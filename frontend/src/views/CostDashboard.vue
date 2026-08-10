@@ -51,7 +51,9 @@
         <el-card shadow="hover" class="kpi-card">
           <div class="kpi-label">总工时</div>
           <div class="kpi-value">{{ totalHours }} h</div>
-          <div class="kpi-sub">人均 {{ totalHours > 0 ? (totalHours / Math.max(totalHeadcount, 1)).toFixed(1) : 0 }} h</div>
+          <div class="kpi-sub">
+            人均 {{ totalHours > 0 ? (totalHours / Math.max(totalHeadcount, 1)).toFixed(1) : 0 }} h
+          </div>
         </el-card>
       </el-col>
       <el-col :span="6">
@@ -149,21 +151,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue"
-import { ElMessage } from "element-plus"
-import { Refresh } from "@element-plus/icons-vue"
-import { costApi, type CostDimensionRow, type CostDimensionResponse } from "@/api/cost"
+import { ref, computed, onMounted, watch } from 'vue'
+import { ElMessage } from 'element-plus'
+import { Refresh } from '@element-plus/icons-vue'
+import { costApi, type CostDimensionRow, type CostDimensionResponse } from '@/api/cost'
 
-const dim = ref<"PROJECT" | "PHASE" | "DEPT">("PROJECT")
-const monthDate = ref<string | null>("2026-06")
+const dim = ref<'PROJECT' | 'PHASE' | 'DEPT'>('PROJECT')
+const monthDate = ref<string | null>('2026-06')
 const loading = ref(false)
 const response = ref<CostDimensionResponse | null>(null)
 
-const dimLabel = computed(() =>
-  dim.value === "PROJECT" ? "项目" : dim.value === "PHASE" ? "阶段" : "部门",
-)
+const dimLabel = computed(() => (dim.value === 'PROJECT' ? '项目' : dim.value === 'PHASE' ? '阶段' : '部门'))
 
-const yearMonthLabel = computed(() => monthDate.value || "全历史")
+const yearMonthLabel = computed(() => monthDate.value || '全历史')
 
 const rows = computed<CostDimensionRow[]>(() => response.value?.rows ?? [])
 const totalCost = computed(() => response.value?.totalCost ?? 0)
@@ -174,26 +174,24 @@ const avgCostPerUser = computed(() => response.value?.avgCostPerUser ?? 0)
 const budgetCoveragePct = computed(() => response.value?.budgetCoveragePct ?? 0)
 const avgHourlyRate = computed(() => response.value?.avgHourlyRate ?? 0)
 const rowCount = computed(() => rows.value.length)
-const avgRate = computed(() =>
-  totalHours.value > 0 ? (totalCost.value / totalHours.value).toFixed(0) : "0",
-)
+const avgRate = computed(() => (totalHours.value > 0 ? (totalCost.value / totalHours.value).toFixed(0) : '0'))
 
 function format(n: number) {
-  return n.toLocaleString("zh-CN", { maximumFractionDigits: 0 })
+  return n.toLocaleString('zh-CN', { maximumFractionDigits: 0 })
 }
 
 function barColor(pct: number) {
-  if (pct >= 50) return "#f56c6c"
-  if (pct >= 25) return "#e6a23c"
-  return "#67c23a"
+  if (pct >= 50) return '#f56c6c'
+  if (pct >= 25) return '#e6a23c'
+  return '#67c23a'
 }
 
 function costPctOfBudgetClass(row: CostDimensionRow) {
-  if (!row.budget) return "muted"
+  if (!row.budget) return 'muted'
   const pct = (row.cost / row.budget) * 100
-  if (pct > 90) return "warn-bad"
-  if (pct > 70) return "warn-mid"
-  return "num-sm"
+  if (pct > 90) return 'warn-bad'
+  if (pct > 70) return 'warn-mid'
+  return 'num-sm'
 }
 
 async function load() {
@@ -205,7 +203,7 @@ async function load() {
     })
     response.value = resp
   } catch (e: any) {
-    ElMessage.error(e?.message || "加载失败")
+    ElMessage.error(e?.message || '加载失败')
   } finally {
     loading.value = false
   }
@@ -215,22 +213,73 @@ onMounted(load)
 </script>
 
 <style scoped>
-.cost-dashboard { padding: 16px; }
-.kpi-row { margin-bottom: 16px; }
-.kpi-card { text-align: left; }
-.kpi-card.kpi-total { background: linear-gradient(135deg, #409eff 0%, #67c23a 100%); color: #fff; }
-.kpi-card.kpi-total .kpi-label, .kpi-card.kpi-total .kpi-sub { color: rgba(255,255,255,0.85); }
-.kpi-label { font-size: 12px; color: #909399; }
-.kpi-value { font-size: 28px; font-weight: 700; color: #303133; margin: 6px 0; }
-.kpi-sub { font-size: 12px; color: #909399; }
-.filter-card, .table-card { margin-bottom: 16px; }
-.num { font-variant-numeric: tabular-nums; }
-.num.strong { font-weight: 600; color: #303133; }
-.num-sm { font-variant-numeric: tabular-nums; color: #606266; font-size: 13px; }
-.muted { color: #c0c4cc; }
-.row-label { font-weight: 500; }
-.ml-1 { margin-left: 6px; }
-.pct-text { margin-left: 8px; font-size: 12px; color: #606266; }
-.warn-bad { color: #f56c6c; font-weight: 600; }
-.warn-mid { color: #e6a23c; font-weight: 600; }
+.cost-dashboard {
+  padding: 16px;
+}
+.kpi-row {
+  margin-bottom: 16px;
+}
+.kpi-card {
+  text-align: left;
+}
+.kpi-card.kpi-total {
+  background: linear-gradient(135deg, #409eff 0%, #67c23a 100%);
+  color: #fff;
+}
+.kpi-card.kpi-total .kpi-label,
+.kpi-card.kpi-total .kpi-sub {
+  color: rgba(255, 255, 255, 0.85);
+}
+.kpi-label {
+  font-size: 12px;
+  color: #909399;
+}
+.kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #303133;
+  margin: 6px 0;
+}
+.kpi-sub {
+  font-size: 12px;
+  color: #909399;
+}
+.filter-card,
+.table-card {
+  margin-bottom: 16px;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+.num.strong {
+  font-weight: 600;
+  color: #303133;
+}
+.num-sm {
+  font-variant-numeric: tabular-nums;
+  color: #606266;
+  font-size: 13px;
+}
+.muted {
+  color: #c0c4cc;
+}
+.row-label {
+  font-weight: 500;
+}
+.ml-1 {
+  margin-left: 6px;
+}
+.pct-text {
+  margin-left: 8px;
+  font-size: 12px;
+  color: #606266;
+}
+.warn-bad {
+  color: #f56c6c;
+  font-weight: 600;
+}
+.warn-mid {
+  color: #e6a23c;
+  font-weight: 600;
+}
 </style>

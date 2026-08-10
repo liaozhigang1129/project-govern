@@ -48,12 +48,7 @@
 
     <template #footer>
       <el-button @click="onClose">取消</el-button>
-      <el-button
-        type="primary"
-        :loading="loading"
-        :disabled="selectedIds.length === 0"
-        @click="onConfirm"
-      >
+      <el-button type="primary" :loading="loading" :disabled="selectedIds.length === 0" @click="onConfirm">
         确认分配 ({{ selectedIds.length }})
       </el-button>
     </template>
@@ -85,9 +80,7 @@ const filteredUsers = computed(() => {
   if (!filterText.value) return props.sourceUsers
   const k = filterText.value.toLowerCase()
   return props.sourceUsers.filter((u) =>
-    [u.username, u.fullName, u.phone, u.email]
-      .filter(Boolean)
-      .some((s) => s!.toLowerCase().includes(k))
+    [u.username, u.fullName, u.phone, u.email].filter(Boolean).some((s) => s!.toLowerCase().includes(k)),
   )
 })
 
@@ -108,13 +101,23 @@ function onConfirm() {
   emit('confirm', { selectedIds: selectedIds.value })
 }
 
-watch(() => props.sourceUsers, () => {
-  selectedIds.value = []
-})
+watch(
+  () => props.sourceUsers,
+  () => {
+    selectedIds.value = []
+  },
+)
 </script>
 
 <style scoped>
-.batch-assign { display: flex; flex-direction: column; }
-.user-list { flex: 1; }
-:deep(.el-checkbox-group) { display: block; }
+.batch-assign {
+  display: flex;
+  flex-direction: column;
+}
+.user-list {
+  flex: 1;
+}
+:deep(.el-checkbox-group) {
+  display: block;
+}
 </style>

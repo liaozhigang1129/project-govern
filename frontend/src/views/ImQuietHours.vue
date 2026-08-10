@@ -15,11 +15,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Bell, BellFilled, Clock, Delete, Edit, Moon, Plus, Refresh } from '@element-plus/icons-vue'
-import {
-  type ImQuietHours,
-  type ImQuietHoursUpdateReq,
-  imQuietHoursApi,
-} from '@/api/im-quiet-hours'
+import { type ImQuietHours, type ImQuietHoursUpdateReq, imQuietHoursApi } from '@/api/im-quiet-hours'
 import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
@@ -66,7 +62,10 @@ const nextWindow = computed(() => {
   const cur = sorted.find((w) => inWindow(hhmm, w.startTime, w.endTime))
   if (cur) return { state: 'active' as const, label: `${cur.startTime} ~ ${cur.endTime}` }
   const future = sorted.find((w) => w.startTime > hhmm)
-  return { state: 'idle' as const, label: future ? `下一个 ${future.startTime} ~ ${future.endTime}` : '今日无' }
+  return {
+    state: 'idle' as const,
+    label: future ? `下一个 ${future.startTime} ~ ${future.endTime}` : '今日无',
+  }
 })
 
 /** 单点判定,跨午夜支持 */
@@ -178,7 +177,7 @@ async function remove(row: ImQuietHours) {
     await ElMessageBox.confirm(
       `确定删除「${row.startTime} ~ ${row.endTime}」时段吗?删除后该窗口不再生效。`,
       '确认删除',
-      { type: 'warning' }
+      { type: 'warning' },
     )
   } catch {
     return
@@ -211,13 +210,19 @@ function isCrossNight(start: string, end: string): boolean {
   <div style="padding: 16px">
     <el-card>
       <template #header>
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+          "
+        >
           <span style="display: flex; align-items: center; gap: 6px">
             <el-icon><Moon /></el-icon>
             勿扰时段管理
-            <el-tag type="info" size="small" style="margin-left: 6px">
-              仅影响 IM 推送(邮件仍走)
-            </el-tag>
+            <el-tag type="info" size="small" style="margin-left: 6px">仅影响 IM 推送(邮件仍走)</el-tag>
           </span>
           <div style="display: flex; gap: 8px; align-items: center">
             <el-button :icon="Refresh" @click="loadList">刷新</el-button>
@@ -255,23 +260,20 @@ function isCrossNight(start: string, end: string): boolean {
                 <div style="font-size: 18px; font-weight: 600">
                   {{ now.toTimeString().slice(0, 8) }}
                 </div>
-                <div style="font-size: 12px; color: #909399; margin-top: 2px">
-                  Asia/Shanghai
-                </div>
+                <div style="font-size: 12px; color: #909399; margin-top: 2px">Asia/Shanghai</div>
               </div>
             </div>
           </el-card>
         </el-col>
       </el-row>
 
-      <el-alert
-        type="info"
-        :closable="false"
-        show-icon
-        style="margin-bottom: 12px"
-      >
+      <el-alert type="info" :closable="false" show-icon style="margin-bottom: 12px">
         <template #title>
-          命中任一<strong>启用中</strong>时段, IM 通道将<strong>不推送</strong>通知(邮件、站内信仍照常)— 防止深夜/午休被打扰。
+          命中任一
+          <strong>启用中</strong>
+          时段, IM 通道将
+          <strong>不推送</strong>
+          通知(邮件、站内信仍照常)— 防止深夜/午休被打扰。
         </template>
       </el-alert>
 
@@ -311,7 +313,9 @@ function isCrossNight(start: string, end: string): boolean {
             >
               {{ row.enabled ? '暂停' : '启用' }}
             </el-button>
-            <el-button :icon="Delete" link type="danger" :loading="saving" @click="remove(row)">删除</el-button>
+            <el-button :icon="Delete" link type="danger" :loading="saving" @click="remove(row)">
+              删除
+            </el-button>
           </template>
         </el-table-column>
         <template #empty>
@@ -374,6 +378,10 @@ function isCrossNight(start: string, end: string): boolean {
 </template>
 
 <style scoped>
-:deep(.el-card__header) { padding: 12px 16px; }
-:deep(.el-card__body) { padding: 16px; }
+:deep(.el-card__header) {
+  padding: 12px 16px;
+}
+:deep(.el-card__body) {
+  padding: 16px;
+}
 </style>

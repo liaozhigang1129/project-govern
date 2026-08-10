@@ -26,24 +26,26 @@ const allList = ref<TimesheetSummary[]>([])
 const loading = ref(false)
 
 // 驳回后落到 DRAFT,目前用 submitterNote 包含【驳回】前缀来识别
-const submittedRows = computed(() => allList.value.filter(r => r.status === 'SUBMITTED'))
-const approvedRows  = computed(() => allList.value.filter(r => r.status === 'APPROVED'))
-const rejectedRows  = computed(() => allList.value.filter(r =>
-  r.status === 'DRAFT' && (r.submitterNote ?? '').startsWith('【驳回】')
-))
+const submittedRows = computed(() => allList.value.filter((r) => r.status === 'SUBMITTED'))
+const approvedRows = computed(() => allList.value.filter((r) => r.status === 'APPROVED'))
+const rejectedRows = computed(() =>
+  allList.value.filter((r) => r.status === 'DRAFT' && (r.submitterNote ?? '').startsWith('【驳回】')),
+)
 
 // ----- 搜索/过滤 -----
 const keyword = ref('')
 const filteredRows = computed(() => {
   const k = keyword.value.trim().toLowerCase()
-  const src = activeTab.value === 'SUBMITTED' ? submittedRows.value
-    : activeTab.value === 'APPROVED' ? approvedRows.value
-    : rejectedRows.value
+  const src =
+    activeTab.value === 'SUBMITTED'
+      ? submittedRows.value
+      : activeTab.value === 'APPROVED'
+        ? approvedRows.value
+        : rejectedRows.value
   if (!k) return src
-  return src.filter(r =>
-    (r.userName ?? '').toLowerCase().includes(k) ||
-    r.weekStart.includes(k) ||
-    String(r.userId).includes(k)
+  return src.filter(
+    (r) =>
+      (r.userName ?? '').toLowerCase().includes(k) || r.weekStart.includes(k) || String(r.userId).includes(k),
   )
 })
 
@@ -71,7 +73,9 @@ async function load() {
   }
 }
 
-watch(activeTab, () => { selection.value = [] })
+watch(activeTab, () => {
+  selection.value = []
+})
 onMounted(load)
 
 // ----- 单条批准 -----
@@ -80,9 +84,11 @@ async function approveOne(row: TimesheetSummary) {
     await ElMessageBox.confirm(
       `批准 ${row.userName} 的 ${row.weekStart} 周报(${row.totalHours}h,${row.entryCount} 行)?`,
       '审批',
-      { type: 'success' }
+      { type: 'success' },
     )
-  } catch { return }
+  } catch {
+    return
+  }
   try {
     await timesheetApi.approve(row.id)
     ElMessage.success('已批准')
@@ -125,16 +131,18 @@ async function batchApprove() {
     ElMessage.warning('请先勾选要批准的周报')
     return
   }
-  const ids = selection.value.map(r => r.id)
+  const ids = selection.value.map((r) => r.id)
   try {
-    await ElMessageBox.confirm(
-      `批量批准 ${ids.length} 份周报?`,
-      '批量审批',
-      { type: 'success' }
-    )
-  } catch { return }
+    await ElMessageBox.confirm(`批量批准 ${ids.length} 份周报?`, '批量审批', { type: 'success' })
+  } catch {
+    return
+  }
   try {
-    const out = await timesheetApi.batchApprove(ids) as unknown as { approved: any[]; requested: number; successCount: number }
+    const out = (await timesheetApi.batchApprove(ids)) as unknown as {
+      approved: any[]
+      requested: number
+      successCount: number
+    }
     ElMessage.success(`已批准 ${out.successCount}/${out.requested} 份(去重后)`)
     selection.value = []
     await load()
@@ -175,7 +183,15 @@ function fmtTime(s?: string) {
   <div class="page">
     <el-card>
       <template #header>
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+          "
+        >
           <div>
             <el-icon style="vertical-align: middle"><Check /></el-icon>
             <span style="font-size: 16px; font-weight: 600">工时审批中心</span>
@@ -206,12 +222,9 @@ function fmtTime(s?: string) {
         <!-- Tab 1:待审 -->
         <el-tab-pane :label="`待我审批 (${submittedRows.length})`" name="SUBMITTED">
           <div style="margin-bottom: 8px; display: flex; gap: 8px">
-            <el-button
-              type="success"
-              :icon="Check"
-              :disabled="selection.length === 0"
-              @click="batchApprove"
-            >批量批准({{ selection.length }})</el-button>
+            <el-button type="success" :icon="Check" :disabled="selection.length === 0" @click="batchApprove">
+              批量批准({{ selection.length }})
+            </el-button>
           </div>
           <el-table
             :data="filteredRows"
@@ -291,7 +304,12 @@ function fmtTime(s?: string) {
     <!-- 驳回对话框 -->
     <el-dialog v-model="rejectDialog" title="驳回周报" width="520px">
       <div v-if="rejectTarget" style="margin-bottom: 12px; color: #606266">
-        <span>提交人: <b>{{ rejectTarget.userName }}</b> ｜ 周次: <b>{{ rejectTarget.weekStart }}</b></span>
+        <span>
+          提交人:
+          <b>{{ rejectTarget.userName }}</b>
+          ｜ 周次:
+          <b>{{ rejectTarget.weekStart }}</b>
+        </span>
       </div>
       <el-form>
         <el-form-item label="驳回理由" required>
@@ -326,14 +344,22 @@ function fmtTime(s?: string) {
               <el-tag :type="statusTag(detail.status) as any">{{ detail.status }}</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="提交人">{{ detail.userName }}</el-descriptions-item>
-            <el-descriptions-item label="周次">{{ detail.weekStart }} ~ {{ detail.weekEnd }}</el-descriptions-item>
+            <el-descriptions-item label="周次">
+              {{ detail.weekStart }} ~ {{ detail.weekEnd }}
+            </el-descriptions-item>
             <el-descriptions-item label="审批人">{{ detail.approverName ?? '—' }}</el-descriptions-item>
             <el-descriptions-item label="总工时">
-              <b :style="{ color: detail.totalHours > 60 ? '#f56c6c' : detail.totalHours > 40 ? '#e6a23c' : '#67c23a' }">
+              <b
+                :style="{
+                  color: detail.totalHours > 60 ? '#f56c6c' : detail.totalHours > 40 ? '#e6a23c' : '#67c23a',
+                }"
+              >
                 {{ detail.totalHours }}h
               </b>
             </el-descriptions-item>
-            <el-descriptions-item label="提交时间" :span="2">{{ fmtTime(detail.submittedAt) }}</el-descriptions-item>
+            <el-descriptions-item label="提交时间" :span="2">
+              {{ fmtTime(detail.submittedAt) }}
+            </el-descriptions-item>
             <el-descriptions-item label="备注" :span="2">
               <span :style="{ color: (detail.submitterNote ?? '').startsWith('【驳回】') ? '#f56c6c' : '' }">
                 {{ detail.submitterNote ?? '—' }}
@@ -356,5 +382,7 @@ function fmtTime(s?: string) {
 </template>
 
 <style scoped>
-.page { padding: 16px; }
+.page {
+  padding: 16px;
+}
 </style>

@@ -55,8 +55,10 @@ const users = ref<UserLite[]>([])
 async function loadUsers() {
   if (!isAdmin.value) return
   try {
-    users.value = (await api.get<UserLite[]>('/users/options'))
-  } catch { /* ignore */ }
+    users.value = await api.get<UserLite[]>('/users/options')
+  } catch {
+    /* ignore */
+  }
 }
 
 const currentUserLabel = computed(() => {
@@ -171,7 +173,7 @@ async function remove(row: ImBinding) {
     await ElMessageBox.confirm(
       `确定删除「${CHANNEL_LABEL[row.channel]}」绑定吗?删除后将不再推送。`,
       '确认删除',
-      { type: 'warning' }
+      { type: 'warning' },
     )
   } catch {
     return
@@ -205,13 +207,19 @@ onMounted(async () => {
   <div style="padding: 16px">
     <el-card>
       <template #header>
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+          "
+        >
           <span style="display: flex; align-items: center; gap: 6px">
             <el-icon><ChatDotRound /></el-icon>
             IM 绑定管理
-            <el-tag type="info" size="small" style="margin-left: 6px">
-              当前: {{ currentUserLabel }}
-            </el-tag>
+            <el-tag type="info" size="small" style="margin-left: 6px">当前: {{ currentUserLabel }}</el-tag>
           </span>
           <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
             <el-select
@@ -235,15 +243,11 @@ onMounted(async () => {
         </div>
       </template>
 
-      <el-alert
-        type="info"
-        :closable="false"
-        show-icon
-        style="margin-bottom: 12px"
-      >
+      <el-alert type="info" :closable="false" show-icon style="margin-bottom: 12px">
         <template #title>
-          绑定后,审批通知将通过对应 IM 平台实时推送给您。
-          暂停(<el-tag type="warning" size="small">已暂停</el-tag>)后仍保留记录,只是不再推送;删除后无法恢复。
+          绑定后,审批通知将通过对应 IM 平台实时推送给您。 暂停(
+          <el-tag type="warning" size="small">已暂停</el-tag>
+          )后仍保留记录,只是不再推送;删除后无法恢复。
         </template>
       </el-alert>
 
@@ -255,7 +259,9 @@ onMounted(async () => {
         </el-table-column>
         <el-table-column prop="externalUserId" label="IM 标识" min-width="200">
           <template #default="{ row }">
-            <code style="background: #f5f7fa; padding: 2px 6px; border-radius: 3px">{{ row.externalUserId }}</code>
+            <code style="background: #f5f7fa; padding: 2px 6px; border-radius: 3px">
+              {{ row.externalUserId }}
+            </code>
           </template>
         </el-table-column>
         <el-table-column v-if="isAdmin" prop="userId" label="所属用户" width="140">
@@ -289,7 +295,9 @@ onMounted(async () => {
             >
               {{ row.enabled ? '暂停' : '启用' }}
             </el-button>
-            <el-button :icon="Delete" link type="danger" :loading="saving" @click="remove(row)">删除</el-button>
+            <el-button :icon="Delete" link type="danger" :loading="saving" @click="remove(row)">
+              删除
+            </el-button>
           </template>
         </el-table-column>
         <template #empty>
@@ -340,9 +348,7 @@ onMounted(async () => {
         </el-form-item>
         <el-form-item v-if="dialogMode === 'edit'" label="启用">
           <el-switch v-model="form.enabled" />
-          <span style="color: #909399; font-size: 12px; margin-left: 8px">
-            关闭后不再推送通知,但保留记录
-          </span>
+          <span style="color: #909399; font-size: 12px; margin-left: 8px">关闭后不再推送通知,但保留记录</span>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -354,6 +360,10 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-:deep(.el-card__header) { padding: 12px 16px; }
-:deep(.el-card__body) { padding: 16px; }
+:deep(.el-card__header) {
+  padding: 12px 16px;
+}
+:deep(.el-card__body) {
+  padding: 16px;
+}
 </style>

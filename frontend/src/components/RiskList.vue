@@ -37,17 +37,17 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'select', risk: RiskItem): void
-  (e: 'edit',   risk: RiskItem): void
+  (e: 'edit', risk: RiskItem): void
   (e: 'create'): void
 }>()
 
 const store = useRiskStore()
 
 // 筛选 (本地状态, 远端已经按 status 切过)
-const filterLevel    = ref<RiskLevel | ''>('')
+const filterLevel = ref<RiskLevel | ''>('')
 const filterCategory = ref<string>('')
-const filterStatus   = ref<RiskStatus | ''>('')
-const filterText     = ref('')        // 模糊匹配 code/title
+const filterStatus = ref<RiskStatus | ''>('')
+const filterText = ref('') // 模糊匹配 code/title
 
 const loading = computed(() => store.isLoading(`list:${props.projectId}:${props.scope !== 'all'}`))
 
@@ -59,13 +59,13 @@ const source = computed<RiskItem[]>(() => {
 const filtered = computed<RiskItem[]>(() => {
   const lvl = filterLevel.value
   const cat = filterCategory.value
-  const st  = filterStatus.value
+  const st = filterStatus.value
   const txt = filterText.value.trim().toLowerCase()
-  return source.value.filter(r => {
+  return source.value.filter((r) => {
     if (lvl && r.level !== lvl) return false
     if (cat && r.category !== cat) return false
-    if (st  && r.status  !== st)  return false
-    if (txt && !(`${r.code} ${r.title}`.toLowerCase().includes(txt))) return false
+    if (st && r.status !== st) return false
+    if (txt && !`${r.code} ${r.title}`.toLowerCase().includes(txt)) return false
     return true
   })
 })
@@ -73,31 +73,50 @@ const filtered = computed<RiskItem[]>(() => {
 // 颜色 / 标签映射
 function levelTagType(lvl: RiskLevel): '' | 'success' | 'warning' | 'danger' | 'info' {
   switch (lvl) {
-    case 'CRITICAL': return 'danger'
-    case 'HIGH':     return 'warning'
-    case 'MEDIUM':   return ''
-    case 'LOW':      return 'success'
+    case 'CRITICAL':
+      return 'danger'
+    case 'HIGH':
+      return 'warning'
+    case 'MEDIUM':
+      return ''
+    case 'LOW':
+      return 'success'
   }
 }
 function statusTagType(s: RiskStatus): '' | 'success' | 'warning' | 'info' | 'primary' {
   switch (s) {
-    case 'OPEN':        return 'info'
-    case 'MITIGATING':  return 'warning'
-    case 'OCCURRED':    return 'danger' as any   // ElTag 实际支持, 但 union 没列
-    case 'ACCEPTED':    return ''
-    case 'CLOSED':      return 'success'
-    default:            return 'info'
+    case 'OPEN':
+      return 'info'
+    case 'MITIGATING':
+      return 'warning'
+    case 'OCCURRED':
+      return 'danger' as any // ElTag 实际支持, 但 union 没列
+    case 'ACCEPTED':
+      return ''
+    case 'CLOSED':
+      return 'success'
+    default:
+      return 'info'
   }
 }
 function categoryLabel(c: string) {
-  return {
-    TECHNICAL: '技术', SCHEDULE: '进度', COST: '成本', QUALITY: '质量',
-    EXTERNAL: '外部', ORGANIZATIONAL: '组织', OTHER: '其他',
-  }[c] ?? c
+  return (
+    {
+      TECHNICAL: '技术',
+      SCHEDULE: '进度',
+      COST: '成本',
+      QUALITY: '质量',
+      EXTERNAL: '外部',
+      ORGANIZATIONAL: '组织',
+      OTHER: '其他',
+    }[c] ?? c
+  )
 }
 
 // 行点击 → 父组件弹 drawer
-function onRowClick(row: RiskItem) { emit('select', row) }
+function onRowClick(row: RiskItem) {
+  emit('select', row)
+}
 function onEdit(row: RiskItem, e: Event) {
   e.stopPropagation()
   emit('edit', row)
@@ -106,10 +125,11 @@ function onEdit(row: RiskItem, e: Event) {
 async function onDelete(row: RiskItem, e: Event) {
   e.stopPropagation()
   try {
-    await ElMessageBox.confirm(
-      `确定删除风险 ${row.code} ${row.title}? 此操作会写历史, 可追溯.`,
-      '删除确认', { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' }
-    )
+    await ElMessageBox.confirm(`确定删除风险 ${row.code} ${row.title}? 此操作会写历史, 可追溯.`, '删除确认', {
+      type: 'warning',
+      confirmButtonText: '删除',
+      cancelButtonText: '取消',
+    })
     await store.remove(row.id, props.projectId)
     ElMessage.success('已删除')
   } catch (e: any) {
@@ -131,7 +151,11 @@ watch(() => props.scope, load)
 <template>
   <div class="risk-list" v-loading="loading">
     <!-- 筛选条 -->
-    <el-form inline class="filter-bar" :model="{ l: filterLevel, c: filterCategory, s: filterStatus, t: filterText }">
+    <el-form
+      inline
+      class="filter-bar"
+      :model="{ l: filterLevel, c: filterCategory, s: filterStatus, t: filterText }"
+    >
       <el-form-item label="搜索">
         <el-input
           v-model="filterText"
@@ -143,20 +167,20 @@ watch(() => props.scope, load)
       </el-form-item>
       <el-form-item label="分类">
         <el-select v-model="filterCategory" placeholder="全部" clearable style="width: 130px">
-          <el-option label="技术"   value="TECHNICAL" />
-          <el-option label="进度"   value="SCHEDULE" />
-          <el-option label="成本"   value="COST" />
-          <el-option label="质量"   value="QUALITY" />
-          <el-option label="外部"   value="EXTERNAL" />
-          <el-option label="组织"   value="ORGANIZATIONAL" />
-          <el-option label="其他"   value="OTHER" />
+          <el-option label="技术" value="TECHNICAL" />
+          <el-option label="进度" value="SCHEDULE" />
+          <el-option label="成本" value="COST" />
+          <el-option label="质量" value="QUALITY" />
+          <el-option label="外部" value="EXTERNAL" />
+          <el-option label="组织" value="ORGANIZATIONAL" />
+          <el-option label="其他" value="OTHER" />
         </el-select>
       </el-form-item>
       <el-form-item label="等级">
         <el-select v-model="filterLevel" placeholder="全部" clearable style="width: 120px">
-          <el-option label="低"   value="LOW" />
-          <el-option label="中"   value="MEDIUM" />
-          <el-option label="高"   value="HIGH" />
+          <el-option label="低" value="LOW" />
+          <el-option label="中" value="MEDIUM" />
+          <el-option label="高" value="HIGH" />
           <el-option label="严重" value="CRITICAL" />
         </el-select>
       </el-form-item>
@@ -171,10 +195,12 @@ watch(() => props.scope, load)
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="emit('create')">
-          <el-icon><Plus /></el-icon> 新建风险
+          <el-icon><Plus /></el-icon>
+          新建风险
         </el-button>
         <el-button text @click="load">
-          <el-icon><Refresh /></el-icon> 刷新
+          <el-icon><Refresh /></el-icon>
+          刷新
         </el-button>
       </el-form-item>
     </el-form>
@@ -207,11 +233,17 @@ watch(() => props.scope, load)
         <template #default="{ row }">
           <el-tag :type="statusTagType(row.status)" size="small" effect="plain">
             {{
-              row.status === 'OPEN' ? '已识别' :
-              row.status === 'MITIGATING' ? '应对中' :
-              row.status === 'OCCURRED' ? '已发生' :
-              row.status === 'ACCEPTED' ? '已接受' :
-              row.status === 'CLOSED' ? '已关闭' : row.status
+              row.status === 'OPEN'
+                ? '已识别'
+                : row.status === 'MITIGATING'
+                  ? '应对中'
+                  : row.status === 'OCCURRED'
+                    ? '已发生'
+                    : row.status === 'ACCEPTED'
+                      ? '已接受'
+                      : row.status === 'CLOSED'
+                        ? '已关闭'
+                        : row.status
             }}
           </el-tag>
         </template>
@@ -223,7 +255,12 @@ watch(() => props.scope, load)
       </el-table-column>
       <el-table-column label="分数" width="70" align="center">
         <template #default="{ row }">
-          <span :style="{ fontWeight: 600, color: row.score >= 16 ? '#f56c6c' : row.score >= 10 ? '#e6a23c' : '#67c23a' }">
+          <span
+            :style="{
+              fontWeight: 600,
+              color: row.score >= 16 ? '#f56c6c' : row.score >= 10 ? '#e6a23c' : '#67c23a',
+            }"
+          >
             {{ row.score }}
           </span>
         </template>
@@ -237,20 +274,18 @@ watch(() => props.scope, load)
       <el-table-column label="操作" width="160" align="center" fixed="right">
         <template #default="{ row }">
           <el-button size="small" link type="primary" @click="onEdit(row, $event)">编辑</el-button>
-          <el-button
-            v-if="canDelete"
-            size="small"
-            link
-            type="danger"
-            @click="onDelete(row, $event)"
-          >删除</el-button>
+          <el-button v-if="canDelete" size="small" link type="danger" @click="onDelete(row, $event)">
+            删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <!-- 底部统计 -->
     <div class="footer" v-if="filtered.length">
-      共 <b>{{ filtered.length }}</b> 条
+      共
+      <b>{{ filtered.length }}</b>
+      条
       <span v-if="filtered.length !== source.length" style="color: #909399; margin-left: 8px">
         (已筛选自 {{ source.length }} 条)
       </span>

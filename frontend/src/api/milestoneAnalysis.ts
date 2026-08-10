@@ -7,21 +7,21 @@ import api from './client'
 
 // 7 阶段常量 (与后端 V3.1 milestone_phase 对齐)
 export const PHASE_LIST = [
-  { id: 1, code: 'INITIATION',   name: '立项',     color: '#909399' },
-  { id: 2, code: 'REQUIREMENT',  name: '需求',     color: '#409EFF' },
-  { id: 3, code: 'DESIGN',       name: '设计',     color: '#67C23A' },
-  { id: 4, code: 'DEVELOPMENT',  name: '开发',     color: '#E6A23C' },
-  { id: 5, code: 'TESTING',      name: '测试',     color: '#F56C6C' },
-  { id: 6, code: 'DEPLOY',       name: '上线运维', color: '#9C27B0' },
-  { id: 7, code: 'MAINTENANCE',  name: '维保',     color: '#795548' },
+  { id: 1, code: 'INITIATION', name: '立项', color: '#909399' },
+  { id: 2, code: 'REQUIREMENT', name: '需求', color: '#409EFF' },
+  { id: 3, code: 'DESIGN', name: '设计', color: '#67C23A' },
+  { id: 4, code: 'DEVELOPMENT', name: '开发', color: '#E6A23C' },
+  { id: 5, code: 'TESTING', name: '测试', color: '#F56C6C' },
+  { id: 6, code: 'DEPLOY', name: '上线运维', color: '#9C27B0' },
+  { id: 7, code: 'MAINTENANCE', name: '维保', color: '#795548' },
 ] as const
 
 // 4 状态常量
 export const STATUS_LIST = [
-  { code: 'PENDING',     name: '未开始', color: '#909399' },
+  { code: 'PENDING', name: '未开始', color: '#909399' },
   { code: 'IN_PROGRESS', name: '进行中', color: '#409EFF' },
-  { code: 'COMPLETED',   name: '已完成', color: '#67C23A' },
-  { code: 'DELAYED',     name: '已延期', color: '#F56C6C' },
+  { code: 'COMPLETED', name: '已完成', color: '#67C23A' },
+  { code: 'DELAYED', name: '已延期', color: '#F56C6C' },
 ] as const
 
 export type MilestoneAnalysisQuery = {

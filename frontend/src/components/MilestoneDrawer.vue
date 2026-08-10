@@ -42,7 +42,7 @@ const emit = defineEmits<{
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (v) => emit('update:modelValue', v)
+  set: (v) => emit('update:modelValue', v),
 })
 
 // 完整 milestone(从后端拉)
@@ -52,37 +52,51 @@ const users = ref<AppUser[]>([])
 
 // 编辑状态
 const editing = ref(false)
-const editForm = ref<{ planDate: string; weight: number; ownerUserId: number | null; deliverable: string; remark: string }>({
+const editForm = ref<{
+  planDate: string
+  weight: number
+  ownerUserId: number | null
+  deliverable: string
+  remark: string
+}>({
   planDate: '',
   weight: 1,
   ownerUserId: null,
   deliverable: '',
-  remark: ''
+  remark: '',
 })
 const saving = ref(false)
 
 // ---------- 监听:打开抽屉时拉详情 ----------
-watch(() => [props.modelValue, props.milestone?.id], async ([vis, mid]) => {
-  if (!vis || !mid) return
-  await loadDetail(mid as number)
-  // 顺便拉用户列表(只一次缓存)
-  if (users.value.length === 0) {
-    try { users.value = await userApi.list({ enabled: true }) } catch { /* 兜底 */ }
-  }
-}, { immediate: false })
+watch(
+  () => [props.modelValue, props.milestone?.id],
+  async ([vis, mid]) => {
+    if (!vis || !mid) return
+    await loadDetail(mid as number)
+    // 顺便拉用户列表(只一次缓存)
+    if (users.value.length === 0) {
+      try {
+        users.value = await userApi.list({ enabled: true })
+      } catch {
+        /* 兜底 */
+      }
+    }
+  },
+  { immediate: false },
+)
 
 async function loadDetail(id: number) {
   loading.value = true
   try {
     const list = await milestoneApi.list(props.milestone!.projectId)
-    detail.value = list.find(m => m.id === id) ?? null
+    detail.value = list.find((m) => m.id === id) ?? null
     if (detail.value) {
       editForm.value = {
         planDate: detail.value.planDate,
         weight: detail.value.weight,
         ownerUserId: detail.value.ownerUserId,
         deliverable: detail.value.deliverable ?? '',
-        remark: detail.value.remark ?? ''
+        remark: detail.value.remark ?? '',
       }
     }
   } catch (e: any) {
@@ -99,7 +113,7 @@ const ownerUser = computed(() => {
   if (props.userMap?.has(detail.value.ownerUserId)) {
     return props.userMap.get(detail.value.ownerUserId)!
   }
-  return users.value.find(u => u.id === detail.value!.ownerUserId) ?? null
+  return users.value.find((u) => u.id === detail.value!.ownerUserId) ?? null
 })
 
 const statusColor = computed(() => {
@@ -107,7 +121,7 @@ const statusColor = computed(() => {
     PENDING: '#909399',
     IN_PROGRESS: '#e6a23c',
     COMPLETED: '#67c23a',
-    DELAYED: '#f56c6c'
+    DELAYED: '#f56c6c',
   }
   return map[detail.value?.status?.code ?? ''] ?? '#909399'
 })
@@ -128,7 +142,7 @@ async function saveEdit() {
       weight: editForm.value.weight,
       ownerUserId: editForm.value.ownerUserId ?? undefined,
       deliverable: editForm.value.deliverable,
-      remark: editForm.value.remark
+      remark: editForm.value.remark,
     })
     ElMessage.success('已保存')
     editing.value = false
@@ -147,7 +161,8 @@ async function changeStatus(status: MilestoneStatusCode) {
     if (status === 'COMPLETED') {
       await ElMessageBox.confirm(
         `将里程碑"${detail.value.name}"标记为已完成,系统将自动写入实际完成日期为今天。继续?`,
-        '确认完成', { confirmButtonText: '标记完成', cancelButtonText: '取消', type: 'success' }
+        '确认完成',
+        { confirmButtonText: '标记完成', cancelButtonText: '取消', type: 'success' },
       )
     }
     await milestoneApi.putStatus(detail.value.id, status)
@@ -192,7 +207,7 @@ function close() {
               :color="statusColor"
               effect="dark"
               size="small"
-              style="color:#fff; border:none"
+              style="color: #fff; border: none"
             >
               {{ detail.status.name }}
             </el-tag>
@@ -214,8 +229,13 @@ function close() {
                 <span class="ms-field-value">
                   <template v-if="!editing">{{ detail.planDate }}</template>
                   <el-date-picker
-                    v-else v-model="editForm.planDate" type="date"
-                    format="YYYY-MM-DD" value-format="YYYY-MM-DD" size="small" style="width:130px"
+                    v-else
+                    v-model="editForm.planDate"
+                    type="date"
+                    format="YYYY-MM-DD"
+                    value-format="YYYY-MM-DD"
+                    size="small"
+                    style="width: 130px"
                   />
                 </span>
               </div>
@@ -228,10 +248,10 @@ function close() {
               </div>
             </el-col>
           </el-row>
-          <div v-if="detail.completedAt" class="ms-field" style="margin-top:8px">
+          <div v-if="detail.completedAt" class="ms-field" style="margin-top: 8px">
             <el-icon><Check /></el-icon>
             <span class="ms-field-label">完成时间</span>
-            <span class="ms-field-value" style="font-size:12px; color:#909399">
+            <span class="ms-field-value" style="font-size: 12px; color: #909399">
               {{ new Date(detail.completedAt).toLocaleString('zh-CN') }}
             </span>
           </div>
@@ -245,15 +265,29 @@ function close() {
             <span class="ms-field-value">
               <template v-if="!editing">
                 <template v-if="ownerUser">
-                  <el-avatar :size="20" style="vertical-align:middle; margin-right:4px">
+                  <el-avatar :size="20" style="vertical-align: middle; margin-right: 4px">
                     {{ ownerUser.fullName?.charAt(0) }}
                   </el-avatar>
-                  {{ ownerUser.fullName }} <span style="color:#909399; font-size:12px">({{ ownerUser.username }})</span>
+                  {{ ownerUser.fullName }}
+                  <span style="color: #909399; font-size: 12px">({{ ownerUser.username }})</span>
                 </template>
-                <span v-else style="color:#c0c4cc">未指定</span>
+                <span v-else style="color: #c0c4cc">未指定</span>
               </template>
-              <el-select v-else v-model="editForm.ownerUserId" placeholder="选 owner" filterable clearable size="small" style="width:200px">
-                <el-option v-for="u in users" :key="u.id" :value="u.id" :label="`${u.fullName} (${u.username})`" />
+              <el-select
+                v-else
+                v-model="editForm.ownerUserId"
+                placeholder="选 owner"
+                filterable
+                clearable
+                size="small"
+                style="width: 200px"
+              >
+                <el-option
+                  v-for="u in users"
+                  :key="u.id"
+                  :value="u.id"
+                  :label="`${u.fullName} (${u.username})`"
+                />
               </el-select>
             </span>
           </div>
@@ -261,8 +295,8 @@ function close() {
 
         <div class="ms-section">
           <h3 class="ms-section-title">交付物</h3>
-          <div class="ms-field" style="flex-direction:column; align-items:flex-start; gap:6px">
-            <div style="display:flex; align-items:center; gap:6px">
+          <div class="ms-field" style="flex-direction: column; align-items: flex-start; gap: 6px">
+            <div style="display: flex; align-items: center; gap: 6px">
               <el-icon><Document /></el-icon>
               <span class="ms-field-label">交付物清单</span>
             </div>
@@ -285,7 +319,10 @@ function close() {
             {{ detail.remark || '— 暂无 —' }}
           </div>
           <el-input
-            v-else v-model="editForm.remark" type="textarea" :rows="2"
+            v-else
+            v-model="editForm.remark"
+            type="textarea"
+            :rows="2"
             placeholder="备注 / 风险说明 / 客户方反馈..."
           />
         </div>
@@ -293,8 +330,22 @@ function close() {
         <div class="ms-section">
           <h3 class="ms-section-title">元信息</h3>
           <el-row :gutter="16">
-            <el-col :span="12"><div class="ms-field"><span class="ms-field-label">创建</span><span class="ms-field-value" style="font-size:12px">{{ new Date(detail.createdAt).toLocaleString('zh-CN') }}</span></div></el-col>
-            <el-col :span="12"><div class="ms-field"><span class="ms-field-label">更新</span><span class="ms-field-value" style="font-size:12px">{{ new Date(detail.updatedAt).toLocaleString('zh-CN') }}</span></div></el-col>
+            <el-col :span="12">
+              <div class="ms-field">
+                <span class="ms-field-label">创建</span>
+                <span class="ms-field-value" style="font-size: 12px">
+                  {{ new Date(detail.createdAt).toLocaleString('zh-CN') }}
+                </span>
+              </div>
+            </el-col>
+            <el-col :span="12">
+              <div class="ms-field">
+                <span class="ms-field-label">更新</span>
+                <span class="ms-field-value" style="font-size: 12px">
+                  {{ new Date(detail.updatedAt).toLocaleString('zh-CN') }}
+                </span>
+              </div>
+            </el-col>
           </el-row>
         </div>
 
@@ -304,20 +355,25 @@ function close() {
             <el-button-group>
               <el-button
                 v-if="detail.status?.code === 'PENDING'"
-                :icon="Edit" @click="changeStatus('IN_PROGRESS')"
-              >开始</el-button>
+                :icon="Edit"
+                @click="changeStatus('IN_PROGRESS')"
+              >
+                开始
+              </el-button>
               <el-button
                 v-if="detail.status?.code === 'IN_PROGRESS'"
-                :icon="Check" type="success" @click="changeStatus('COMPLETED')"
-              >标记完成</el-button>
-              <el-button
-                v-if="!detail.status?.terminal"
-                type="warning" @click="changeStatus('DELAYED')"
-              >标记延期</el-button>
-              <el-button
-                v-if="detail.status?.code === 'DELAYED'"
-                @click="changeStatus('IN_PROGRESS')"
-              >恢复进行中</el-button>
+                :icon="Check"
+                type="success"
+                @click="changeStatus('COMPLETED')"
+              >
+                标记完成
+              </el-button>
+              <el-button v-if="!detail.status?.terminal" type="warning" @click="changeStatus('DELAYED')">
+                标记延期
+              </el-button>
+              <el-button v-if="detail.status?.code === 'DELAYED'" @click="changeStatus('IN_PROGRESS')">
+                恢复进行中
+              </el-button>
             </el-button-group>
             <el-button :icon="Edit" type="primary" plain @click="editing = true">编辑</el-button>
             <el-button :icon="Refresh" @click="loadDetail(detail.id)">刷新</el-button>
@@ -333,21 +389,42 @@ function close() {
 </template>
 
 <style scoped>
-.ms-drawer { padding: 0; }
-.ms-empty { padding-top: 80px; }
+.ms-drawer {
+  padding: 0;
+}
+.ms-empty {
+  padding-top: 80px;
+}
 .ms-header {
   padding: 16px 20px 14px;
   border-bottom: 1px solid #ebeef5;
   border-left: 4px solid #909399;
   background: #fafbfc;
 }
-.ms-title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.ms-status-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  box-shadow: 0 0 0 3px rgba(255,255,255,1), 0 0 0 4px currentColor;
+.ms-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
-.ms-title { margin: 0; font-size: 18px; font-weight: 600; }
-.ms-subtitle { font-size: 12px; color: #909399; margin-top: 4px; }
+.ms-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 1),
+    0 0 0 4px currentColor;
+}
+.ms-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+.ms-subtitle {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 4px;
+}
 .ms-section {
   padding: 14px 20px;
   border-bottom: 1px solid #f5f5f5;
@@ -366,8 +443,14 @@ function close() {
   font-size: 13px;
   line-height: 1.8;
 }
-.ms-field-label { color: #909399; min-width: 60px; }
-.ms-field-value { color: #303133; flex: 1; }
+.ms-field-label {
+  color: #909399;
+  min-width: 60px;
+}
+.ms-field-value {
+  color: #303133;
+  flex: 1;
+}
 .ms-multiline {
   width: 100%;
   background: #fafafa;

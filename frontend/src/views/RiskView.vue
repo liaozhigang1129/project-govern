@@ -130,18 +130,27 @@ onMounted(() => {
   if (projectId.value > 0) refreshAll()
   else if (projectOptions.value.length === 0) loadProjects()
 })
-watch(() => projectId.value, (v) => {
-  if (v > 0) refreshAll()
-})
-watch(() => viewMode.value, (v) => {
-  if (projectId.value > 0) {
-    if (v === 'matrix') store.loadMatrix(projectId.value)
-    if (v === 'health') store.loadHealth(projectId.value)
-  }
-})
-watch(() => listScope.value, () => {
-  if (projectId.value > 0) store.loadList(projectId.value, listScope.value !== 'all')
-})
+watch(
+  () => projectId.value,
+  (v) => {
+    if (v > 0) refreshAll()
+  },
+)
+watch(
+  () => viewMode.value,
+  (v) => {
+    if (projectId.value > 0) {
+      if (v === 'matrix') store.loadMatrix(projectId.value)
+      if (v === 'health') store.loadHealth(projectId.value)
+    }
+  },
+)
+watch(
+  () => listScope.value,
+  () => {
+    if (projectId.value > 0) store.loadList(projectId.value, listScope.value !== 'all')
+  },
+)
 </script>
 
 <template>
@@ -149,7 +158,15 @@ watch(() => listScope.value, () => {
     <!-- 顶栏 -->
     <el-page-header :icon="null" style="margin-bottom: 12px">
       <template #content>
-        <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+          "
+        >
           <span style="font-size: 18px; font-weight: 600">
             <el-icon><Warning /></el-icon>
             风险管理
@@ -179,10 +196,12 @@ watch(() => listScope.value, () => {
               <el-radio-button value="all">全部</el-radio-button>
             </el-radio-group>
             <el-button v-if="projectId > 0" type="primary" @click="onCreate">
-              <el-icon><Plus /></el-icon> 新建风险
+              <el-icon><Plus /></el-icon>
+              新建风险
             </el-button>
             <el-button v-if="projectId > 0" text @click="refreshAll">
-              <el-icon><Refresh /></el-icon> 刷新
+              <el-icon><Refresh /></el-icon>
+              刷新
             </el-button>
           </div>
         </div>
@@ -190,11 +209,10 @@ watch(() => listScope.value, () => {
     </el-page-header>
 
     <!-- 没选项目时 (全局入口) 提示用户选项目 -->
-    <el-empty
-      v-if="projectId <= 0"
-      description="请先选择一个项目"
-    >
-      <el-button v-if="projectOptions.length === 0" type="primary" @click="loadProjects">加载项目列表</el-button>
+    <el-empty v-if="projectId <= 0" description="请先选择一个项目">
+      <el-button v-if="projectOptions.length === 0" type="primary" @click="loadProjects">
+        加载项目列表
+      </el-button>
     </el-empty>
 
     <!-- 健康度 KPI 卡片条 (顶部常驻, 给 PMO 一眼看态势) -->
@@ -233,10 +251,12 @@ watch(() => listScope.value, () => {
         <el-radio-group v-model="viewMode" size="default">
           <el-radio-button value="list">📋 列表</el-radio-button>
           <el-radio-button value="matrix">
-            <el-icon><Histogram /></el-icon> 5x5 矩阵
+            <el-icon><Histogram /></el-icon>
+            5x5 矩阵
           </el-radio-button>
           <el-radio-button value="health">
-            <el-icon><DataLine /></el-icon> 健康度
+            <el-icon><DataLine /></el-icon>
+            健康度
           </el-radio-button>
         </el-radio-group>
       </template>
@@ -253,10 +273,7 @@ watch(() => listScope.value, () => {
       />
 
       <!-- 矩阵 tab -->
-      <RiskMatrixView
-        v-else-if="viewMode === 'matrix'"
-        :project-id="projectId"
-      />
+      <RiskMatrixView v-else-if="viewMode === 'matrix'" :project-id="projectId" />
 
       <!-- 健康度 tab (KPI 分类详情) -->
       <div v-else-if="viewMode === 'health'" v-loading="kpiLoading">
@@ -270,7 +287,7 @@ watch(() => listScope.value, () => {
                   <div v-for="(n, k) in health.byCategory" :key="k" class="bar-row">
                     <span class="bar-label">{{ k }}</span>
                     <el-progress
-                      :percentage="n / health.activeCount * 100"
+                      :percentage="(n / health.activeCount) * 100"
                       :format="() => n"
                       :stroke-width="14"
                     />
@@ -285,15 +302,34 @@ watch(() => listScope.value, () => {
                   <div v-for="(n, k) in health.byLevel" :key="k" class="bar-row">
                     <span class="bar-label">
                       <el-tag
-                        :type="k === 'CRITICAL' ? 'danger' : k === 'HIGH' ? 'warning' : k === 'MEDIUM' ? '' : 'success'"
-                        effect="dark" size="small"
-                      >{{ k }}</el-tag>
+                        :type="
+                          k === 'CRITICAL'
+                            ? 'danger'
+                            : k === 'HIGH'
+                              ? 'warning'
+                              : k === 'MEDIUM'
+                                ? ''
+                                : 'success'
+                        "
+                        effect="dark"
+                        size="small"
+                      >
+                        {{ k }}
+                      </el-tag>
                     </span>
                     <el-progress
-                      :percentage="n / health.activeCount * 100"
+                      :percentage="(n / health.activeCount) * 100"
                       :format="() => n"
                       :stroke-width="14"
-                      :color="k === 'CRITICAL' ? '#f56c6c' : k === 'HIGH' ? '#e6a23c' : k === 'MEDIUM' ? '#909399' : '#67c23a'"
+                      :color="
+                        k === 'CRITICAL'
+                          ? '#f56c6c'
+                          : k === 'HIGH'
+                            ? '#e6a23c'
+                            : k === 'MEDIUM'
+                              ? '#909399'
+                              : '#67c23a'
+                      "
                     />
                   </div>
                 </div>
@@ -305,11 +341,7 @@ watch(() => listScope.value, () => {
     </el-card>
 
     <!-- 抽屉 + 弹窗 -->
-    <RiskDetailDrawer
-      v-model="detailDrawer.visible"
-      :risk="detailDrawer.risk"
-      @edit="onDetailEdit"
-    />
+    <RiskDetailDrawer v-model="detailDrawer.visible" :risk="detailDrawer.risk" @edit="onDetailEdit" />
     <RiskFormDialog
       v-model="formDialog.visible"
       :project-id="projectId"
@@ -320,7 +352,11 @@ watch(() => listScope.value, () => {
 </template>
 
 <style scoped>
-.risk-page { display: flex; flex-direction: column; gap: 12px; }
+.risk-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
 /* KPI 卡片条 */
 .kpi-bar {
@@ -337,15 +373,48 @@ watch(() => listScope.value, () => {
   padding: 6px 0;
   border-right: 1px solid #ebeef5;
 }
-.kpi-cell:last-child { border-right: none; }
-.kpi-warn { background: #fef0f0; border-radius: 4px; border-right: none; }
-.kpi-label { font-size: 12px; color: #909399; margin-bottom: 4px; }
-.kpi-value { font-size: 22px; font-weight: 700; color: #303133; }
+.kpi-cell:last-child {
+  border-right: none;
+}
+.kpi-warn {
+  background: #fef0f0;
+  border-radius: 4px;
+  border-right: none;
+}
+.kpi-label {
+  font-size: 12px;
+  color: #909399;
+  margin-bottom: 4px;
+}
+.kpi-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #303133;
+}
 
 /* 健康度 tab */
-.muted { color: #c0c4cc; font-size: 13px; text-align: center; padding: 12px; }
-.bar-list { display: flex; flex-direction: column; gap: 8px; }
-.bar-row { display: flex; align-items: center; gap: 12px; }
-.bar-label { width: 100px; font-size: 12px; color: #606266; }
-.bar-row :deep(.el-progress) { flex: 1; }
+.muted {
+  color: #c0c4cc;
+  font-size: 13px;
+  text-align: center;
+  padding: 12px;
+}
+.bar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.bar-label {
+  width: 100px;
+  font-size: 12px;
+  color: #606266;
+}
+.bar-row :deep(.el-progress) {
+  flex: 1;
+}
 </style>

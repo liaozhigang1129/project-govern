@@ -36,7 +36,7 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{
   (e: 'update:modelValue', v: boolean): void
-  (e: 'edit',   risk: RiskItem): void
+  (e: 'edit', risk: RiskItem): void
 }>()
 
 const store = useRiskStore()
@@ -49,20 +49,44 @@ const visible = computed({
 // 工具: 颜色 / 中文 / 标签
 // ============================================================
 function levelTagType(l: RiskLevel) {
-  return { CRITICAL: 'danger', HIGH: 'warning', MEDIUM: '', LOW: 'success' }[l] as '' | 'success' | 'warning' | 'danger'
+  return { CRITICAL: 'danger', HIGH: 'warning', MEDIUM: '', LOW: 'success' }[l] as
+    '' | 'success' | 'warning' | 'danger'
 }
 function statusTagType(s: RiskStatus) {
-  return { OPEN: 'info', MITIGATING: 'warning', OCCURRED: 'danger', ACCEPTED: '', CLOSED: 'success' }[s] as '' | 'success' | 'warning' | 'info' | 'danger'
+  return { OPEN: 'info', MITIGATING: 'warning', OCCURRED: 'danger', ACCEPTED: '', CLOSED: 'success' }[s] as
+    '' | 'success' | 'warning' | 'info' | 'danger'
 }
 function statusLabel(s: RiskStatus) {
-  return { OPEN: '已识别', MITIGATING: '应对中', OCCURRED: '已发生', ACCEPTED: '已接受', CLOSED: '已关闭' }[s] ?? s
+  return (
+    { OPEN: '已识别', MITIGATING: '应对中', OCCURRED: '已发生', ACCEPTED: '已接受', CLOSED: '已关闭' }[s] ?? s
+  )
 }
 function categoryLabel(c: string) {
-  return { TECHNICAL: '技术', SCHEDULE: '进度', COST: '成本', QUALITY: '质量', EXTERNAL: '外部', ORGANIZATIONAL: '组织', OTHER: '其他' }[c] ?? c
+  return (
+    {
+      TECHNICAL: '技术',
+      SCHEDULE: '进度',
+      COST: '成本',
+      QUALITY: '质量',
+      EXTERNAL: '外部',
+      ORGANIZATIONAL: '组织',
+      OTHER: '其他',
+    }[c] ?? c
+  )
 }
 function strategyLabel(s: string | null) {
   if (!s) return '—'
-  return { AVOID: '规避 AVOID', MITIGATE: '缓解 MITIGATE', TRANSFER: '转移 TRANSFER', ACCEPT: '接受 ACCEPT', EXPLOIT: '开拓 EXPLOIT', ENHANCE: '提高 ENHANCE', SHARE: '分享 SHARE' }[s] ?? s
+  return (
+    {
+      AVOID: '规避 AVOID',
+      MITIGATE: '缓解 MITIGATE',
+      TRANSFER: '转移 TRANSFER',
+      ACCEPT: '接受 ACCEPT',
+      EXPLOIT: '开拓 EXPLOIT',
+      ENHANCE: '提高 ENHANCE',
+      SHARE: '分享 SHARE',
+    }[s] ?? s
+  )
 }
 
 // score 配色 (跟 List / Matrix 一致)
@@ -89,32 +113,42 @@ const history = computed<RiskHistoryItem[]>(() => {
 // ============================================================
 async function load() {
   if (!props.risk?.id) return
-  await Promise.all([
-    store.loadResponses(props.risk.id),
-    store.loadHistory(props.risk.id),
-  ])
+  await Promise.all([store.loadResponses(props.risk.id), store.loadHistory(props.risk.id)])
 }
 onMounted(load)
-watch(() => [props.modelValue, props.risk?.id], ([v, id]) => {
-  if (v && id) load()
-})
+watch(
+  () => [props.modelValue, props.risk?.id],
+  ([v, id]) => {
+    if (v && id) load()
+  },
+)
 defineExpose({ load })
 
 // ============================================================
 // 应对行动 (内嵌编辑)  —— step B 追加
 // ============================================================
-const respEditingId  = ref<number | 'new' | null>(null)  // 当前编辑的行 id, 'new' = 新建
-const respDraft      = ref<{ action: string; ownerUserId: number | null; dueDate: string | null; status: 'PLANNED' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED'; note: string }>({
-  action: '', ownerUserId: null, dueDate: null, status: 'PLANNED', note: '',
+const respEditingId = ref<number | 'new' | null>(null) // 当前编辑的行 id, 'new' = 新建
+const respDraft = ref<{
+  action: string
+  ownerUserId: number | null
+  dueDate: string | null
+  status: 'PLANNED' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED'
+  note: string
+}>({
+  action: '',
+  ownerUserId: null,
+  dueDate: null,
+  status: 'PLANNED',
+  note: '',
 })
-const respSaving     = ref(false)
+const respSaving = ref(false)
 
 function respStartNew() {
   respEditingId.value = 'new'
   respDraft.value = { action: '', ownerUserId: null, dueDate: null, status: 'PLANNED', note: '' }
 }
 function respStartEdit(id: number) {
-  const r = responses.value.find(x => x.id === id)
+  const r = responses.value.find((x) => x.id === id)
   if (!r) return
   respEditingId.value = id
   respDraft.value = {
@@ -167,31 +201,34 @@ function respStatusLabel(s: string) {
   return { PLANNED: '已计划', IN_PROGRESS: '执行中', DONE: '已完成', CANCELLED: '已取消' }[s] ?? s
 }
 function respStatusType(s: string) {
-  return { PLANNED: 'info', IN_PROGRESS: 'warning', DONE: 'success', CANCELLED: '' }[s] as '' | 'info' | 'warning' | 'success' | undefined
+  return { PLANNED: 'info', IN_PROGRESS: 'warning', DONE: 'success', CANCELLED: '' }[s] as
+    '' | 'info' | 'warning' | 'success' | undefined
 }
 
 // ============================================================
 // 历史时间轴 (action → 颜色 / 图标)  —— step B 追加
 // ============================================================
 function histActionLabel(a: string) {
-  return {
-    CREATED:        '🆕 风险登记',
-    STATUS_CHANGED: '🔄 状态变更',
-    SCORE_CHANGED:  '📊 分数变化',
-    OWNER_CHANGED:  '👤 责任人变更',
-    LEVEL_CHANGED:  '📈 等级变化',
-    COMMENTED:      '💬 评论',
-    RESPONSE_ADDED: '➕ 新增应对行动',
-    RESPONSE_DONE:  '✅ 应对行动完成 / 删除',
-    DELETED:        '🗑️ 风险已删除',
-  }[a] ?? a
+  return (
+    {
+      CREATED: '🆕 风险登记',
+      STATUS_CHANGED: '🔄 状态变更',
+      SCORE_CHANGED: '📊 分数变化',
+      OWNER_CHANGED: '👤 责任人变更',
+      LEVEL_CHANGED: '📈 等级变化',
+      COMMENTED: '💬 评论',
+      RESPONSE_ADDED: '➕ 新增应对行动',
+      RESPONSE_DONE: '✅ 应对行动完成 / 删除',
+      DELETED: '🗑️ 风险已删除',
+    }[a] ?? a
+  )
 }
 function histActionColor(a: string): 'primary' | 'success' | 'warning' | 'danger' | 'info' {
-  if (a === 'CREATED')        return 'success'
-  if (a === 'DELETED')        return 'danger'
+  if (a === 'CREATED') return 'success'
+  if (a === 'DELETED') return 'danger'
   if (a === 'SCORE_CHANGED' || a === 'LEVEL_CHANGED') return 'warning'
   if (a === 'STATUS_CHANGED' || a === 'OWNER_CHANGED') return 'primary'
-  if (a === 'RESPONSE_DONE')  return 'success'
+  if (a === 'RESPONSE_DONE') return 'success'
   return 'info'
 }
 function histFieldValue(h: RiskHistoryItem): string {
@@ -211,7 +248,8 @@ async function onDelete() {
   try {
     await ElMessageBox.confirm(
       `确定删除风险 ${props.risk.code} ${props.risk.title}? 该操作会写历史, 可追溯.`,
-      '删除风险', { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' }
+      '删除风险',
+      { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' },
     )
     await store.remove(props.risk.id, props.risk.projectId)
     ElMessage.success('已删除')
@@ -227,13 +265,7 @@ function onEdit() {
 </script>
 
 <template>
-  <el-drawer
-    v-model="visible"
-    direction="rtl"
-    size="640px"
-    :with-header="false"
-    :destroy-on-close="false"
-  >
+  <el-drawer v-model="visible" direction="rtl" size="640px" :with-header="false" :destroy-on-close="false">
     <div v-if="!risk" class="rd-empty">
       <el-empty description="未选择风险" />
     </div>
@@ -295,7 +327,9 @@ function onEdit() {
           <el-col :span="6">
             <div class="rd-kpi">
               <div class="rd-kpi-label">应对策略</div>
-              <div class="rd-kpi-value" style="font-size: 12px">{{ strategyLabel(risk.responseStrategy) }}</div>
+              <div class="rd-kpi-value" style="font-size: 12px">
+                {{ strategyLabel(risk.responseStrategy) }}
+              </div>
             </div>
           </el-col>
         </el-row>
@@ -350,10 +384,12 @@ function onEdit() {
         </el-row>
         <div v-if="risk.relatedWbsTaskName || risk.relatedMilestoneName" class="rd-relations">
           <span v-if="risk.relatedWbsTaskName" class="rd-rel-tag">
-            <el-icon><Document /></el-icon> 关联任务: {{ risk.relatedWbsTaskName }}
+            <el-icon><Document /></el-icon>
+            关联任务: {{ risk.relatedWbsTaskName }}
           </span>
           <span v-if="risk.relatedMilestoneName" class="rd-rel-tag">
-            <el-icon><Document /></el-icon> 关联里程碑: {{ risk.relatedMilestoneName }}
+            <el-icon><Document /></el-icon>
+            关联里程碑: {{ risk.relatedMilestoneName }}
           </span>
         </div>
         <div v-if="risk.description" class="rd-multiline">
@@ -393,7 +429,8 @@ function onEdit() {
             plain
             @click="respStartNew"
           >
-            <el-icon><Plus /></el-icon> 新增
+            <el-icon><Plus /></el-icon>
+            新增
           </el-button>
         </div>
 
@@ -401,7 +438,12 @@ function onEdit() {
         <div v-if="respEditingId !== null" class="rd-resp-edit">
           <el-form label-width="80px" size="small">
             <el-form-item label="动作" required>
-              <el-input v-model="respDraft.action" placeholder="例如 联系厂商升级 / 准备备用方案" maxlength="256" show-word-limit />
+              <el-input
+                v-model="respDraft.action"
+                placeholder="例如 联系厂商升级 / 准备备用方案"
+                maxlength="256"
+                show-word-limit
+              />
             </el-form-item>
             <el-row :gutter="12">
               <el-col :span="8">
@@ -416,12 +458,22 @@ function onEdit() {
               </el-col>
               <el-col :span="8">
                 <el-form-item label="截止日">
-                  <el-date-picker v-model="respDraft.dueDate" type="date" value-format="YYYY-MM-DD" style="width: 100%" />
+                  <el-date-picker
+                    v-model="respDraft.dueDate"
+                    type="date"
+                    value-format="YYYY-MM-DD"
+                    style="width: 100%"
+                  />
                 </el-form-item>
               </el-col>
               <el-col :span="8">
                 <el-form-item label="责任人">
-                  <el-input-number v-model="respDraft.ownerUserId" :min="1" placeholder="user_id" style="width: 100%" />
+                  <el-input-number
+                    v-model="respDraft.ownerUserId"
+                    :min="1"
+                    placeholder="user_id"
+                    style="width: 100%"
+                  />
                 </el-form-item>
               </el-col>
             </el-row>
@@ -460,7 +512,9 @@ function onEdit() {
                   {{ respStatusLabel(r.status) }}
                 </el-tag>
               </td>
-              <td><span style="font-size: 12px; color: #606266">{{ r.dueDate || '—' }}</span></td>
+              <td>
+                <span style="font-size: 12px; color: #606266">{{ r.dueDate || '—' }}</span>
+              </td>
               <td>
                 <span v-if="r.completedAt" style="font-size: 12px; color: #67c23a">
                   {{ new Date(r.completedAt).toLocaleString('zh-CN') }}
@@ -497,7 +551,7 @@ function onEdit() {
               <span v-if="h.operatorName" class="rd-hist-operator">— {{ h.operatorName }}</span>
             </div>
             <div v-if="histFieldValue(h)" class="rd-hist-line2">
-              <span v-if="h.fieldName" class="rd-hist-field">{{ h.fieldName }}: </span>
+              <span v-if="h.fieldName" class="rd-hist-field">{{ h.fieldName }}:</span>
               <span class="rd-hist-value">{{ histFieldValue(h) }}</span>
             </div>
             <div v-if="h.comment" class="rd-hist-comment">💬 {{ h.comment }}</div>
@@ -530,8 +584,12 @@ function onEdit() {
 </template>
 
 <style scoped>
-.rd-drawer { padding: 0; }
-.rd-empty { padding-top: 80px; }
+.rd-drawer {
+  padding: 0;
+}
+.rd-empty {
+  padding-top: 80px;
+}
 
 /* 头部 */
 .rd-header {
@@ -540,11 +598,26 @@ function onEdit() {
   border-left: 4px solid #909399;
   background: #fafbfc;
 }
-.rd-title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.rd-title { margin: 0; font-size: 18px; font-weight: 600; flex: 1; min-width: 0; }
+.rd-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.rd-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+}
 .rd-subtitle {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 12px; color: #909399; margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #909399;
+  margin-top: 6px;
   flex-wrap: wrap;
 }
 
@@ -554,8 +627,11 @@ function onEdit() {
   border-bottom: 1px solid #f5f5f5;
 }
 .rd-section-title {
-  font-size: 13px; font-weight: 600; color: #606266;
-  margin: 0 0 12px 0; letter-spacing: 0.5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #606266;
+  margin: 0 0 12px 0;
+  letter-spacing: 0.5px;
 }
 
 /* 关键指标 */
@@ -569,29 +645,57 @@ function onEdit() {
   gap: 12px;
   margin-bottom: 12px;
 }
-.rd-score-num { font-size: 36px; font-weight: 700; line-height: 1; }
-.rd-score-label { font-size: 14px; opacity: 0.9; }
-.rd-kpi-row { margin-top: 0; }
+.rd-score-num {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
+}
+.rd-score-label {
+  font-size: 14px;
+  opacity: 0.9;
+}
+.rd-kpi-row {
+  margin-top: 0;
+}
 .rd-kpi {
   background: #fafafa;
   border-radius: 4px;
   padding: 8px 10px;
 }
-.rd-kpi-label { font-size: 12px; color: #909399; margin-bottom: 2px; }
-.rd-kpi-value { font-size: 14px; font-weight: 600; color: #303133; }
+.rd-kpi-label {
+  font-size: 12px;
+  color: #909399;
+  margin-bottom: 2px;
+}
+.rd-kpi-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+}
 
 /* 字段 */
 .rd-field {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 13px; line-height: 1.8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.8;
 }
-.rd-field-label { color: #909399; min-width: 56px; }
-.rd-field-value { color: #303133; flex: 1; }
+.rd-field-label {
+  color: #909399;
+  min-width: 56px;
+}
+.rd-field-value {
+  color: #303133;
+  flex: 1;
+}
 
 /* 关联 */
 .rd-relations {
   margin-top: 10px;
-  display: flex; gap: 8px; flex-wrap: wrap;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 .rd-rel-tag {
   background: #ecf5ff;
@@ -599,7 +703,9 @@ function onEdit() {
   padding: 2px 8px;
   border-radius: 3px;
   font-size: 12px;
-  display: inline-flex; align-items: center; gap: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* 多行文本 */
@@ -615,12 +721,20 @@ function onEdit() {
 }
 
 /* 应对措施 */
-.rd-mit-block { }
-.rd-mit-label { font-size: 12px; color: #606266; margin-bottom: 4px; font-weight: 500; }
+.rd-mit-block {
+}
+.rd-mit-label {
+  font-size: 12px;
+  color: #606266;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
 
 /* section 5: 应对行动 */
 .rd-section-title-row {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 12px;
 }
 .rd-resp-edit {
@@ -630,9 +744,15 @@ function onEdit() {
   padding: 12px;
   margin-bottom: 12px;
 }
-.rd-resp-edit :deep(.el-form-item) { margin-bottom: 12px; }
-.rd-resp-edit :deep(.el-form-item:last-child) { margin-bottom: 0; }
-.rd-resp-empty { padding: 8px 0; }
+.rd-resp-edit :deep(.el-form-item) {
+  margin-bottom: 12px;
+}
+.rd-resp-edit :deep(.el-form-item:last-child) {
+  margin-bottom: 0;
+}
+.rd-resp-empty {
+  padding: 8px 0;
+}
 .rd-resp-table {
   width: 100%;
   border-collapse: collapse;
@@ -652,33 +772,55 @@ function onEdit() {
   border-bottom: 1px solid #f5f5f5;
   vertical-align: top;
 }
-.rd-resp-table tr:last-child td { border-bottom: none; }
-.rd-resp-action { color: #303133; }
+.rd-resp-table tr:last-child td {
+  border-bottom: none;
+}
+.rd-resp-action {
+  color: #303133;
+}
 .rd-resp-note {
-  font-size: 12px; color: #909399; margin-top: 2px;
-  white-space: pre-wrap; word-break: break-word;
+  font-size: 12px;
+  color: #909399;
+  margin-top: 2px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 /* section 6: 历史时间轴 */
 .rd-hist-line1 {
-  font-size: 13px; font-weight: 600; color: #303133;
+  font-size: 13px;
+  font-weight: 600;
+  color: #303133;
   margin-bottom: 2px;
 }
-.rd-hist-action { margin-right: 4px; }
-.rd-hist-operator { font-weight: 400; color: #909399; font-size: 12px; }
+.rd-hist-action {
+  margin-right: 4px;
+}
+.rd-hist-operator {
+  font-weight: 400;
+  color: #909399;
+  font-size: 12px;
+}
 .rd-hist-line2 {
-  font-size: 12px; color: #606266;
+  font-size: 12px;
+  color: #606266;
   background: #fafafa;
   padding: 4px 8px;
   border-radius: 3px;
   margin-top: 4px;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
-.rd-hist-field { color: #909399; }
-.rd-hist-value { color: #303133; }
+.rd-hist-field {
+  color: #909399;
+}
+.rd-hist-value {
+  color: #303133;
+}
 .rd-hist-comment {
-  font-size: 12px; color: #909399;
-  margin-top: 4px; font-style: italic;
+  font-size: 12px;
+  color: #909399;
+  margin-top: 4px;
+  font-style: italic;
 }
 
 /* 底部操作栏 */
@@ -689,8 +831,13 @@ function onEdit() {
   gap: 8px;
   flex-wrap: wrap;
 }
-.rd-footer-meta { flex: 1; min-width: 0; }
+.rd-footer-meta {
+  flex: 1;
+  min-width: 0;
+}
 .rd-footer-actions {
-  display: flex; gap: 8px; flex-wrap: wrap;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 </style>

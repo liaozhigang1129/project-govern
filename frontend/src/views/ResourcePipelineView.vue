@@ -15,7 +15,7 @@ import {
   type CapacityMatrix,
   type SkillStat,
   type OverloadAlert,
-  type DeptCapacity
+  type DeptCapacity,
 } from '@/api/resourcePipeline'
 
 const kpis = ref<ResourceKpis | null>(null)
@@ -35,7 +35,7 @@ async function load() {
       getCapacityMatrix(from.value, to.value),
       getSkillMatrix(),
       getOverloadAlerts(),
-      getDepartmentCapacity()
+      getDepartmentCapacity(),
     ])
     kpis.value = k
     matrix.value = m
@@ -89,7 +89,11 @@ onMounted(load)
         </el-card>
       </el-col>
       <el-col :span="4">
-        <el-card shadow="hover" class="kpi-card" :class="(kpis?.overloaded ?? 0) > 0 ? 'kpi-red' : 'kpi-gray'">
+        <el-card
+          shadow="hover"
+          class="kpi-card"
+          :class="(kpis?.overloaded ?? 0) > 0 ? 'kpi-red' : 'kpi-gray'"
+        >
           <div class="kpi-label">加班预警</div>
           <div class="kpi-value">{{ kpis?.overloaded ?? 0 }}</div>
           <div class="kpi-sub">分配率 &gt; 100%</div>
@@ -108,7 +112,9 @@ onMounted(load)
       <div class="util-title">整体利用率</div>
       <el-progress
         :percentage="Math.round(kpis?.utilization ?? 0)"
-        :color="(kpis?.utilization ?? 0) > 85 ? '#f56c6c' : (kpis?.utilization ?? 0) > 70 ? '#e6a23c' : '#67c23a'"
+        :color="
+          (kpis?.utilization ?? 0) > 85 ? '#f56c6c' : (kpis?.utilization ?? 0) > 70 ? '#e6a23c' : '#67c23a'
+        "
         :stroke-width="18"
         text-inside
       />
@@ -153,7 +159,7 @@ onMounted(load)
       </div>
     </el-card>
 
-    <el-row :gutter="16" style="margin-top: 16px;">
+    <el-row :gutter="16" style="margin-top: 16px">
       <el-col :span="12">
         <el-card shadow="hover">
           <h4 class="section">🧠 技能矩阵 Top-20</h4>
@@ -162,7 +168,13 @@ onMounted(load)
             <el-table-column prop="count" label="人数" width="80" align="right" />
             <el-table-column label="平均等级" width="180">
               <template #default="{ row }">
-                <el-rate v-model="row.avgLevel" :max="5" disabled show-score :colors="['#67c23a','#409eff','#e6a23c']" />
+                <el-rate
+                  v-model="row.avgLevel"
+                  :max="5"
+                  disabled
+                  show-score
+                  :colors="['#67c23a', '#409eff', '#e6a23c']"
+                />
               </template>
             </el-table-column>
             <el-table-column prop="certified" label="已认证" width="80" align="right">
@@ -213,42 +225,111 @@ onMounted(load)
 </template>
 
 <style scoped lang="scss">
-.page { padding: 16px; }
-.page-title { margin: 0 0 16px; color: #303133; }
-.kpi-row { margin-bottom: 16px; }
+.page {
+  padding: 16px;
+}
+.page-title {
+  margin: 0 0 16px;
+  color: #303133;
+}
+.kpi-row {
+  margin-bottom: 16px;
+}
 .kpi-card {
   text-align: center;
-  .kpi-label { font-size: 12px; color: #909399; }
-  .kpi-value { font-size: 32px; font-weight: 600; margin: 8px 0; }
-  .kpi-sub { font-size: 11px; color: #c0c4cc; }
+  .kpi-label {
+    font-size: 12px;
+    color: #909399;
+  }
+  .kpi-value {
+    font-size: 32px;
+    font-weight: 600;
+    margin: 8px 0;
+  }
+  .kpi-sub {
+    font-size: 11px;
+    color: #c0c4cc;
+  }
 }
-.kpi-blue .kpi-value { color: #409eff; }
-.kpi-green .kpi-value { color: #67c23a; }
-.kpi-orange .kpi-value { color: #e6a23c; }
-.kpi-red .kpi-value { color: #f56c6c; }
-.kpi-gray .kpi-value { color: #606266; }
-.kpi-purple .kpi-value { color: #9c27b0; }
-.util-card { margin-bottom: 16px; }
-.util-title { font-size: 13px; color: #606266; margin-bottom: 8px; }
+.kpi-blue .kpi-value {
+  color: #409eff;
+}
+.kpi-green .kpi-value {
+  color: #67c23a;
+}
+.kpi-orange .kpi-value {
+  color: #e6a23c;
+}
+.kpi-red .kpi-value {
+  color: #f56c6c;
+}
+.kpi-gray .kpi-value {
+  color: #606266;
+}
+.kpi-purple .kpi-value {
+  color: #9c27b0;
+}
+.util-card {
+  margin-bottom: 16px;
+}
+.util-title {
+  font-size: 13px;
+  color: #606266;
+  margin-bottom: 8px;
+}
 .filter-bar {
-  display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
-  font-size: 13px; color: #606266;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #606266;
 }
-.section { margin: 0 0 12px; color: #303133; font-size: 14px; }
-.heatmap-wrapper { overflow-x: auto; }
+.section {
+  margin: 0 0 12px;
+  color: #303133;
+  font-size: 14px;
+}
+.heatmap-wrapper {
+  overflow-x: auto;
+}
 .heatmap {
-  border-collapse: separate; border-spacing: 2px; font-size: 12px;
+  border-collapse: separate;
+  border-spacing: 2px;
+  font-size: 12px;
   .user-col {
-    position: sticky; left: 0; background: #fafbfc; z-index: 1;
-    padding: 4px 8px; min-width: 80px; text-align: left;
+    position: sticky;
+    left: 0;
+    background: #fafbfc;
+    z-index: 1;
+    padding: 4px 8px;
+    min-width: 80px;
+    text-align: left;
   }
-  .week-col { padding: 4px 8px; min-width: 60px; color: #909399; }
+  .week-col {
+    padding: 4px 8px;
+    min-width: 60px;
+    color: #909399;
+  }
   .week-cell {
-    padding: 4px 8px; min-width: 60px; text-align: center;
-    color: #fff; font-weight: 500; border-radius: 3px;
+    padding: 4px 8px;
+    min-width: 60px;
+    text-align: center;
+    color: #fff;
+    font-weight: 500;
+    border-radius: 3px;
   }
 }
-.alert-card { margin-top: 16px; border: 1px solid #fbc4c4; }
-.empty { text-align: center; color: #c0c4cc; padding: 30px; }
-.muted { color: #c0c4cc; }
+.alert-card {
+  margin-top: 16px;
+  border: 1px solid #fbc4c4;
+}
+.empty {
+  text-align: center;
+  color: #c0c4cc;
+  padding: 30px;
+}
+.muted {
+  color: #c0c4cc;
+}
 </style>

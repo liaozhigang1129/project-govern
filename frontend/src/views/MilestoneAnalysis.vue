@@ -15,9 +15,13 @@ import VChart from 'vue-echarts'
 
 import { useAuthStore } from '@/stores/auth'
 import {
-  fetchAnalysis, fetchDrillDown,
-  PHASE_LIST, STATUS_LIST,
-  type MilestoneAnalysis, type MilestoneDrillDown, type MilestoneProjectRow,
+  fetchAnalysis,
+  fetchDrillDown,
+  PHASE_LIST,
+  STATUS_LIST,
+  type MilestoneAnalysis,
+  type MilestoneDrillDown,
+  type MilestoneProjectRow,
   type MilestoneAnalysisQuery,
 } from '@/api/milestoneAnalysis'
 import { departmentApi, type DepartmentNode } from '@/api/departments'
@@ -63,13 +67,17 @@ async function loadPlList() {
       ? users
       : (users?.content ?? users?.data?.content ?? users?.data ?? [])
     plList.value = raw.map((u: any) => ({
-      id: u.id, fullName: u.fullName ?? u.username, username: u.username,
+      id: u.id,
+      fullName: u.fullName ?? u.username,
+      username: u.username,
     }))
   } catch (e) {
     ElMessage.error('加载 PL 列表失败: ' + (e as any).message)
   }
 }
-function onBuChange() { plId.value = null }
+function onBuChange() {
+  plId.value = null
+}
 
 // ============== 主视图加载 ==============
 const data = ref<MilestoneAnalysis | null>(null)
@@ -81,8 +89,8 @@ const viewMode = ref<'grid' | 'matrix' | 'bar' | 'pie'>('grid')
 const matrixOption = computed(() => {
   if (!data.value) return null
   const phases = data.value.byPhase ?? []
-  const phId = phases.map(b => b.phaseId)
-  const phName = phases.map(b => phaseMeta(b.phaseId).name)
+  const phId = phases.map((b) => b.phaseId)
+  const phName = phases.map((b) => phaseMeta(b.phaseId).name)
   // status 在 Y 轴 (下→上: PENDING/IN_PROGRESS/COMPLETED/DELAYED)
   const stList = STATUS_LIST
   // 数据点 [x=phaseIndex, y=statusIndex, value=count]
@@ -114,7 +122,7 @@ const matrixOption = computed(() => {
     },
     yAxis: {
       type: 'category',
-      data: stList.map(s => s.name),
+      data: stList.map((s) => s.name),
       splitArea: { show: true },
       axisLabel: { color: '#606266', fontSize: 12 },
     },
@@ -128,21 +136,23 @@ const matrixOption = computed(() => {
       inRange: { color: ['#f5f7fa', '#67c23a'] },
       textStyle: { color: '#606266' },
     },
-    series: [{
-      name: '里程碑数',
-      type: 'heatmap',
-      data: cells,
-      label: {
-        show: true,
-        color: '#fff',
-        fontWeight: 600,
-        formatter: (p: any) => p.data[2] || '',
+    series: [
+      {
+        name: '里程碑数',
+        type: 'heatmap',
+        data: cells,
+        label: {
+          show: true,
+          color: '#fff',
+          fontWeight: 600,
+          formatter: (p: any) => p.data[2] || '',
+        },
+        itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 },
+        emphasis: {
+          itemStyle: { shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.3)' },
+        },
       },
-      itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 },
-      emphasis: {
-        itemStyle: { shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.3)' },
-      },
-    }],
+    ],
   }
 })
 
@@ -157,11 +167,11 @@ const barOption = computed(() => {
     grid: { top: 50, left: 50, right: 30, bottom: 30 },
     xAxis: {
       type: 'category',
-      data: phases.map(b => phaseMeta(b.phaseId).name),
+      data: phases.map((b) => phaseMeta(b.phaseId).name),
       axisLabel: { color: '#606266' },
     },
     yAxis: { type: 'value', axisLabel: { color: '#909399' } },
-    series: stList.map(s => ({
+    series: stList.map((s) => ({
       name: s.name,
       type: 'bar',
       stack: 'total',
@@ -172,7 +182,7 @@ const barOption = computed(() => {
         borderRadius: s === stList[stList.length - 1] ? [4, 4, 0, 0] : 0,
         opacity: highlightedStatus.value && highlightedStatus.value !== s.code ? 0.3 : 1,
       },
-      data: phases.map(b => data.value!.phases?.[b.phaseId]?.byStatus?.[s.code] ?? 0),
+      data: phases.map((b) => data.value!.phases?.[b.phaseId]?.byStatus?.[s.code] ?? 0),
     })),
   }
 })
@@ -183,23 +193,30 @@ const pieOption = computed(() => {
   const phases = data.value.byPhase ?? []
   const stList = STATUS_LIST
   const totals: Record<string, number> = {}
-  stList.forEach(s => { totals[s.code] = 0 })
-  phases.forEach(b => {
+  stList.forEach((s) => {
+    totals[s.code] = 0
+  })
+  phases.forEach((b) => {
     const bucket = data.value!.phases?.[b.phaseId]
-    if (bucket) stList.forEach(s => { totals[s.code] += bucket.byStatus?.[s.code] ?? 0 })
+    if (bucket)
+      stList.forEach((s) => {
+        totals[s.code] += bucket.byStatus?.[s.code] ?? 0
+      })
   })
   return {
     tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
     legend: { bottom: 0, textStyle: { color: '#606266' } },
-    series: [{
-      type: 'pie',
-      radius: ['45%', '70%'],
-      avoidLabelOverlap: true,
-      itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
-      label: { show: true, formatter: '{b}\n{c}' },
-      labelLine: { show: true, length: 10, length2: 10 },
-      data: stList.map(s => ({ name: s.name, value: totals[s.code], itemStyle: { color: s.color } })),
-    }],
+    series: [
+      {
+        type: 'pie',
+        radius: ['45%', '70%'],
+        avoidLabelOverlap: true,
+        itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+        label: { show: true, formatter: '{b}\n{c}' },
+        labelLine: { show: true, length: 10, length2: 10 },
+        data: stList.map((s) => ({ name: s.name, value: totals[s.code], itemStyle: { color: s.color } })),
+      },
+    ],
   }
 })
 
@@ -218,7 +235,9 @@ function onMatrixClick(params: any) {
 const highlightedStatus = ref<string | null>(null)
 /** 鼠标移到饼图扇形 → 高亮柱状图同 status 段 */
 function onPieHover(params: any) {
-  highlightedStatus.value = params?.name ? STATUS_LIST.find(s => s.name === params.name)?.code ?? null : null
+  highlightedStatus.value = params?.name
+    ? (STATUS_LIST.find((s) => s.name === params.name)?.code ?? null)
+    : null
 }
 function onPieLeave() {
   highlightedStatus.value = null
@@ -284,10 +303,10 @@ onMounted(async () => {
 
 // ============== 7 phase 视图 ==============
 function phaseMeta(id: number) {
-  return PHASE_LIST.find(p => p.id === id) ?? { id, code: '?', name: '?', color: '#909399' }
+  return PHASE_LIST.find((p) => p.id === id) ?? { id, code: '?', name: '?', color: '#909399' }
 }
 function statusMeta(code: string) {
-  return STATUS_LIST.find(s => s.code === code) ?? { code, name: code, color: '#909399' }
+  return STATUS_LIST.find((s) => s.code === code) ?? { code, name: code, color: '#909399' }
 }
 function phaseBucket(phaseId: number) {
   return data.value?.phases[String(phaseId)]
@@ -304,7 +323,11 @@ const phaseDrill = ref({
 async function openPhaseDrill(phaseId: number) {
   const meta = phaseMeta(phaseId)
   phaseDrill.value = {
-    visible: true, loading: true, phaseId, phaseName: meta.name, data: null,
+    visible: true,
+    loading: true,
+    phaseId,
+    phaseName: meta.name,
+    data: null,
   }
   try {
     phaseDrill.value.data = await fetchDrillDown(buildDrillParams({ phaseId }))
@@ -328,7 +351,10 @@ const nameDrill = ref({
 })
 function buildDrillParams(extra: { phaseId?: number; statusCode?: string; milestoneName?: string } = {}) {
   const params: any = { scope: scope.value, period: period.value }
-  if (period.value === 'custom') { params.from = customFrom.value; params.to = customTo.value }
+  if (period.value === 'custom') {
+    params.from = customFrom.value
+    params.to = customTo.value
+  }
   if (scope.value === 'bu' && buId.value) params.buId = buId.value
   if (scope.value === 'pl' && plId.value) params.plId = plId.value
   if (extra.phaseId != null) params.phaseId = extra.phaseId
@@ -344,16 +370,22 @@ async function openNameDrill(
 ) {
   const phaseMetaObj = phaseMeta(phaseId)
   nameDrill.value = {
-    visible: true, loading: true,
-    phaseId, phaseName: phaseMetaObj.name,
-    statusCode: statusCode ?? '', statusName: statusName ?? '',
-    milestoneName: milestoneName ?? '', data: null,
+    visible: true,
+    loading: true,
+    phaseId,
+    phaseName: phaseMetaObj.name,
+    statusCode: statusCode ?? '',
+    statusName: statusName ?? '',
+    milestoneName: milestoneName ?? '',
+    data: null,
   }
   try {
     nameDrill.value.data = await fetchDrillDown(
       buildDrillParams({
-        phaseId, statusCode, milestoneName,
-      })
+        phaseId,
+        statusCode,
+        milestoneName,
+      }),
     )
   } catch (e) {
     ElMessage.error('加载命中项目失败: ' + (e as any).message)
@@ -368,14 +400,17 @@ const scopeLabel = computed(() => {
     const findName = (nodes: DepartmentNode[]): string | null => {
       for (const n of nodes) {
         if (n.id === buId.value) return n.name
-        if (n.children?.length) { const r = findName(n.children); if (r) return r }
+        if (n.children?.length) {
+          const r = findName(n.children)
+          if (r) return r
+        }
       }
       return null
     }
     return findName(deptTree.value) ?? `部门#${buId.value}`
   }
   if (scope.value === 'pl' && plId.value) {
-    const p = plList.value.find(x => x.id === plId.value)
+    const p = plList.value.find((x) => x.id === plId.value)
     return p ? `${p.fullName} (${p.username})` : `PM#${plId.value}`
   }
   return '全公司'
@@ -449,13 +484,19 @@ const scopeLabel = computed(() => {
         <div v-if="period === 'custom'" class="ma-filter-item">
           <label>起止日期</label>
           <el-date-picker
-            v-model="customFrom" type="date" placeholder="开始"
-            value-format="YYYY-MM-DD" style="width: 150px"
+            v-model="customFrom"
+            type="date"
+            placeholder="开始"
+            value-format="YYYY-MM-DD"
+            style="width: 150px"
           />
           <span>~</span>
           <el-date-picker
-            v-model="customTo" type="date" placeholder="结束"
-            value-format="YYYY-MM-DD" style="width: 150px"
+            v-model="customTo"
+            type="date"
+            placeholder="结束"
+            value-format="YYYY-MM-DD"
+            style="width: 150px"
           />
         </div>
       </div>
@@ -473,7 +514,10 @@ const scopeLabel = computed(() => {
     <!-- 视图模式切换 -->
     <div class="ma-view-switch">
       <el-button-group style="margin-right: 8px">
-        <el-button size="default" @click="exportCharts" :disabled="!data"><el-icon><Download /></el-icon><span>导出图表</span></el-button>
+        <el-button size="default" @click="exportCharts" :disabled="!data">
+          <el-icon><Download /></el-icon>
+          <span>导出图表</span>
+        </el-button>
       </el-button-group>
       <el-radio-group v-model="viewMode" size="default">
         <el-radio-button value="grid">📊 7 桶卡片</el-radio-button>
@@ -542,10 +586,17 @@ const scopeLabel = computed(() => {
             v-for="(item, idx) in (phaseBucket(bucket.phaseId)?.byName ?? []).slice(0, 5)"
             :key="`${bucket.phaseId}-${idx}`"
             class="ma-name-row"
-            @click.stop="openNameDrill(bucket.phaseId, item.statusCode, statusMeta(item.statusCode).name, item.name)"
+            @click.stop="
+              openNameDrill(bucket.phaseId, item.statusCode, statusMeta(item.statusCode).name, item.name)
+            "
           >
             <span class="ma-name">{{ item.name }}</span>
-            <el-tag size="small" effect="plain" :color="statusMeta(item.statusCode).color" :style="{ color: '#fff', border: 'none' }">
+            <el-tag
+              size="small"
+              effect="plain"
+              :color="statusMeta(item.statusCode).color"
+              :style="{ color: '#fff', border: 'none' }"
+            >
               ×{{ item.count }}
             </el-tag>
           </div>
@@ -623,7 +674,9 @@ const scopeLabel = computed(() => {
       <template v-else-if="phaseDrill.data">
         <el-descriptions :column="3" border size="small" style="margin-bottom: 16px">
           <el-descriptions-item label="范围">{{ scopeLabel }}</el-descriptions-item>
-          <el-descriptions-item label="周期">{{ phaseDrill.data.from }} ~ {{ phaseDrill.data.to }}</el-descriptions-item>
+          <el-descriptions-item label="周期">
+            {{ phaseDrill.data.from }} ~ {{ phaseDrill.data.to }}
+          </el-descriptions-item>
           <el-descriptions-item label="命中项目">{{ phaseDrill.data.total }}</el-descriptions-item>
         </el-descriptions>
 
@@ -636,7 +689,9 @@ const scopeLabel = computed(() => {
             :style="{ borderLeft: `3px solid ${s.color}` }"
           >
             <span class="ma-pill-name">{{ s.name }}</span>
-            <span class="ma-pill-num">{{ phaseBucket(phaseDrill.phaseId ?? 0)?.byStatus?.[s.code] ?? 0 }}</span>
+            <span class="ma-pill-num">
+              {{ phaseBucket(phaseDrill.phaseId ?? 0)?.byStatus?.[s.code] ?? 0 }}
+            </span>
           </div>
         </div>
 
@@ -644,7 +699,10 @@ const scopeLabel = computed(() => {
         <el-table :data="phaseBucket(phaseDrill.phaseId ?? 0)?.byName ?? []" stripe size="small">
           <el-table-column label="状态" width="100">
             <template #default="{ row }">
-              <el-tag size="small" :style="{ background: statusMeta(row.statusCode).color, color: '#fff', border: 'none' }">
+              <el-tag
+                size="small"
+                :style="{ background: statusMeta(row.statusCode).color, color: '#fff', border: 'none' }"
+              >
                 {{ statusMeta(row.statusCode).name }}
               </el-tag>
             </template>
@@ -685,7 +743,10 @@ const scopeLabel = computed(() => {
           <el-table-column label="里程碑名" prop="milestoneName" min-width="160" show-overflow-tooltip />
           <el-table-column label="状态" width="90">
             <template #default="{ row }">
-              <el-tag size="small" :style="{ background: statusMeta(row.statusCode).color, color: '#fff', border: 'none' }">
+              <el-tag
+                size="small"
+                :style="{ background: statusMeta(row.statusCode).color, color: '#fff', border: 'none' }"
+              >
                 {{ row.statusName }}
               </el-tag>
             </template>
@@ -1121,13 +1182,27 @@ const scopeLabel = computed(() => {
 .ma-bucket {
   animation: ma-fade-in-up 0.3s ease-out backwards;
 }
-.ma-bucket:nth-child(1) { animation-delay: 0.02s; }
-.ma-bucket:nth-child(2) { animation-delay: 0.04s; }
-.ma-bucket:nth-child(3) { animation-delay: 0.06s; }
-.ma-bucket:nth-child(4) { animation-delay: 0.08s; }
-.ma-bucket:nth-child(5) { animation-delay: 0.10s; }
-.ma-bucket:nth-child(6) { animation-delay: 0.12s; }
-.ma-bucket:nth-child(7) { animation-delay: 0.14s; }
+.ma-bucket:nth-child(1) {
+  animation-delay: 0.02s;
+}
+.ma-bucket:nth-child(2) {
+  animation-delay: 0.04s;
+}
+.ma-bucket:nth-child(3) {
+  animation-delay: 0.06s;
+}
+.ma-bucket:nth-child(4) {
+  animation-delay: 0.08s;
+}
+.ma-bucket:nth-child(5) {
+  animation-delay: 0.1s;
+}
+.ma-bucket:nth-child(6) {
+  animation-delay: 0.12s;
+}
+.ma-bucket:nth-child(7) {
+  animation-delay: 0.14s;
+}
 
 /* ============== 响应式 ============== */
 @media (max-width: 1280px) {

@@ -32,7 +32,7 @@ async function loadProjects() {
   try {
     const r: any = await api.get('/projects?page=0&size=200')
     // 后端 /api/projects 直接返回 array, 不是 Page 包装
-    projectList.value = Array.isArray(r) ? r : (r.content || r.data?.content || r.data || [])
+    projectList.value = Array.isArray(r) ? r : r.content || r.data?.content || r.data || []
     console.log('[RiskHealth] loaded projects:', projectList.value.length, projectList.value[0])
   } catch (e) {
     ElMessage.error('加载项目列表失败: ' + (e as any).message)
@@ -60,13 +60,16 @@ function onProjectChange(v: number | undefined) {
 }
 
 // 切换 projectId 自动 reload (修复: 删 setTimeout 100ms)
-watch(() => route.query.projectId, async (newQ) => {
-  if (newQ) {
-    await load()
-  } else {
-    data.value = null
-  }
-})
+watch(
+  () => route.query.projectId,
+  async (newQ) => {
+    if (newQ) {
+      await load()
+    } else {
+      data.value = null
+    }
+  },
+)
 
 onMounted(async () => {
   await loadProjects()
@@ -110,8 +113,9 @@ const sortedCategories = computed(() => {
 const sortedLevels = computed(() => {
   if (!data.value?.byLevel) return []
   const order = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']
-  return order.filter(l => data.value.byLevel[l] !== undefined)
-    .map(l => ({ k: l, v: data.value.byLevel[l] }))
+  return order
+    .filter((l) => data.value.byLevel[l] !== undefined)
+    .map((l) => ({ k: l, v: data.value.byLevel[l] }))
 })
 </script>
 
@@ -191,7 +195,7 @@ const sortedLevels = computed(() => {
                 {{ lv.k }}
               </span>
               <el-progress
-                :percentage="data.activeCount ? Math.round(lv.v / data.activeCount * 100) : 0"
+                :percentage="data.activeCount ? Math.round((lv.v / data.activeCount) * 100) : 0"
                 :color="colorByLevel(lv.k)"
                 :stroke-width="16"
                 style="flex: 1"
@@ -207,7 +211,7 @@ const sortedLevels = computed(() => {
             <div v-for="cat in sortedCategories" :key="cat.k" class="rh-bar-row">
               <span style="width: '120px'">{{ cat.k }}</span>
               <el-progress
-                :percentage="data.activeCount ? Math.round(cat.v / data.activeCount * 100) : 0"
+                :percentage="data.activeCount ? Math.round((cat.v / data.activeCount) * 100) : 0"
                 :stroke-width="16"
                 style="flex: 1"
               />

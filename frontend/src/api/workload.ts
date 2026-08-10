@@ -62,8 +62,15 @@ export const workloadApi = {
   projectLoad: (projectId: number, params: { from?: string; to?: string } = {}) =>
     call<ProjectLoad>(api.get(`/workload/projects/${projectId}`, { params })),
   /** 甘特图(自动 / 手动范围) */
-  gantt: (params: { from?: string; to?: string; departmentId?: number; pmUserId?: number; includeCompleted?: boolean } = {}) =>
-    call<import('@/components/GanttView.vue').GanttResponse>(api.get('/gantt', { params })),
+  gantt: (
+    params: {
+      from?: string
+      to?: string
+      departmentId?: number
+      pmUserId?: number
+      includeCompleted?: boolean
+    } = {},
+  ) => call<import('@/components/GanttView.vue').GanttResponse>(api.get('/gantt', { params })),
   /**
    * 拖拽甘特图上整条项目计划条后,提交新 planStart / planEnd
    *  - 后端: PUT /api/projects/{id} (ProjectUpdateRequest)
@@ -106,10 +113,7 @@ export interface UserMilestoneList {
 }
 
 /** 单元格下钻 API */
-export async function fetchUserMilestones(
-  userId: number,
-  weekStart: string,
-): Promise<UserMilestoneList> {
+export async function fetchUserMilestones(userId: number, weekStart: string): Promise<UserMilestoneList> {
   return api.get<UserMilestoneList>(`/workload/users/${userId}/milestones`, {
     params: { weekStart },
   })

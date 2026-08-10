@@ -28,11 +28,12 @@ const keyword = ref('')
 const filteredLeaves = computed(() => {
   const kw = keyword.value.trim().toLowerCase()
   if (!kw) return leaves.value
-  return leaves.value.filter(l =>
-    (l.userName || '').toLowerCase().includes(kw) ||
-    (l.userid || '').toLowerCase().includes(kw) ||
-    (l.leaveType || '').toLowerCase().includes(kw) ||
-    (l.reason || '').toLowerCase().includes(kw)
+  return leaves.value.filter(
+    (l) =>
+      (l.userName || '').toLowerCase().includes(kw) ||
+      (l.userid || '').toLowerCase().includes(kw) ||
+      (l.leaveType || '').toLowerCase().includes(kw) ||
+      (l.reason || '').toLowerCase().includes(kw),
   )
 })
 
@@ -73,23 +74,20 @@ async function loadStats() {
   }
 }
 
-function pollLog(logId: number, maxAttempts = 60): Promise<DingTalkLeaveSyncLog | null> {
-  return new Promise(async (resolve) => {
-    for (let i = 0; i < maxAttempts; i++) {
-      await new Promise(r => setTimeout(r, 1500))
-      try {
-        const data = await dingtalkLeaveApi.listLogs(0, 1)
-        const log = data.content.find(x => x.id === logId)
-        if (log && log.status !== 'RUNNING') {
-          resolve(log)
-          return
-        }
-      } catch {
-        // 忽略单次失败
+async function pollLog(logId: number, maxAttempts = 60): Promise<DingTalkLeaveSyncLog | null> {
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise((r) => setTimeout(r, 1500))
+    try {
+      const data = await dingtalkLeaveApi.listLogs(0, 1)
+      const log = data.content.find((x) => x.id === logId)
+      if (log && log.status !== 'RUNNING') {
+        return log
       }
+    } catch {
+      // 忽略单次失败
     }
-    resolve(null)
-  })
+  }
+  return null
 }
 
 async function trigger(fullSync: boolean) {
@@ -98,9 +96,11 @@ async function trigger(fullSync: boolean) {
     await ElMessageBox.confirm(
       `即将触发${mode}同步,请休假数据将从钉钉拉取并入库。${fullSync ? '\n(全量会重拉近 365 天数据)' : ''}`,
       '确认同步',
-      { type: 'warning' }
+      { type: 'warning' },
     )
-  } catch { return }
+  } catch {
+    return
+  }
 
   syncing.value = true
   try {
@@ -113,7 +113,7 @@ async function trigger(fullSync: boolean) {
       ElMessage.warning('同步超时未完成,稍后查看日志')
     } else if (finalLog.status === 'SUCCESS') {
       ElMessage.success(
-        `同步成功: 拉取 ${finalLog.fetched} / 新增 ${finalLog.createdCount} / 更新 ${finalLog.updatedCount} / 失效 ${finalLog.deletedCount}`
+        `同步成功: 拉取 ${finalLog.fetched} / 新增 ${finalLog.createdCount} / 更新 ${finalLog.updatedCount} / 失效 ${finalLog.deletedCount}`,
       )
     } else {
       ElMessage.error(`同步失败: ${finalLog.errorMessage ?? '未知错误'}`)
@@ -157,10 +157,14 @@ function fmtTime(t: string | null | undefined): string {
 
 function statusTag(s: string | null | undefined): 'success' | 'warning' | 'danger' | 'info' {
   switch (s) {
-    case 'SUCCESS': return 'success'
-    case 'FAILED': return 'danger'
-    case 'RUNNING': return 'warning'
-    default: return 'info'
+    case 'SUCCESS':
+      return 'success'
+    case 'FAILED':
+      return 'danger'
+    case 'RUNNING':
+      return 'warning'
+    default:
+      return 'info'
   }
 }
 
@@ -168,10 +172,14 @@ function leaveStatusTag(s: string | null | undefined): 'success' | 'warning' | '
   if (!s) return 'info'
   // 钉钉请休假状态: 1=审批中, 2=已通过, 3=已驳回, 4=已撤销
   switch (s) {
-    case '2': return 'success'
-    case '3': return 'danger'
-    case '4': return 'info'
-    default: return 'warning'
+    case '2':
+      return 'success'
+    case '3':
+      return 'danger'
+    case '4':
+      return 'info'
+    default:
+      return 'warning'
   }
 }
 
@@ -208,7 +216,10 @@ function startAutoRefresh() {
 }
 
 function stopAutoRefresh() {
-  if (timer) { clearInterval(timer); timer = null }
+  if (timer) {
+    clearInterval(timer)
+    timer = null
+  }
 }
 
 onMounted(async () => {
@@ -219,7 +230,9 @@ onMounted(async () => {
 onUnmounted(stopAutoRefresh)
 
 // 监听分页变化
-watch([page, size], () => { loadList() })
+watch([page, size], () => {
+  loadList()
+})
 </script>
 
 <template>
@@ -276,14 +289,21 @@ watch([page, size], () => { loadList() })
     </el-row>
 
     <el-alert type="info" :closable="false" style="margin-bottom: 12px">
-      增量同步只会拉取上次同步时间之后的变更;全量同步会拉取近 365 天数据并刷新全部记录。后台异步执行,完成前页面会保持轮询。
+      增量同步只会拉取上次同步时间之后的变更;全量同步会拉取近 365
+      天数据并刷新全部记录。后台异步执行,完成前页面会保持轮询。
     </el-alert>
 
     <el-tabs>
       <!-- 请休假列表 -->
       <el-tab-pane label="请休假记录">
         <div style="margin-bottom: 12px">
-          <el-input v-model="keyword" placeholder="搜索姓名 / userid / 类型 / 事由" :prefix-icon="Search" clearable style="width: 320px" />
+          <el-input
+            v-model="keyword"
+            placeholder="搜索姓名 / userid / 类型 / 事由"
+            :prefix-icon="Search"
+            clearable
+            style="width: 320px"
+          />
         </div>
         <el-table
           v-loading="loading"
@@ -305,13 +325,18 @@ watch([page, size], () => { loadList() })
           </el-table-column>
           <el-table-column label="时长" min-width="100">
             <template #default="{ row }">
-              <span v-if="row.duration">{{ row.duration }} {{ row.durationUnit === 'percentDay' ? '%天' : (row.durationUnit || '小时') }}</span>
+              <span v-if="row.duration">
+                {{ row.duration }}
+                {{ row.durationUnit === 'percentDay' ? '%天' : row.durationUnit || '小时' }}
+              </span>
               <span v-else>-</span>
             </template>
           </el-table-column>
           <el-table-column label="状态" width="100">
             <template #default="{ row }">
-              <el-tag :type="leaveStatusTag(row.status)" size="small">{{ leaveStatusText(row.status) }}</el-tag>
+              <el-tag :type="leaveStatusTag(row.status)" size="small">
+                {{ leaveStatusText(row.status) }}
+              </el-tag>
             </template>
           </el-table-column>
           <el-table-column label="���步时间" min-width="160">
@@ -388,7 +413,9 @@ watch([page, size], () => { loadList() })
         </el-descriptions-item>
         <el-descriptions-item label="事由" :span="2">{{ detail.leave.reason || '-' }}</el-descriptions-item>
         <el-descriptions-item label="审批人">{{ detail.leave.approverUserid || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="钉钉更新时间">{{ fmtTime(detail.leave.dingtalkUpdatedAt) }}</el-descriptions-item>
+        <el-descriptions-item label="钉钉更新时间">
+          {{ fmtTime(detail.leave.dingtalkUpdatedAt) }}
+        </el-descriptions-item>
         <el-descriptions-item label="同步时间">{{ fmtTime(detail.leave.syncedAt) }}</el-descriptions-item>
         <el-descriptions-item label="leaveId">{{ detail.leave.leaveId }}</el-descriptions-item>
       </el-descriptions>

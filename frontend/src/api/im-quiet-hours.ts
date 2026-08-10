@@ -18,7 +18,7 @@ export interface ImQuietHours {
   id: number
   userId: number
   startTime: string // "HH:mm"
-  endTime: string   // "HH:mm"
+  endTime: string // "HH:mm"
   timezone: string
   enabled: boolean
   createdAt: string

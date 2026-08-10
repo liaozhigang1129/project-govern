@@ -19,9 +19,9 @@ import { Calendar, Refresh } from '@element-plus/icons-vue'
 export interface GanttMilestone {
   id: number
   name: string
-  planDate: string       // YYYY-MM-DD
+  planDate: string // YYYY-MM-DD
   actualDate: string | null
-  status: string         // PENDING/IN_PROGRESS/COMPLETED/DELAYED
+  status: string // PENDING/IN_PROGRESS/COMPLETED/DELAYED
   weight: number
   /** V3.1: 阶段 id (1-7) */
   phaseId: number | null
@@ -73,27 +73,30 @@ function toDate(s: string | null | undefined): Date | null {
 const viewFrom = computed<Date>(() => {
   if (props.data?.rangeFrom) return toDate(props.data.rangeFrom)!
   // 兜底:bar 最早 planStart
-  const dates = props.data?.bars
-    ?.map(b => toDate(b.planStart) || toDate(b.actualStart))
-    .filter((d): d is Date => !!d) ?? []
-  if (dates.length) return new Date(Math.min(...dates.map(d => d.getTime())))
+  const dates =
+    props.data?.bars
+      ?.map((b) => toDate(b.planStart) || toDate(b.actualStart))
+      .filter((d): d is Date => !!d) ?? []
+  if (dates.length) return new Date(Math.min(...dates.map((d) => d.getTime())))
   return new Date()
 })
 const viewTo = computed<Date>(() => {
   if (props.data?.rangeTo) return toDate(props.data.rangeTo)!
-  const dates = props.data?.bars
-    ?.map(b => toDate(b.planEnd) || toDate(b.actualEnd))
-    .filter((d): d is Date => !!d) ?? []
-  if (dates.length) return new Date(Math.max(...dates.map(d => d.getTime())))
+  const dates =
+    props.data?.bars?.map((b) => toDate(b.planEnd) || toDate(b.actualEnd)).filter((d): d is Date => !!d) ?? []
+  if (dates.length) return new Date(Math.max(...dates.map((d) => d.getTime())))
   return new Date(viewFrom.value.getTime() + 90 * 24 * 3600 * 1000)
 })
 
 const totalDays = computed(() =>
-  Math.max(1, Math.round((viewTo.value.getTime() - viewFrom.value.getTime()) / 86400000))
+  Math.max(1, Math.round((viewTo.value.getTime() - viewFrom.value.getTime()) / 86400000)),
 )
 
 // ---------- 月份分隔条 ----------
-interface MonthTick { x: number; label: string }
+interface MonthTick {
+  x: number
+  label: string
+}
 const monthTicks = computed<MonthTick[]>(() => {
   const ticks: MonthTick[] = []
   const start = new Date(viewFrom.value.getFullYear(), viewFrom.value.getMonth(), 1)
@@ -104,7 +107,7 @@ const monthTicks = computed<MonthTick[]>(() => {
     const x = (days / totalDays.value) * 100
     ticks.push({
       x,
-      label: `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}`
+      label: `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}`,
     })
     cur = new Date(cur.getFullYear(), cur.getMonth() + 1, 1)
   }
@@ -115,7 +118,7 @@ const monthTicks = computed<MonthTick[]>(() => {
 function barStyle(bar: GanttBar) {
   // 实际区间(优先)
   const s = toDate(bar.actualStart) || toDate(bar.planStart)
-  const e = toDate(bar.actualEnd)   || toDate(bar.planEnd)
+  const e = toDate(bar.actualEnd) || toDate(bar.planEnd)
   if (!s || !e) {
     return { display: 'none' as const }
   }
@@ -140,7 +143,7 @@ function progressStyle(bar: GanttBar) {
   // base.width 是 "123.4px", 乘以 pct/100
   const m = /^([\d.]+)px$/.exec(base.width as string)
   if (!m) return base
-  const w = parseFloat(m[1]) * Math.min(100, Math.max(0, bar.progressPct)) / 100
+  const w = (parseFloat(m[1]) * Math.min(100, Math.max(0, bar.progressPct))) / 100
   return { left: base.left, width: `${w}px` }
 }
 function milestoneStyle(bar: GanttBar, m: GanttMilestone) {
@@ -150,13 +153,13 @@ function milestoneStyle(bar: GanttBar, m: GanttMilestone) {
   if (days < 0 || days > totalDays.value) return { display: 'none' as const }
   // 用绝对 px 定位,跟缩放联动
   const left = LABEL_W + days * pxPerDay()
-  const size = Math.max(8, Math.min(20, 4 + m.weight * 2))  // 8~20px
+  const size = Math.max(8, Math.min(20, 4 + m.weight * 2)) // 8~20px
   return {
     position: 'absolute' as const,
-    top: '12px',                                            // 跟父 .gantt-track 顶部对齐(36px - size/2 = 18?取 12px 让菱形大致居中)
+    top: '12px', // 跟父 .gantt-track 顶部对齐(36px - size/2 = 18?取 12px 让菱形大致居中)
     left: `${left - size / 2}px`,
     width: `${size}px`,
-    height: `${size}px`
+    height: `${size}px`,
   }
 }
 
@@ -170,8 +173,8 @@ function offsetBadgeStyle(bar: GanttBar, m: GanttMilestone) {
   return {
     position: 'absolute' as const,
     top: '2px',
-    left: `${wrapLeft + size - 11}px`,  // 右上角偏移
-    zIndex: 12
+    left: `${wrapLeft + size - 11}px`, // 右上角偏移
+    zIndex: 12,
   }
 }
 
@@ -225,7 +228,7 @@ const dragGhostPreview = computed(() => {
     rows.push({
       id,
       name: nameById.get(id) ?? `#${id}`,
-      newDate: dateAtOffset(d, dragGhost.value.dayOffset)
+      newDate: dateAtOffset(d, dragGhost.value.dayOffset),
     })
   }
   return rows.slice(0, GHOST_LIST_MAX)
@@ -241,12 +244,18 @@ const dragGhostHiddenCount = computed(() => {
 const PROJECT_COLOR_CACHE = new Map<number, string>()
 function projectColor(projectId: number): string {
   if (!PROJECT_COLOR_CACHE.has(projectId)) {
-    const hue = Math.abs((projectId * 137.5) % 360)   // 黄金角,均匀分布
+    const hue = Math.abs((projectId * 137.5) % 360) // 黄金角,均匀分布
     PROJECT_COLOR_CACHE.set(projectId, `hsl(${hue}, 70%, 55%)`)
   }
   return PROJECT_COLOR_CACHE.get(projectId)!
 }
-interface MilestonePos { x: number; y: number; projectId: number; size: number; color: string }
+interface MilestonePos {
+  x: number
+  y: number
+  projectId: number
+  size: number
+  color: string
+}
 // ★ 关键修复:用真实 DOM 位置而不是计算位置(因为缩放/滚动会让像素位置错位)
 function getMilestonePosById(id: number): MilestonePos | null {
   if (!scrollRef.value) return null
@@ -284,8 +293,8 @@ const dragConnectionLines = computed(() => {
   const main = getMilestonePosById(primaryDragId.value)
   if (!main) return []
   return dragCtx.ids
-    .filter(id => id !== primaryDragId.value)
-    .map(id => {
+    .filter((id) => id !== primaryDragId.value)
+    .map((id) => {
       const p = getMilestonePosById(id)
       if (!p) return null
       return {
@@ -294,7 +303,7 @@ const dragConnectionLines = computed(() => {
         y1: main.y,
         x2: p.x + dragGhostOffsetPx.value,
         y2: p.y,
-        color: p.color
+        color: p.color,
       }
     })
     .filter((x): x is NonNullable<typeof x> => !!x)
@@ -303,41 +312,58 @@ const dragConnectionLines = computed(() => {
 // 目标预览菱形(每个辅拖的"目标位置" ghost rect)
 const dragTargetGhosts = computed(() => {
   if (!dragCtx || primaryDragId.value == null || !dragGhost.value) return []
-  return dragCtx.ids.map(id => {
-    const p = getMilestonePosById(id)
-    if (!p) return null
-    // 目标位置 = 当前位置 + movedPx
-    return {
-      id,
-      x: p.x + dragGhostOffsetPx.value - p.size / 2,
-      y: p.y - p.size / 2,
-      size: p.size,
-      color: p.color
-    }
-  }).filter((x): x is NonNullable<typeof x> => !!x)
+  return dragCtx.ids
+    .map((id) => {
+      const p = getMilestonePosById(id)
+      if (!p) return null
+      // 目标位置 = 当前位置 + movedPx
+      return {
+        id,
+        x: p.x + dragGhostOffsetPx.value - p.size / 2,
+        y: p.y - p.size / 2,
+        size: p.size,
+        color: p.color,
+      }
+    })
+    .filter((x): x is NonNullable<typeof x> => !!x)
 })
 
 // ---------- 远程协作(光标 + 拖动轨迹) ----------
-export interface RemoteCursor { userId: number; userName: string; color: string; x: number; y: number; labelWidth: number; ts: number }
-export interface RemoteTrail  { userId: number; color: string; startX: number | null; currentX: number | null; y: number; dayOffset: number }
+export interface RemoteCursor {
+  userId: number
+  userName: string
+  color: string
+  x: number
+  y: number
+  labelWidth: number
+  ts: number
+}
+export interface RemoteTrail {
+  userId: number
+  color: string
+  startX: number | null
+  currentX: number | null
+  y: number
+  dayOffset: number
+}
 const remoteCursors = ref<RemoteCursor[]>([])
-const remoteTrails  = ref<RemoteTrail[]>([])
+const remoteTrails = ref<RemoteTrail[]>([])
 
 // 暴露给父组件的协作 API(父组件用 SSE / WebSocket 接收广播,转给这里)
 function applyRemoteCursor(c: Omit<RemoteCursor, 'ts' | 'labelWidth'>) {
   const labelWidth = Math.max(36, c.userName.length * 8 + 14)
-  const next = remoteCursors.value.filter(rc => rc.userId !== c.userId)
+  const next = remoteCursors.value.filter((rc) => rc.userId !== c.userId)
   next.push({ ...c, labelWidth, ts: Date.now() })
   remoteCursors.value = next
 }
 function applyRemoteTrail(t: RemoteTrail) {
-  const next = remoteTrails.value.filter(rt => rt.userId !== t.userId)
+  const next = remoteTrails.value.filter((rt) => rt.userId !== t.userId)
   next.push(t)
   remoteTrails.value = next
 }
 function clearRemoteUser(userId: number) {
-  remoteCursors.value = remoteCursors.value.filter(rc => rc.userId !== userId)
-  remoteTrails.value  = remoteTrails.value.filter(rt => rt.userId !== userId)
+  remoteCursors.value = remoteCursors.value.filter((rc) => rc.userId !== userId)
+  remoteTrails.value = remoteTrails.value.filter((rt) => rt.userId !== userId)
 }
 // 暴露给父组件
 defineExpose({ applyRemoteCursor, applyRemoteTrail, clearRemoteUser, projectColor })
@@ -345,8 +371,10 @@ defineExpose({ applyRemoteCursor, applyRemoteTrail, clearRemoteUser, projectColo
 // 广播节流(本地拖动时给父组件发)
 let broadcastThrottle: number | null = null
 function broadcastDrag(payload: { ids: number[]; dayOffset: number; x: number; y: number; ts: number }) {
-  if (broadcastThrottle) return  // 16ms 内只发一次(~60fps)
-  broadcastThrottle = window.setTimeout(() => { broadcastThrottle = null }, 16)
+  if (broadcastThrottle) return // 16ms 内只发一次(~60fps)
+  broadcastThrottle = window.setTimeout(() => {
+    broadcastThrottle = null
+  }, 16)
   emit('drag-broadcast', payload)
 }
 
@@ -364,23 +392,32 @@ function startRemoteStaleSweep() {
   const tick = () => {
     const now = Date.now()
     const before = remoteCursors.value.length
-    remoteCursors.value = remoteCursors.value.filter(rc => now - rc.ts < REMOTE_STALE_MS)
-    if (remoteCursors.value.length !== before) {/* 触发响应式 */}
+    remoteCursors.value = remoteCursors.value.filter((rc) => now - rc.ts < REMOTE_STALE_MS)
+    if (remoteCursors.value.length !== before) {
+      /* 触发响应式 */
+    }
     remoteStaleRaf = requestAnimationFrame(tick)
   }
   remoteStaleRaf = requestAnimationFrame(tick)
 }
 onMounted(startRemoteStaleSweep)
-const dragGhost = ref<{ x: number; y: number; dayOffset: number; movedPx: number; planDate: string; count: number } | null>(null)
+const dragGhost = ref<{
+  x: number
+  y: number
+  dayOffset: number
+  movedPx: number
+  planDate: string
+  count: number
+} | null>(null)
 
 // 多选
 const selectedIds = ref<Set<number>>(new Set())
 const lastClickedId = ref<number | null>(null)
 
 interface DragCtx {
-  ids: number[]                                  // 1 个或多个(多选时)
-  projectIds: Map<number, number>               // id -> projectId
-  originalPlanDates: Map<number, string>        // id -> 原 planDate
+  ids: number[] // 1 个或多个(多选时)
+  projectIds: Map<number, number> // id -> projectId
+  originalPlanDates: Map<number, string> // id -> 原 planDate
   startX: number
   movedPx: number
   lastDayOffset: number
@@ -392,7 +429,7 @@ let edgeScrollDir: -1 | 0 | 1 = 0
 function dayAtX(clientX: number): number {
   if (!scrollRef.value) return 0
   const rect = scrollRef.value.getBoundingClientRect()
-  const xInInner = (clientX - rect.left) + scrollRef.value.scrollLeft - LABEL_W
+  const xInInner = clientX - rect.left + scrollRef.value.scrollLeft - LABEL_W
   return Math.round(xInInner / pxPerDay())
 }
 
@@ -444,8 +481,8 @@ function toggleRangeSelection(bar: GanttBar, m: GanttMilestone) {
       all.push({ id: mm.id, projectId: b.projectId, ms: mm })
     }
   }
-  const startIdx = all.findIndex(x => x.id === lastClickedId.value)
-  const endIdx = all.findIndex(x => x.id === m.id)
+  const startIdx = all.findIndex((x) => x.id === lastClickedId.value)
+  const endIdx = all.findIndex((x) => x.id === m.id)
   if (startIdx < 0 || endIdx < 0) {
     selectedIds.value = new Set([m.id])
     lastClickedId.value = m.id
@@ -492,9 +529,7 @@ function onMilestoneDragStart(bar: GanttBar, m: GanttMilestone, e: MouseEvent) {
 
   // 多选:如果当前里程碑在 selectedIds 里,拖所有;否则只拖当前
   // 注意:取一个不同名字的局部变量,避免和外层 draggingIds ref 冲突
-  const idsToDrag: number[] = selectedIds.value.has(m.id)
-    ? [...selectedIds.value]
-    : [m.id]
+  const idsToDrag: number[] = selectedIds.value.has(m.id) ? [...selectedIds.value] : [m.id]
 
   // 收集每个 id 的原 planDate 和 projectId
   const projectIds = new Map<number, number>()
@@ -514,10 +549,10 @@ function onMilestoneDragStart(bar: GanttBar, m: GanttMilestone, e: MouseEvent) {
     originalPlanDates,
     startX: e.clientX,
     movedPx: 0,
-    lastDayOffset: 0
+    lastDayOffset: 0,
   }
-  draggingIds.value = new Set(idsToDrag)                // 所有被一起拖的 id
-  primaryDragId.value = m.id                            // 主拖的 id
+  draggingIds.value = new Set(idsToDrag) // 所有被一起拖的 id
+  primaryDragId.value = m.id // 主拖的 id
   document.body.style.cursor = 'grabbing'
   window.addEventListener('mousemove', onMilestoneDragMove)
   window.addEventListener('mouseup', onMilestoneDragEnd, { once: true })
@@ -576,7 +611,7 @@ function onMilestoneDragMove(e: MouseEvent) {
     dayOffset,
     movedPx: dragCtx.movedPx,
     planDate: newPlanDate,
-    count: dragCtx.ids.length
+    count: dragCtx.ids.length,
   }
   // 第一次真正移动 + dayOffset != 0 → 弹确认提示(只弹一次,直到 mouseup)
   if (!dragConfirmOpen.value && dayOffset !== 0) {
@@ -588,7 +623,7 @@ function onMilestoneDragMove(e: MouseEvent) {
     dayOffset,
     x: e.clientX,
     y: e.clientY,
-    ts: Date.now()
+    ts: Date.now(),
   })
 }
 
@@ -623,8 +658,8 @@ async function onMilestoneDragEnd() {
   stopAutoScroll()
   const ctx = dragCtx
   dragCtx = null
-  draggingIds.value = new Set()      // 重置:所有被一起拖的
-  primaryDragId.value = null         // 重置:主拖的
+  draggingIds.value = new Set() // 重置:所有被一起拖的
+  primaryDragId.value = null // 重置:主拖的
   const ghost = dragGhost.value
   dragGhost.value = null
   const confirmOpen = dragConfirmOpen.value
@@ -660,27 +695,36 @@ function showBatchConfirm(ctx: DragCtx, ghost: { dayOffset: number; planDate: st
     cancelButtonText: '取消',
     closeOnClickModal: false,
     closeOnPressEscape: true,
-    message: () => h('div', { class: 'gantt-batch-confirm-body' }, [
-      h('div', { class: 'gantt-batch-confirm-header' }, [
-        h('span', null, `📅 即将改期 `),
-        h('strong', null, `${ghost.count} 个里程碑`),
-        h('span', null, ',共偏移 '),
-        h('strong', { class: 'gantt-batch-confirm-offset' }, `${daySign}${ghost.dayOffset} 天`),
-        h('span', null, '。主控日期:'),
-        h('strong', null, ` ${ghost.planDate}`)
+    message: () =>
+      h('div', { class: 'gantt-batch-confirm-body' }, [
+        h('div', { class: 'gantt-batch-confirm-header' }, [
+          h('span', null, `📅 即将改期 `),
+          h('strong', null, `${ghost.count} 个里程碑`),
+          h('span', null, ',共偏移 '),
+          h('strong', { class: 'gantt-batch-confirm-offset' }, `${daySign}${ghost.dayOffset} 天`),
+          h('span', null, '。主控日期:'),
+          h('strong', null, ` ${ghost.planDate}`),
+        ]),
+        // ★ 预览列表(展示每个被改期里程碑的:◆ 名称 → 新日期)
+        h(
+          'div',
+          { class: 'gantt-batch-confirm-list' },
+          previewRows.map((row) =>
+            h('div', { class: 'gantt-batch-confirm-row' }, [
+              h(
+                'span',
+                {
+                  class: 'gantt-batch-confirm-bullet ' + (row.id === ctx.ids[0] ? 'is-primary' : 'is-batch'),
+                },
+                '◆',
+              ),
+              h('span', { class: 'gantt-batch-confirm-name' }, row.name),
+              h('span', { class: 'gantt-batch-confirm-date' }, row.newDate),
+            ]),
+          ),
+        ),
+        hidden > 0 ? h('div', { class: 'gantt-batch-confirm-more' }, `… 还有 ${hidden} 个`) : null,
       ]),
-      // ★ 预览列表(展示每个被改期里程碑的:◆ 名称 → 新日期)
-      h('div', { class: 'gantt-batch-confirm-list' },
-        previewRows.map(row => h('div', { class: 'gantt-batch-confirm-row' }, [
-          h('span', {
-            class: 'gantt-batch-confirm-bullet ' + (row.id === ctx.ids[0] ? 'is-primary' : 'is-batch')
-          }, '◆'),
-          h('span', { class: 'gantt-batch-confirm-name' }, row.name),
-          h('span', { class: 'gantt-batch-confirm-date' }, row.newDate)
-        ]))
-      ),
-      hidden > 0 ? h('div', { class: 'gantt-batch-confirm-more' }, `… 还有 ${hidden} 个`) : null
-    ])
   })
     .then(async () => {
       await performBatchPatch(ctx, ghost)
@@ -693,15 +737,25 @@ function showBatchConfirm(ctx: DragCtx, ghost: { dayOffset: number; planDate: st
 }
 
 /** 真正执行批量 PATCH(主流程) */
-async function performBatchPatch(ctx: DragCtx, ghost: { dayOffset: number; planDate: string; count: number }) {
+async function performBatchPatch(
+  ctx: DragCtx,
+  ghost: { dayOffset: number; planDate: string; count: number },
+) {
   const isBatch = ctx.ids.length > 1
   try {
-    const promises = ctx.ids.map(id => {
+    const promises = ctx.ids.map((id) => {
       const orig = ctx.originalPlanDates.get(id)!
       const d = toDate(orig)!
       const newDate = dateAtOffset(d, ghost.dayOffset)
-      return milestoneApi.patchPlanDate(id, newDate)
-        .then((updated: any) => ({ id, newPlanDate: newDate, projectId: ctx.projectIds.get(id)!, ok: true as const, updated }))
+      return milestoneApi
+        .patchPlanDate(id, newDate)
+        .then((updated: any) => ({
+          id,
+          newPlanDate: newDate,
+          projectId: ctx.projectIds.get(id)!,
+          ok: true as const,
+          updated,
+        }))
         .catch((err: any) => ({ id, ok: false as const, err: err.message ?? '改期失败' }))
     })
     const results = await Promise.all(promises)
@@ -709,12 +763,14 @@ async function performBatchPatch(ctx: DragCtx, ghost: { dayOffset: number; planD
     const fail = results.length - ok
     if (ok > 0) {
       ElMessage.success(
-        isBatch
-          ? `已批量改期 ${ok} 个里程碑${fail ? ` (${fail} 失败)` : ''}`
-          : `已改期至 ${ghost.planDate}`
+        isBatch ? `已批量改期 ${ok} 个里程碑${fail ? ` (${fail} 失败)` : ''}` : `已改期至 ${ghost.planDate}`,
       )
       // 发一个聚合事件(用主拖的 id)
-      emit('milestone-moved', { id: ctx.ids[0], projectId: ctx.projectIds.get(ctx.ids[0])!, newPlanDate: ghost.planDate })
+      emit('milestone-moved', {
+        id: ctx.ids[0],
+        projectId: ctx.projectIds.get(ctx.ids[0])!,
+        newPlanDate: ghost.planDate,
+      })
     }
     if (fail > 0 && ok === 0) {
       ElMessage.error('全部改期失败')
@@ -733,7 +789,7 @@ async function onGlobalKeydownForReschedule(e: KeyboardEvent) {
   for (const b of props.data?.bars ?? []) {
     for (const mm of b.milestones) {
       if (mm.id !== focusedId.value) continue
-      if (mm.status === 'COMPLETED') return  // 完成的不能改
+      if (mm.status === 'COMPLETED') return // 完成的不能改
       if (e.key === 'ArrowLeft') {
         e.preventDefault()
         await rescheduleOne(mm.id, b.projectId, mm.planDate, -1)
@@ -786,7 +842,7 @@ const STATUS_COLOR: Record<string, string> = {
   PENDING: '#909399',
   IN_PROGRESS: '#e6a23c',
   COMPLETED: '#67c23a',
-  DELAYED: '#f56c6c'
+  DELAYED: '#f56c6c',
 }
 
 /**
@@ -800,37 +856,38 @@ const STATUS_COLOR: Record<string, string> = {
  *  - 跨 phase: 立项紫 / 需求蓝 / 设计青绿 / 开发橙 / 测试红 / 上线绿 / 维保灰 → 一眼可分辨
  */
 const PHASE_HUE: Record<number, number> = {
-  1: 280,  // 立项 — 紫 (HSL hue 280)
-  2: 210,  // 需求 — 蓝 (HSL hue 210)
-  3: 165,  // 设计 — 青绿 (HSL hue 165)
-  4:  30,  // 开发 — 橙 (HSL hue 30)
-  5:   0,  // 测试 — 红 (HSL hue 0)
-  6: 145,  // 上线运维 — 绿 (HSL hue 145)
-  7: 200,  // 维保 — 灰蓝 (HSL hue 200)
+  1: 280, // 立项 — 紫 (HSL hue 280)
+  2: 210, // 需求 — 蓝 (HSL hue 210)
+  3: 165, // 设计 — 青绿 (HSL hue 165)
+  4: 30, // 开发 — 橙 (HSL hue 30)
+  5: 0, // 测试 — 红 (HSL hue 0)
+  6: 145, // 上线运维 — 绿 (HSL hue 145)
+  7: 200, // 维保 — 灰蓝 (HSL hue 200)
 }
 
 /** 同 phase 内 4 个槽位 → 饱和度 / 亮度梯度 (从最深到最浅) */
 const SLOT_STYLE: { s: number; l: number }[] = [
-  { s: 75, l: 42 },  // 深 — 主色
-  { s: 65, l: 52 },  // 中
-  { s: 55, l: 62 },  // 浅
-  { s: 45, l: 72 },  // 极浅 — 第 4 个 milestone 仍可区分
+  { s: 75, l: 42 }, // 深 — 主色
+  { s: 65, l: 52 }, // 中
+  { s: 55, l: 62 }, // 浅
+  { s: 45, l: 72 }, // 极浅 — 第 4 个 milestone 仍可区分
 ]
 
 /** HSL → HEX (用于 SVG / inline style) */
 function hslToHex(h: number, s: number, l: number): string {
   // h ∈ [0,360), s/l ∈ [0,100]
-  const sn = s / 100, ln = l / 100
+  const sn = s / 100,
+    ln = l / 100
   const c = (1 - Math.abs(2 * ln - 1)) * sn
   const hp = h / 60
   const x = c * (1 - Math.abs((hp % 2) - 1))
-  let r = 0, g = 0, b = 0
-  if      (hp < 1) [r, g, b] = [c, x, 0]
+  let r!: number, g!: number, b!: number
+  if (hp < 1) [r, g, b] = [c, x, 0]
   else if (hp < 2) [r, g, b] = [x, c, 0]
   else if (hp < 3) [r, g, b] = [0, c, x]
   else if (hp < 4) [r, g, b] = [0, x, c]
   else if (hp < 5) [r, g, b] = [x, 0, c]
-  else             [r, g, b] = [c, 0, x]
+  else [r, g, b] = [c, 0, x]
   const m = ln - c / 2
   const toHex = (v: number) => {
     const n = Math.round((v + m) * 255)
@@ -873,15 +930,21 @@ function milestoneColor(bar: GanttBar, m: GanttMilestone): string {
 
 // 表格列:左 220px 标签 + 右 N px 时间轴(N = days * pxPerDay,固定宽度 → 横向滚动)
 const LABEL_W = 220
-const PX_PER_DAY = 18  // 每天 18px;默认 90 天 ≈ 1620px 容器宽
+const PX_PER_DAY = 18 // 每天 18px;默认 90 天 ≈ 1620px 容器宽
 
 // 缩放:用百分比 60%~200%,实际 px = PX_PER_DAY * zoom/100
 const zoom = ref(100)
 const scrollRef = ref<HTMLElement | null>(null)
 
-function pxPerDay() { return PX_PER_DAY * zoom.value / 100 }
-function trackWidth() { return Math.max(800, totalDays.value * pxPerDay()) }
-function innerWidth() { return LABEL_W + trackWidth() }
+function pxPerDay() {
+  return (PX_PER_DAY * zoom.value) / 100
+}
+function trackWidth() {
+  return Math.max(800, totalDays.value * pxPerDay())
+}
+function innerWidth() {
+  return LABEL_W + trackWidth()
+}
 const gridTemplate = computed(() => `${LABEL_W}px ${trackWidth()}px`)
 
 // 滚动
@@ -896,10 +959,12 @@ function scrollToToday() {
   const days = (Date.now() - viewFrom.value.getTime()) / 86400000
   if (days < 0 || days > totalDays.value) return
   // 标签列 220 + today 位置 - 视口半宽
-  const target = LABEL_W + (days * pxPerDay()) - scrollRef.value.clientWidth / 2
+  const target = LABEL_W + days * pxPerDay() - scrollRef.value.clientWidth / 2
   scrollRef.value.scrollLeft = Math.max(0, target)
 }
-function onZoom() { /* 缩放后让今天保持在视图中央 */ void nextTick(scrollToToday) }
+function onZoom() {
+  /* 缩放后让今天保持在视图中央 */ void nextTick(scrollToToday)
+}
 
 // ---------- 键盘 ←/→ 滚动(7 天一格) ----------
 function scrollByDays(days: number) {
@@ -914,20 +979,42 @@ function onKeydown(e: KeyboardEvent) {
   if (tag === 'input' || tag === 'textarea' || tag === 'select') return
   if (!props.data || !props.data.bars.length) return
   switch (e.key) {
-    case 'ArrowLeft':  e.preventDefault(); scrollByDays(e.shiftKey ? -30 : -7); break
-    case 'ArrowRight': e.preventDefault(); scrollByDays(e.shiftKey ?  30 :  7); break
-    case 'Home':       e.preventDefault(); scrollToStart(); break
-    case 'End':        e.preventDefault(); scrollToEnd(); break
-    case 'PageUp':     e.preventDefault(); scrollByDays(-30); break
-    case 'PageDown':   e.preventDefault(); scrollByDays(30); break
-    case 't': case 'T': e.preventDefault(); scrollToToday(); break
+    case 'ArrowLeft':
+      e.preventDefault()
+      scrollByDays(e.shiftKey ? -30 : -7)
+      break
+    case 'ArrowRight':
+      e.preventDefault()
+      scrollByDays(e.shiftKey ? 30 : 7)
+      break
+    case 'Home':
+      e.preventDefault()
+      scrollToStart()
+      break
+    case 'End':
+      e.preventDefault()
+      scrollToEnd()
+      break
+    case 'PageUp':
+      e.preventDefault()
+      scrollByDays(-30)
+      break
+    case 'PageDown':
+      e.preventDefault()
+      scrollByDays(30)
+      break
+    case 't':
+    case 'T':
+      e.preventDefault()
+      scrollToToday()
+      break
   }
 }
 // 旧的 onMounted/onUnmounted 已被下方的统一注册取代
 
 // ---------- Ctrl+滚轮缩放(鼠标在时间轴上) ----------
 function onWheel(e: WheelEvent) {
-  if (!e.ctrlKey && !e.metaKey) return       // 没按 Ctrl 走默认行为(竖向滚动 → 实际很少触发,被 max-height 兜住)
+  if (!e.ctrlKey && !e.metaKey) return // 没按 Ctrl 走默认行为(竖向滚动 → 实际很少触发,被 max-height 兜住)
   if (!props.data || !props.data.bars.length) return
   e.preventDefault()
   // 滚上(deltaY<0)=放大,滚下=缩小
@@ -936,7 +1023,7 @@ function onWheel(e: WheelEvent) {
   if (newZoom === zoom.value) return
   // 以鼠标位置为锚缩放,不让用户丢失当前视野中心
   const oldPx = pxPerDay()
-  const newPx = PX_PER_DAY * newZoom / 100
+  const newPx = (PX_PER_DAY * newZoom) / 100
   const rect = scrollRef.value!.getBoundingClientRect()
   const mouseXInScroller = e.clientX - rect.left + (scrollRef.value?.scrollLeft ?? 0)
   // 鼠标对应的"日期" = (mouseX - LABEL_W) / oldPx
@@ -952,9 +1039,12 @@ function onWheel(e: WheelEvent) {
 }
 
 // 监听数据变化,首次加载滚到今天
-watch(() => props.data, (d) => {
-  if (d && d.bars.length) void nextTick(scrollToToday)
-})
+watch(
+  () => props.data,
+  (d) => {
+    if (d && d.bars.length) void nextTick(scrollToToday)
+  },
+)
 
 // ---------- "今天" 在视图中的位置(0~100%) ----------
 const todayX = computed(() => {
@@ -971,9 +1061,11 @@ const todayX = computed(() => {
       <span class="gantt-toolbar-label">缩放</span>
       <el-slider
         v-model="zoom"
-        :min="6" :max="40" :step="1"
+        :min="6"
+        :max="40"
+        :step="1"
         :format-tooltip="(v: number) => `${v}px/天`"
-        style="width:160px"
+        style="width: 160px"
         @change="onZoom"
       />
       <el-button-group>
@@ -981,9 +1073,12 @@ const todayX = computed(() => {
         <el-button size="small" @click="scrollToToday">今天</el-button>
         <el-button size="small" :icon="Refresh" @click="scrollToEnd">终点 →</el-button>
       </el-button-group>
-      <span style="margin-left:auto; font-size:12px; color:#909399">
-        共 {{ totalDays }} 天 · {{ Math.round(totalDays * PX_PER_DAY * zoom / 100) }}px 宽
-        · <span style="color:#c0c4cc">快捷键:← → 滚 7 天 / Shift+← → 滚 30 天 / Home/End 起点终点 / T 今天 / Ctrl+滚轮 缩放 · 里程碑:⇧+点选多 / Tab+Enter 打开 / ←→ ±1 天 (Shift:±7)</span>
+      <span style="margin-left: auto; font-size: 12px; color: #909399">
+        共 {{ totalDays }} 天 · {{ Math.round((totalDays * PX_PER_DAY * zoom) / 100) }}px 宽 ·
+        <span style="color: #c0c4cc">
+          快捷键:← → 滚 7 天 / Shift+← → 滚 30 天 / Home/End 起点终点 / T 今天 / Ctrl+滚轮 缩放 ·
+          里程碑:⇧+点选多 / Tab+Enter 打开 / ←→ ±1 天 (Shift:±7)
+        </span>
       </span>
     </div>
 
@@ -994,43 +1089,58 @@ const todayX = computed(() => {
       :class="{ 'gantt-scroller-dragging': !!dragCtx }"
       @wheel="onWheel"
       tabindex="0"
-      @click="(e) => { if (e.target === e.currentTarget) clearSelection() }"
+      @click="(e) => {; if (e.target === e.currentTarget) clearSelection(); }"
     >
-      <div class="gantt-inner" :style="{ width: `${LABEL_W + Math.max(800, totalDays * PX_PER_DAY * zoom / 100)}px` }">
+      <div
+        class="gantt-inner"
+        :style="{ width: `${LABEL_W + Math.max(800, (totalDays * PX_PER_DAY * zoom) / 100)}px` }"
+      >
         <!-- ★ SVG 叠层:主控拖动轨迹 + 辅拖连接线 + 远程协作光标 + 远程协作轨迹 -->
         <svg
           v-if="dragCtx || remoteCursors.length > 0"
           class="gantt-svg-overlay"
-          :width="LABEL_W + Math.max(800, totalDays * PX_PER_DAY * zoom / 100)"
+          :width="LABEL_W + Math.max(800, (totalDays * PX_PER_DAY * zoom) / 100)"
           :height="Math.max(60, (props.data?.bars.length || 0) * 60 + 60)"
         >
           <!-- 主控拖动轨迹(主线) -->
           <template v-if="dragCtx && dragGhost">
             <line
               v-if="primaryDragCenter && dragGhost.x"
-              :x1="primaryDragCenter.x" :y1="primaryDragCenter.y"
+              :x1="primaryDragCenter.x"
+              :y1="primaryDragCenter.y"
               :x2="primaryDragCenter.x + dragGhostOffsetPx"
               :y2="primaryDragCenter.y"
-              stroke="#409eff" stroke-width="2" opacity="0.5"
+              stroke="#409eff"
+              stroke-width="2"
+              opacity="0.5"
               stroke-dasharray="6 3"
             />
             <!-- 辅拖到目标位置的细线 -->
             <line
               v-for="(line, i) in dragConnectionLines"
               :key="'conn-' + line.toId + '-' + i"
-              :x1="line.x1" :y1="line.y1"
-              :x2="line.x2" :y2="line.y2"
-              :stroke="line.color" stroke-width="1.5" opacity="0.7"
+              :x1="line.x1"
+              :y1="line.y1"
+              :x2="line.x2"
+              :y2="line.y2"
+              :stroke="line.color"
+              stroke-width="1.5"
+              opacity="0.7"
               stroke-dasharray="4 3"
             />
             <!-- 目标预览菱形(每个辅拖的 ghost) -->
             <template v-for="(ghost, gid) in dragTargetGhosts" :key="'gh-' + gid">
               <rect
-                :x="ghost.x" :y="ghost.y"
-                :width="ghost.size" :height="ghost.size"
-                :transform="`rotate(45 ${ghost.x + ghost.size/2} ${ghost.y + ghost.size/2})`"
-                :fill="ghost.color" opacity="0.35"
-                :stroke="ghost.color" stroke-width="1.5" stroke-dasharray="3 2"
+                :x="ghost.x"
+                :y="ghost.y"
+                :width="ghost.size"
+                :height="ghost.size"
+                :transform="`rotate(45 ${ghost.x + ghost.size / 2} ${ghost.y + ghost.size / 2})`"
+                :fill="ghost.color"
+                opacity="0.35"
+                :stroke="ghost.color"
+                stroke-width="1.5"
+                stroke-dasharray="3 2"
               />
             </template>
           </template>
@@ -1041,7 +1151,14 @@ const todayX = computed(() => {
               <path d="M 0 0 L 14 5 L 6 7 L 4 14 Z" :fill="rc.color" stroke="#fff" stroke-width="1" />
               <!-- 用户名气泡 -->
               <rect x="14" y="2" :width="rc.labelWidth" height="18" rx="3" :fill="rc.color" />
-              <text x="14 + rc.labelWidth/2" y="15" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">
+              <text
+                x="14 + rc.labelWidth/2"
+                y="15"
+                text-anchor="middle"
+                fill="#fff"
+                font-size="11"
+                font-weight="600"
+              >
                 {{ rc.userName }}
               </text>
             </g>
@@ -1050,8 +1167,13 @@ const todayX = computed(() => {
           <template v-for="rt in remoteTrails" :key="'rt-' + rt.userId">
             <line
               v-if="rt.startX != null && rt.currentX != null"
-              :x1="rt.startX" :y1="rt.y" :x2="rt.currentX" :y2="rt.y"
-              :stroke="rt.color" stroke-width="2" opacity="0.4"
+              :x1="rt.startX"
+              :y1="rt.y"
+              :x2="rt.currentX"
+              :y2="rt.y"
+              :stroke="rt.color"
+              stroke-width="2"
+              opacity="0.4"
               stroke-dasharray="6 3"
             />
           </template>
@@ -1061,19 +1183,10 @@ const todayX = computed(() => {
         <div v-if="props.data && props.data.bars.length" class="gantt-month-bar">
           <div class="gantt-axis-spacer" />
           <div class="gantt-axis-track">
-            <div
-              v-for="(t, i) in monthTicks"
-              :key="i"
-              class="gantt-month-tick"
-              :style="{ left: t.x + '%' }"
-            >
+            <div v-for="(t, i) in monthTicks" :key="i" class="gantt-month-tick" :style="{ left: t.x + '%' }">
               <span class="gantt-month-label">{{ t.label }}</span>
             </div>
-            <div
-              v-if="todayX >= 0 && todayX <= 100"
-              class="gantt-today-line"
-              :style="{ left: todayX + '%' }"
-            >
+            <div v-if="todayX >= 0 && todayX <= 100" class="gantt-today-line" :style="{ left: todayX + '%' }">
               <span class="gantt-today-label">今天</span>
             </div>
           </div>
@@ -1085,18 +1198,23 @@ const todayX = computed(() => {
         </div>
 
         <div v-if="props.data && props.data.bars.length" class="gantt-body">
-          <div
-            v-for="bar in props.data.bars"
-            :key="bar.projectId"
-            class="gantt-row"
-          >
+          <div v-for="bar in props.data.bars" :key="bar.projectId" class="gantt-row">
             <!-- 左:项目卡 -->
             <div class="gantt-label">
-              <div style="font-weight:600; font-size:13px">{{ bar.projectCode }}</div>
-              <div style="font-size:12px; color:#606266; white-space:nowrap; overflow:hidden; text-overflow:ellipsis" :title="bar.projectName">
+              <div style="font-weight: 600; font-size: 13px">{{ bar.projectCode }}</div>
+              <div
+                style="
+                  font-size: 12px;
+                  color: #606266;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                "
+                :title="bar.projectName"
+              >
                 {{ bar.projectName }}
               </div>
-              <div style="font-size:11px; color:#909399; margin-top:2px">
+              <div style="font-size: 11px; color: #909399; margin-top: 2px">
                 进度 {{ bar.progressPct }}% · 里程碑 {{ bar.milestones.length }}
               </div>
             </div>
@@ -1104,9 +1222,17 @@ const todayX = computed(() => {
             <!-- 右:时间轴 -->
             <div class="gantt-track">
               <!-- 计划区间(背景) -->
-              <div class="gantt-bar gantt-bar-plan" :style="planBarStyle(bar)" :title="`计划 ${bar.planStart} ~ ${bar.planEnd}`" />
+              <div
+                class="gantt-bar gantt-bar-plan"
+                :style="planBarStyle(bar)"
+                :title="`计划 ${bar.planStart} ~ ${bar.planEnd}`"
+              />
               <!-- 实际区间(实色) -->
-              <div class="gantt-bar gantt-bar-actual" :style="barStyle(bar)" :title="`实际 ${bar.actualStart || bar.planStart} ~ ${bar.actualEnd || bar.planEnd}`" />
+              <div
+                class="gantt-bar gantt-bar-actual"
+                :style="barStyle(bar)"
+                :title="`实际 ${bar.actualStart || bar.planStart} ~ ${bar.actualEnd || bar.planEnd}`"
+              />
               <!-- 进度覆盖 -->
               <div class="gantt-bar gantt-bar-progress" :style="progressStyle(bar)" />
               <!-- 里程碑菱形(可点击 + 可拖拽改期 + 可多选 + 键盘改期) -->
@@ -1119,20 +1245,25 @@ const todayX = computed(() => {
                 :data-phase-id="m.phaseId ?? 0"
                 :data-status="m.status"
                 class="gantt-milestone-wrap"
-                :style="{ ...milestoneStyle(bar, m), '--project-color': projectColor(bar.projectId), '--ms-color': milestoneColor(bar, m) }"
-              ><div
+                :style="{
+                  ...milestoneStyle(bar, m),
+                  '--project-color': projectColor(bar.projectId),
+                  '--ms-color': milestoneColor(bar, m),
+                }"
+              >
+                <div
                   class="gantt-milestone"
                   :class="{
                     'gantt-milestone-dragging': primaryDragId === m.id,
                     'gantt-milestone-batch-dragging': draggingIds.has(m.id) && primaryDragId !== m.id,
                     'gantt-milestone-completed': m.status === 'COMPLETED',
                     'gantt-milestone-selected': selectedIds.has(m.id) && !draggingIds.has(m.id),
-                    'gantt-milestone-focused': focusedId === m.id && !draggingIds.has(m.id)
+                    'gantt-milestone-focused': focusedId === m.id && !draggingIds.has(m.id),
                   }"
                   :title="`${m.name}\n阶段: ${m.phaseName ?? '未分阶段'}\n计划: ${m.planDate}\n${m.actualDate ? '实际: ' + m.actualDate : '未完成'}\n状态: ${m.status}\n权重: ${m.weight}\n\n🖱 单击:打开详情(再次单击)\n🖱 拖拽:改期\n⇧ + 单击:多选连续段\n⌘/Ctrl + 单击:多选切换\nTab + Enter:键盘进入 / 打开\n← / →:改 ±1 天 (Shift:±7 天)`"
                   :style="{
                     'background-color': 'var(--ms-color, ' + milestoneColor(bar, m) + ')',
-                    cursor: m.status === 'COMPLETED' ? 'pointer' : 'grab'
+                    cursor: m.status === 'COMPLETED' ? 'pointer' : 'grab',
                   }"
                   tabindex="0"
                   @click.stop="(e) => onMilestoneClick(bar, m, e)"
@@ -1140,7 +1271,8 @@ const todayX = computed(() => {
                   @focus="focusMilestone(m.id)"
                   @blur="focusMilestone(null)"
                   @keydown.stop="(e) => onMilestoneKeydown(e, bar, m)"
-                /></div>
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -1148,37 +1280,58 @@ const todayX = computed(() => {
     </div>
 
     <!-- 拖拽幽灵提示 -->
-    <div v-if="dragGhost" class="gantt-drag-ghost" :style="{ left: (dragGhost.x + 12) + 'px', top: (dragGhost.y - 36) + 'px' }">
+    <div
+      v-if="dragGhost"
+      class="gantt-drag-ghost"
+      :style="{ left: dragGhost.x + 12 + 'px', top: dragGhost.y - 36 + 'px' }"
+    >
       <div class="gantt-drag-ghost-main">
-        {{ dragGhost.count > 1 ? `📅 ${dragGhost.count} 个 → ` : '📅 ' }}{{ dragGhost.planDate }} ({{ dragGhost.dayOffset > 0 ? '+' : '' }}{{ dragGhost.dayOffset }} 天)
+        {{ dragGhost.count > 1 ? `📅 ${dragGhost.count} 个 → ` : '📅 ' }}{{ dragGhost.planDate }} ({{
+          dragGhost.dayOffset > 0 ? '+' : ''
+        }}{{ dragGhost.dayOffset }} 天)
       </div>
       <!-- 批量时:列出每个辅拖的明细(主拖第一个) -->
       <div v-if="dragGhost.count > 1" class="gantt-drag-ghost-list">
         <div v-for="row in dragGhostPreview" :key="row.id" class="gantt-drag-ghost-row">
-          <span class="gantt-drag-ghost-bullet" :class="{ 'is-primary': row.id === primaryDragId, 'is-batch': row.id !== primaryDragId }">◆</span>
+          <span
+            class="gantt-drag-ghost-bullet"
+            :class="{ 'is-primary': row.id === primaryDragId, 'is-batch': row.id !== primaryDragId }"
+          >
+            ◆
+          </span>
           <span class="gantt-drag-ghost-name">{{ row.name }}</span>
           <span class="gantt-drag-ghost-date">{{ row.newDate }}</span>
         </div>
-        <div v-if="dragGhostHiddenCount > 0" class="gantt-drag-ghost-more">… 还有 {{ dragGhostHiddenCount }} 个</div>
+        <div v-if="dragGhostHiddenCount > 0" class="gantt-drag-ghost-more">
+          … 还有 {{ dragGhostHiddenCount }} 个
+        </div>
       </div>
     </div>
 
     <!-- 图例 -->
     <div v-if="props.data && props.data.bars.length" class="gantt-legend">
-      <span><i class="lg-plan" /> 计划区间</span>
-      <span><i class="lg-actual" /> 实际区间</span>
-      <span><i class="lg-progress" /> 进度覆盖</span>
+      <span>
+        <i class="lg-plan" />
+        计划区间
+      </span>
+      <span>
+        <i class="lg-actual" />
+        实际区间
+      </span>
+      <span>
+        <i class="lg-progress" />
+        进度覆盖
+      </span>
       <!-- 阶段色图例 (同 phase 同色相;同 phase 内 4 个深浅 = 不同 milestone) -->
       <span class="legend-divider">阶段:</span>
       <span v-for="(hue, pid) in phaseLegend" :key="String(pid)" :title="phaseName(Number(pid))">
         <i class="lg-diamond" :style="{ background: hslToHex(Number(hue), 75, 42) }" />
         {{ phaseName(Number(pid)) }}
       </span>
-      <span style="margin-left:auto; color:#909399; font-size:12px">
-        <el-icon style="vertical-align:middle"><Calendar /></el-icon>
-        区间 {{ props.data.rangeFrom }} ~ {{ props.data.rangeTo }}
-        · 共 {{ props.data.projectCount }} 项目
-        · 模式:{{ props.mode === 'auto' ? '自动' : '手动' }}
+      <span style="margin-left: auto; color: #909399; font-size: 12px">
+        <el-icon style="vertical-align: middle"><Calendar /></el-icon>
+        区间 {{ props.data.rangeFrom }} ~ {{ props.data.rangeTo }} · 共 {{ props.data.projectCount }} 项目 ·
+        模式:{{ props.mode === 'auto' ? '自动' : '手动' }}
         · 菱形色 = 阶段(同色相 4 深浅 = phase 内不同 milestone)
       </span>
     </div>
@@ -1214,19 +1367,36 @@ const todayX = computed(() => {
   scrollbar-width: thin;
   scrollbar-color: #c0c4cc #f5f7fa;
 }
-.gantt-scroller::-webkit-scrollbar { height: 8px; }
-.gantt-scroller::-webkit-scrollbar-track { background: #f5f7fa; }
-.gantt-scroller::-webkit-scrollbar-thumb { background: #c0c4cc; border-radius: 4px; }
-.gantt-scroller::-webkit-scrollbar-thumb:hover { background: #909399; }
+.gantt-scroller::-webkit-scrollbar {
+  height: 8px;
+}
+.gantt-scroller::-webkit-scrollbar-track {
+  background: #f5f7fa;
+}
+.gantt-scroller::-webkit-scrollbar-thumb {
+  background: #c0c4cc;
+  border-radius: 4px;
+}
+.gantt-scroller::-webkit-scrollbar-thumb:hover {
+  background: #909399;
+}
 /* 拖拽时滚动条变蓝,提示可拖到边缘外 */
-.gantt-scroller-dragging::-webkit-scrollbar-thumb { background: #409eff; }
+.gantt-scroller-dragging::-webkit-scrollbar-thumb {
+  background: #409eff;
+}
 .gantt-scroller-dragging::after {
   /* 提示边缘:左右各一个渐变指示 */
   content: '';
   position: sticky;
   display: block;
   height: 4px;
-  background: linear-gradient(90deg, rgba(64,158,255,0.3), transparent 30%, transparent 70%, rgba(64,158,255,0.3));
+  background: linear-gradient(
+    90deg,
+    rgba(64, 158, 255, 0.3),
+    transparent 30%,
+    transparent 70%,
+    rgba(64, 158, 255, 0.3)
+  );
   pointer-events: none;
 }
 
@@ -1247,7 +1417,9 @@ const todayX = computed(() => {
   background: #fafbfc;
   z-index: 3;
 }
-.gantt-axis-spacer { width: 220px; }
+.gantt-axis-spacer {
+  width: 220px;
+}
 .gantt-axis-track {
   position: relative;
   height: 22px;
@@ -1288,8 +1460,14 @@ const todayX = computed(() => {
   white-space: nowrap;
 }
 
-.gantt-empty { padding: 40px 0; }
-.gantt-body { display: flex; flex-direction: column; gap: 4px; }
+.gantt-empty {
+  padding: 40px 0;
+}
+.gantt-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 .gantt-row {
   display: grid;
   grid-template-columns: v-bind(gridTemplate);
@@ -1312,9 +1490,8 @@ const todayX = computed(() => {
 .gantt-track {
   position: relative;
   height: 36px;
-  background-image:
-    linear-gradient(to right, #ebeef5 0, #ebeef5 1px, transparent 1px, transparent 100%);
-  background-size: calc(v-bind('pxPerDay()') * 7px) 100%;  /* 7 天一周分隔 */
+  background-image: linear-gradient(to right, #ebeef5 0, #ebeef5 1px, transparent 1px, transparent 100%);
+  background-size: calc(v-bind('pxPerDay()') * 7px) 100%; /* 7 天一周分隔 */
   border-radius: 3px;
 }
 .gantt-bar {
@@ -1349,11 +1526,14 @@ const todayX = computed(() => {
   z-index: 6;
 }
 .gantt-milestone-wrap {
-  display: inline-block;  /* ★ 防止 v-for fragment 把它当 transparent 折叠掉 */
+  display: inline-block; /* ★ 防止 v-for fragment 把它当 transparent 折叠掉 */
   position: absolute;
   z-index: 2;
   /* 尺寸继承 milestoneStyle() 的 left/width/height/position:top */
-  background-color: var(--ms-color, transparent);  /* ★ V3.1 兜底:内联 background-color 失效时,wrap div 也染色 */
+  background-color: var(
+    --ms-color,
+    transparent
+  ); /* ★ V3.1 兜底:内联 background-color 失效时,wrap div 也染色 */
 }
 /* 批量确认弹窗:预览列表 */
 .gantt-batch-confirm-body {
@@ -1387,8 +1567,12 @@ const todayX = computed(() => {
   font-size: 11px;
   flex-shrink: 0;
 }
-.gantt-batch-confirm-bullet.is-primary { color: #409eff; }
-.gantt-batch-confirm-bullet.is-batch   { color: #e6a23c; }
+.gantt-batch-confirm-bullet.is-primary {
+  color: #409eff;
+}
+.gantt-batch-confirm-bullet.is-batch {
+  color: #e6a23c;
+}
 .gantt-batch-confirm-name {
   flex: 1;
   overflow: hidden;
@@ -1416,10 +1600,13 @@ const todayX = computed(() => {
   width: 100%;
   height: 100%;
   border: 1.5px solid #fff;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   z-index: 2;
   transform: rotate(45deg);
-  transition: transform 0.1s, box-shadow 0.1s, outline 0.1s;
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s,
+    outline 0.1s;
   outline: 2px solid transparent;
   outline-offset: 2px;
 }
@@ -1441,7 +1628,7 @@ const todayX = computed(() => {
   z-index: 12;
   pointer-events: none;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-  transform: rotate(-45deg);  /* 抵消菱形的旋转,徽章保持正向 */
+  transform: rotate(-45deg); /* 抵消菱形的旋转,徽章保持正向 */
 }
 .gantt-milestone-offset-badge.is-primary {
   background: #409eff;
@@ -1455,7 +1642,7 @@ const todayX = computed(() => {
 }
 .gantt-milestone:hover {
   transform: rotate(45deg) scale(1.25);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   z-index: 4;
 }
 .gantt-milestone-selected {
@@ -1489,7 +1676,8 @@ const todayX = computed(() => {
   animation: gantt-batch-pulse 0.9s ease-in-out infinite;
 }
 @keyframes gantt-batch-pulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow:
       0 0 0 3px rgba(230, 163, 60, 0.4),
       0 2px 8px rgba(230, 163, 60, 0.4);
@@ -1513,7 +1701,7 @@ const todayX = computed(() => {
   font-size: 12px;
   font-weight: 600;
   z-index: 9999;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   white-space: nowrap;
   max-width: 320px;
 }
@@ -1541,8 +1729,12 @@ const todayX = computed(() => {
   font-size: 10px;
   flex-shrink: 0;
 }
-.gantt-drag-ghost-bullet.is-primary { color: #fff; }
-.gantt-drag-ghost-bullet.is-batch   { color: rgba(255, 255, 255, 0.7); }
+.gantt-drag-ghost-bullet.is-primary {
+  color: #fff;
+}
+.gantt-drag-ghost-bullet.is-batch {
+  color: rgba(255, 255, 255, 0.7);
+}
 .gantt-drag-ghost-name {
   flex: 1;
   overflow: hidden;
@@ -1579,8 +1771,27 @@ const todayX = computed(() => {
   vertical-align: middle;
   margin-right: 4px;
 }
-.lg-plan    { width: 20px; height: 12px; background: rgba(103,194,58,0.18); border: 1px dashed #b3e19d; }
-.lg-actual  { width: 20px; height: 12px; background: rgba(64,158,255,0.45); border: 1px solid #409eff; }
-.lg-progress{ width: 20px; height: 6px; background: rgba(103,194,58,0.85); border-radius: 2px; }
-.lg-diamond { width: 10px; height: 10px; transform: rotate(45deg); }
+.lg-plan {
+  width: 20px;
+  height: 12px;
+  background: rgba(103, 194, 58, 0.18);
+  border: 1px dashed #b3e19d;
+}
+.lg-actual {
+  width: 20px;
+  height: 12px;
+  background: rgba(64, 158, 255, 0.45);
+  border: 1px solid #409eff;
+}
+.lg-progress {
+  width: 20px;
+  height: 6px;
+  background: rgba(103, 194, 58, 0.85);
+  border-radius: 2px;
+}
+.lg-diamond {
+  width: 10px;
+  height: 10px;
+  transform: rotate(45deg);
+}
 </style>

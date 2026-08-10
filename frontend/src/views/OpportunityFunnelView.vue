@@ -6,10 +6,18 @@
 import { ref, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
-  getOpportunityKpis, getFunnel, getConversionRates,
-  getMonthlyTrend, getSalesRank, getAmountByBuPl,
-  type OpportunityKpis, type FunnelStage, type ConversionRate,
-  type MonthlyTrend, type SalesRank, type BuPlAmount
+  getOpportunityKpis,
+  getFunnel,
+  getConversionRates,
+  getMonthlyTrend,
+  getSalesRank,
+  getAmountByBuPl,
+  type OpportunityKpis,
+  type FunnelStage,
+  type ConversionRate,
+  type MonthlyTrend,
+  type SalesRank,
+  type BuPlAmount,
 } from '@/api/opportunityFunnel'
 
 const kpis = ref<OpportunityKpis | null>(null)
@@ -24,8 +32,12 @@ async function load() {
   loading.value = true
   try {
     const [k, f, r, t, sr, bp] = await Promise.all([
-      getOpportunityKpis(), getFunnel(), getConversionRates(),
-      getMonthlyTrend(), getSalesRank(), getAmountByBuPl()
+      getOpportunityKpis(),
+      getFunnel(),
+      getConversionRates(),
+      getMonthlyTrend(),
+      getSalesRank(),
+      getAmountByBuPl(),
     ])
     kpis.value = k
     funnel.value = f
@@ -48,12 +60,12 @@ function fmtMoney(v: number) {
 
 const funnelMax = computed(() => {
   if (!funnel.value.length) return 1
-  return Math.max(1, ...funnel.value.map(s => s.count))
+  return Math.max(1, ...funnel.value.map((s) => s.count))
 })
 
 const trendMax = computed(() => {
   if (!trend.value.length) return 1
-  return Math.max(1, ...trend.value.map(t => t.wonAmount))
+  return Math.max(1, ...trend.value.map((t) => t.wonAmount))
 })
 
 onMounted(load)
@@ -111,8 +123,8 @@ onMounted(load)
               :key="s.stage"
               class="funnel-stage"
               :style="{
-                width: (Math.max(s.count, 1) / funnelMax * 100) + '%',
-                background: s.color
+                width: (Math.max(s.count, 1) / funnelMax) * 100 + '%',
+                background: s.color,
               }"
             >
               <div class="stage-name">{{ s.stage }}</div>
@@ -126,11 +138,7 @@ onMounted(load)
       <el-col :span="10">
         <el-card shadow="hover">
           <h4 class="section">📈 阶段转化率</h4>
-          <div
-            v-for="r in rates"
-            :key="r.from + r.to"
-            class="conv-row"
-          >
+          <div v-for="r in rates" :key="r.from + r.to" class="conv-row">
             <span class="conv-from">{{ r.from }}</span>
             <span class="conv-arrow">→</span>
             <span class="conv-to">{{ r.to }}</span>
@@ -138,7 +146,7 @@ onMounted(load)
               :percentage="r.rate"
               :color="r.rate >= 30 ? '#67c23a' : r.rate >= 15 ? '#e6a23c' : '#f56c6c'"
               :stroke-width="10"
-              style="flex: 1; margin: 0 12px;"
+              style="flex: 1; margin: 0 12px"
             />
             <span class="conv-rate">{{ r.rate }}%</span>
           </div>
@@ -146,7 +154,7 @@ onMounted(load)
       </el-col>
     </el-row>
 
-    <el-card shadow="hover" style="margin-top: 16px;">
+    <el-card shadow="hover" style="margin-top: 16px">
       <h4 class="section">📊 月度成交趋势</h4>
       <el-table v-if="trend.length" :data="trend" stripe size="small" max-height="280">
         <el-table-column prop="month" label="月份" width="120" />
@@ -156,17 +164,14 @@ onMounted(load)
         </el-table-column>
         <el-table-column label="可视化" min-width="200">
           <template #default="{ row }">
-            <el-progress
-              :percentage="Math.min(100, (row.wonAmount / trendMax) * 100)"
-              :color="'#67c23a'"
-            />
+            <el-progress :percentage="Math.min(100, (row.wonAmount / trendMax) * 100)" :color="'#67c23a'" />
           </template>
         </el-table-column>
       </el-table>
       <div v-else class="empty">暂无成交数据</div>
     </el-card>
 
-    <el-row :gutter="16" style="margin-top: 16px;">
+    <el-row :gutter="16" style="margin-top: 16px">
       <el-col :span="12">
         <el-card shadow="hover">
           <h4 class="section">🏆 销售排行 Top-20</h4>
@@ -203,43 +208,110 @@ onMounted(load)
 </template>
 
 <style scoped lang="scss">
-.page { padding: 16px; }
-.page-title { margin: 0 0 16px; color: #303133; }
-.kpi-row { margin-bottom: 16px; }
+.page {
+  padding: 16px;
+}
+.page-title {
+  margin: 0 0 16px;
+  color: #303133;
+}
+.kpi-row {
+  margin-bottom: 16px;
+}
 .kpi-card {
   text-align: center;
-  .kpi-label { font-size: 12px; color: #909399; }
-  .kpi-value { font-size: 28px; font-weight: 600; margin: 6px 0; }
-  .kpi-sub { font-size: 11px; color: #c0c4cc; }
+  .kpi-label {
+    font-size: 12px;
+    color: #909399;
+  }
+  .kpi-value {
+    font-size: 28px;
+    font-weight: 600;
+    margin: 6px 0;
+  }
+  .kpi-sub {
+    font-size: 11px;
+    color: #c0c4cc;
+  }
 }
-.kpi-blue .kpi-value { color: #409eff; }
-.kpi-green .kpi-value { color: #67c23a; }
-.kpi-orange .kpi-value { color: #e6a23c; }
-.kpi-purple .kpi-value { color: #9c27b0; }
-.kpi-gray .kpi-value { color: #606266; }
-.section { margin: 0 0 12px; color: #303133; font-size: 14px; }
+.kpi-blue .kpi-value {
+  color: #409eff;
+}
+.kpi-green .kpi-value {
+  color: #67c23a;
+}
+.kpi-orange .kpi-value {
+  color: #e6a23c;
+}
+.kpi-purple .kpi-value {
+  color: #9c27b0;
+}
+.kpi-gray .kpi-value {
+  color: #606266;
+}
+.section {
+  margin: 0 0 12px;
+  color: #303133;
+  font-size: 14px;
+}
 
 .funnel {
-  display: flex; flex-direction: column; align-items: stretch; gap: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
   padding: 16px 0;
 }
 .funnel-stage {
-  color: #fff; padding: 12px 16px; border-radius: 4px;
-  display: flex; justify-content: space-between; align-items: center;
-  font-size: 13px; min-width: 200px;
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  min-width: 200px;
   transition: all 0.3s;
-  &:hover { transform: scale(1.02); }
-  .stage-name { font-weight: 600; min-width: 90px; }
-  .stage-count { font-size: 18px; font-weight: 700; }
-  .stage-amount { font-size: 11px; opacity: 0.9; }
+  &:hover {
+    transform: scale(1.02);
+  }
+  .stage-name {
+    font-weight: 600;
+    min-width: 90px;
+  }
+  .stage-count {
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .stage-amount {
+    font-size: 11px;
+    opacity: 0.9;
+  }
 }
 
 .conv-row {
-  display: flex; align-items: center; margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
   font-size: 12px;
-  .conv-from, .conv-to { width: 90px; font-weight: 500; }
-  .conv-arrow { color: #909399; margin: 0 4px; }
-  .conv-rate { width: 50px; text-align: right; font-weight: 600; }
+  .conv-from,
+  .conv-to {
+    width: 90px;
+    font-weight: 500;
+  }
+  .conv-arrow {
+    color: #909399;
+    margin: 0 4px;
+  }
+  .conv-rate {
+    width: 50px;
+    text-align: right;
+    font-weight: 600;
+  }
 }
-.empty { text-align: center; color: #c0c4cc; padding: 30px; }
+.empty {
+  text-align: center;
+  color: #c0c4cc;
+  padding: 30px;
+}
 </style>

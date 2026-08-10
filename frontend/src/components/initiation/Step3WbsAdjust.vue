@@ -4,7 +4,8 @@
 
   <div v-else>
     <el-alert
-      type="warning" :closable="false"
+      type="warning"
+      :closable="false"
       title="AI 生成的草稿为建议值,您可以编辑里程碑/工作包/风险内容,确认后将应用到项目 WBS 库。"
       style="margin-bottom: 16px"
     />
@@ -12,9 +13,19 @@
     <div v-for="(m, mi) in localMilestones" :key="mi" class="ms-edit-card">
       <div class="ms-edit-header">
         <el-input v-model="m.name" style="flex: 1; margin-right: 8px" placeholder="里程碑名称" />
-        <el-input-number v-model="m.sequence" :min="1" :max="20" controls-position="right" style="width: 110px" />
         <el-input-number
-          v-model="m.targetWeek" :min="0" :max="104" placeholder="目标周" controls-position="right"
+          v-model="m.sequence"
+          :min="1"
+          :max="20"
+          controls-position="right"
+          style="width: 110px"
+        />
+        <el-input-number
+          v-model="m.targetWeek"
+          :min="0"
+          :max="104"
+          placeholder="目标周"
+          controls-position="right"
           style="width: 130px; margin-left: 8px"
         />
         <el-button type="danger" link :icon="Delete" @click="removeMilestone(mi)" style="margin-left: 8px" />
@@ -28,7 +39,14 @@
         </el-table-column>
         <el-table-column label="工期(周)" width="120">
           <template #default="{ row }">
-            <el-input-number v-model="row.durationWeeks" :min="1" :max="52" size="small" :controls="false" style="width: 100%" />
+            <el-input-number
+              v-model="row.durationWeeks"
+              :min="1"
+              :max="52"
+              size="small"
+              :controls="false"
+              style="width: 100%"
+            />
           </template>
         </el-table-column>
         <el-table-column label="负责角色" width="140">
@@ -45,15 +63,27 @@
         </el-table-column>
         <el-table-column label="" width="60" align="center">
           <template #default="{ $index }">
-            <el-button size="small" link type="danger" :icon="Delete" @click="m.workPackages.splice($index, 1)" />
+            <el-button
+              size="small"
+              link
+              type="danger"
+              :icon="Delete"
+              @click="m.workPackages.splice($index, 1)"
+            />
           </template>
         </el-table-column>
       </el-table>
 
       <el-button
-        link type="primary" size="small" :icon="Plus"
-        style="margin-top: 6px" @click="addWorkPackage(mi)"
-      >+ 添加工作包</el-button>
+        link
+        type="primary"
+        size="small"
+        :icon="Plus"
+        style="margin-top: 6px"
+        @click="addWorkPackage(mi)"
+      >
+        + 添加工作包
+      </el-button>
     </div>
 
     <el-button :icon="Plus" type="primary" plain @click="addMilestone" style="margin-top: 12px">
@@ -108,7 +138,12 @@
 import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus, Delete, Check } from '@element-plus/icons-vue'
-import api, { type AiWbsDraft, type AiWbsMilestone, type AiWbsRisk, type AiWbsWorkPackage } from '@/api/client'
+import api, {
+  type AiWbsDraft,
+  type AiWbsMilestone,
+  type AiWbsRisk,
+  type AiWbsWorkPackage,
+} from '@/api/client'
 
 const props = defineProps<{
   initiationId: number
@@ -139,12 +174,16 @@ const localMilestones = ref<AiWbsMilestone[]>([])
 const localRisks = ref<AiWbsRisk[]>([])
 const confirming = ref(false)
 
-watch(() => props.aiDraft, (v) => {
-  if (v) {
-    localMilestones.value = JSON.parse(JSON.stringify(v.milestones))
-    localRisks.value = JSON.parse(JSON.stringify(v.risks))
-  }
-}, { immediate: true })
+watch(
+  () => props.aiDraft,
+  (v) => {
+    if (v) {
+      localMilestones.value = JSON.parse(JSON.stringify(v.milestones))
+      localRisks.value = JSON.parse(JSON.stringify(v.risks))
+    }
+  },
+  { immediate: true },
+)
 
 function addMilestone() {
   localMilestones.value.push({

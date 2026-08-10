@@ -26,15 +26,15 @@ const props = defineProps<{
 const data = ref<RiskMatrix | null>(null)
 const loading = ref(false)
 
-const ECHARTS_HEATMAP_REGISTERED = true  // Heatmap 是 ECharts 核心组件, 默认已注册
+const ECHARTS_HEATMAP_REGISTERED = true // Heatmap 是 ECharts 核心组件, 默认已注册
 
 const chartOption = computed(() => {
   if (!data.value) return {}
   const cells = data.value.cells
   // [x, y, value, risks]  ECharts heatmap 数据格式
   // x = impact, y = probability
-  const series = cells.map(c => [c.impact - 1, c.probability - 1, c.count])
-  const maxCount = Math.max(1, ...cells.map(c => c.count))
+  const series = cells.map((c) => [c.impact - 1, c.probability - 1, c.count])
+  const maxCount = Math.max(1, ...cells.map((c) => c.count))
   // 按 (p, i) 索引
   const byPI = new Map<string, RiskItem[]>()
   for (const c of cells) {
@@ -92,7 +92,7 @@ const chartOption = computed(() => {
         data: series,
         label: {
           show: true,
-          formatter: (p: any) => p.value[2] > 0 ? p.value[2] : '',
+          formatter: (p: any) => (p.value[2] > 0 ? p.value[2] : ''),
           fontSize: 14,
           fontWeight: 600,
           color: '#303133',
@@ -130,12 +130,7 @@ defineExpose({ load })
 
 <template>
   <div class="risk-matrix-view" v-loading="loading">
-    <v-chart
-      v-if="data"
-      :option="chartOption"
-      autoresize
-      style="height: 360px; width: 100%"
-    />
+    <v-chart v-if="data" :option="chartOption" autoresize style="height: 360px; width: 100%" />
   </div>
 </template>
 

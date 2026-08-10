@@ -38,9 +38,9 @@ export interface DepartmentOption {
 }
 
 export interface DepartmentCreateBody {
-  code: string                  // 字母/数字/下划线, 2-32 字符
+  code: string // 字母/数字/下划线, 2-32 字符
   name: string
-  parentId?: number | null      // null = 根
+  parentId?: number | null // null = 根
   sortOrder?: number
   enabled?: boolean
 }
@@ -57,32 +57,26 @@ export interface DepartmentUpdateBody {
 // ============================================================
 export const departmentApi = {
   /** 1. 树状全量 (前端表格用) */
-  tree: () =>
-    api.get<DepartmentNode[]>('/departments/tree'),
+  tree: () => api.get<DepartmentNode[]>('/departments/tree'),
 
   /** 2. 简表 (下拉用, 仅启用) */
-  options: () =>
-    api.get<DepartmentOption[]>('/departments/options'),
+  options: () => api.get<DepartmentOption[]>('/departments/options'),
 
   /** 3. 详情 */
-  get: (id: number) =>
-    api.get<DepartmentNode>(`/departments/${id}`),
+  get: (id: number) => api.get<DepartmentNode>(`/departments/${id}`),
 
   /** 4. 新建 (PMO_ADMIN/ADMIN) */
-  create: (body: DepartmentCreateBody) =>
-    api.post<DepartmentNode>('/departments', body),
+  create: (body: DepartmentCreateBody) => api.post<DepartmentNode>('/departments', body),
 
   /** 5. 更新 (PMO_ADMIN/ADMIN) */
-  update: (id: number, body: DepartmentUpdateBody) =>
-    api.put<DepartmentNode>(`/departments/${id}`, body),
+  update: (id: number, body: DepartmentUpdateBody) => api.put<DepartmentNode>(`/departments/${id}`, body),
 
   /** 6. 启停 */
   setEnabled: (id: number, enabled: boolean) =>
     api.patch<DepartmentNode>(`/departments/${id}/enabled`, { enabled }),
 
   /** 7. 删除 (软删) */
-  delete: (id: number) =>
-    api.delete<void>(`/departments/${id}`),
+  delete: (id: number) => api.delete<void>(`/departments/${id}`),
 
   // ============================================================
   // V4.14 用户-部门分配
@@ -103,8 +97,7 @@ export const departmentApi = {
     ),
 
   /** 10. 子部门 ID 列表 (含自身, 给前端筛选) */
-  descendantIds: (deptId: number) =>
-    api.get<number[]>(`/departments/${deptId}/descendants`),
+  descendantIds: (deptId: number) => api.get<number[]>(`/departments/${deptId}/descendants`),
 
   /** 5.5 缺失部门的用户列表 (admin 限定) */
   missingUsers: (page: number, size: number) =>

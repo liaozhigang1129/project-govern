@@ -25,8 +25,13 @@ async function submit() {
 
 <template>
   <div
-    style="height: 100vh; display: flex; align-items: center; justify-content: center;
-           background: linear-gradient(135deg, #667eea, #764ba2)"
+    style="
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    "
   >
     <el-card style="width: 380px; border-radius: 12px">
       <h2 style="margin: 0 0 24px; text-align: center">🏗 PMO 治理系统</h2>
@@ -35,25 +40,14 @@ async function submit() {
           <el-input v-model="form.username" placeholder="用户名" size="large" />
         </el-form-item>
         <el-form-item>
-          <el-input
-            v-model="form.password"
-            type="password"
-            placeholder="密码"
-            size="large"
-            show-password
-          />
+          <el-input v-model="form.password" type="password" placeholder="密码" size="large" show-password />
         </el-form-item>
-        <el-button
-          type="primary"
-          size="large"
-          :loading="loading"
-          style="width: 100%"
-          @click="submit"
-        >
+        <el-button type="primary" size="large" :loading="loading" style="width: 100%" @click="submit">
           登录
         </el-button>
         <p style="margin-top: 16px; font-size: 12px; color: #909399; text-align: center">
-          演示账号: admin / pmo123<br />
+          演示账号: admin / pmo123
+          <br />
           其他: pm_zhang, lead_wu, vp_chen
         </p>
       </el-form>

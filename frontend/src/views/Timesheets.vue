@@ -5,7 +5,14 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Calendar, Check, Plus, Refresh, Document, MagicStick } from '@element-plus/icons-vue'
-import { timesheetApi, type Entry, type TimesheetDetail, type TimesheetSummary, type AutoFillResult, type DayFillResult } from '@/api/timesheet'
+import {
+  timesheetApi,
+  type Entry,
+  type TimesheetDetail,
+  type TimesheetSummary,
+  type AutoFillResult,
+  type DayFillResult,
+} from '@/api/timesheet'
 import api, { type ProjectCard } from '@/api/client'
 import { useAuthStore } from '@/stores/auth'
 
@@ -24,7 +31,9 @@ const isApprover = computed(() => {
   return r === 'PMO_ADMIN' || r === 'ADMIN' || r === 'EXEC'
 })
 const editUserId = ref<number | null>(null)
-const targetUserId = computed(() => isApprover.value && editUserId.value ? editUserId.value : (auth.user?.id ?? 0))
+const targetUserId = computed(() =>
+  isApprover.value && editUserId.value ? editUserId.value : (auth.user?.id ?? 0),
+)
 
 // P2.A 工时审批:Tab 切换 + 待审批列表
 // P3 修复:非审批者默认进"我的工时" Tab,避免看到空 pane
@@ -35,7 +44,7 @@ const pendingCount = computed(() => pendingList.value.length)
 // ---------- 选周 ----------
 function mondayOf(d: Date): Date {
   const r = new Date(d)
-  const day = r.getDay()  // 0=Sun
+  const day = r.getDay() // 0=Sun
   const diff = day === 0 ? -6 : 1 - day
   r.setDate(r.getDate() + diff)
   r.setHours(0, 0, 0, 0)
@@ -78,8 +87,10 @@ const projects = ref<ProjectCard[]>([])
 
 async function loadProjects() {
   try {
-    projects.value = (await api.get('/projects') as ProjectCard[]) ?? []
-  } catch { /* ignore */ }
+    projects.value = ((await api.get('/projects')) as ProjectCard[]) ?? []
+  } catch {
+    /* ignore */
+  }
 }
 
 async function ensureCurrentWeek() {
@@ -107,7 +118,7 @@ async function loadHistory() {
     const res = await timesheetApi.list({
       userId: targetUserId.value,
       page: histPage.value,
-      size: histSize.value
+      size: histSize.value,
     })
     history.value = res.content
     historyTotal.value = res.totalElements
@@ -167,7 +178,7 @@ function addRow(date: string) {
 }
 function addAllDays() {
   if (!current.value) return
-  current.value.entries = weekDays.value.map(d => emptyRow(fmt(d)))
+  current.value.entries = weekDays.value.map((d) => emptyRow(fmt(d)))
   ElMessage.info('已填充 7 天空白行')
 }
 function removeRow(idx: number) {
@@ -198,19 +209,19 @@ async function save() {
   saving.value = true
   try {
     // 校验
-    const valid = current.value.entries.filter(e => e.projectId && e.hours > 0)
+    const valid = current.value.entries.filter((e) => e.projectId && e.hours > 0)
     if (valid.length === 0) {
       ElMessage.warning('请至少录入一行')
       saving.value = false
       return
     }
-    const cleaned = valid.map(e => ({
+    const cleaned = valid.map((e) => ({
       id: e.id,
       workDate: e.workDate,
       projectId: e.projectId,
       milestoneId: e.milestoneId || undefined,
       hours: Number(e.hours),
-      description: e.description ?? ''
+      description: e.description ?? '',
     }))
     const updated = await timesheetApi.upsertEntries(current.value.id, cleaned)
     current.value = updated
@@ -231,7 +242,9 @@ async function submit() {
   }
   try {
     await ElMessageBox.confirm('提交后 PMO/EXEC 即可审批,确定?', '提交周报', { type: 'warning' })
-  } catch { return }
+  } catch {
+    return
+  }
   saving.value = true
   try {
     const updated = await timesheetApi.submit(current.value.id, '')
@@ -248,12 +261,14 @@ async function submit() {
 async function approve(id: number) {
   try {
     await ElMessageBox.confirm('确认批准该周报?', '审批', { type: 'success' })
-  } catch { return }
+  } catch {
+    return
+  }
   try {
     await timesheetApi.approve(id)
     ElMessage.success('已批准')
     await loadHistory()
-    await loadPending()   // P2.A: 同步刷新待审批 tab
+    await loadPending() // P2.A: 同步刷新待审批 tab
   } catch (e: any) {
     ElMessage.error(e.message ?? '审批失败')
   }
@@ -281,11 +296,16 @@ const reasonLabel: Record<string, string> = {
   PL: '我 PL 的项目',
   DEPT_GROUP: '我部门项目组',
   WBS: '我分配的 WBS 任务',
-  PLACEHOLDER: '无候选项目(占位)'
+  PLACEHOLDER: '无候选项目(占位)',
 }
 
 const reasonTagType: Record<string, string> = {
-  PM: 'danger', BU: 'warning', PL: 'success', DEPT_GROUP: 'info', WBS: '', PLACEHOLDER: 'info'
+  PM: 'danger',
+  BU: 'warning',
+  PL: 'success',
+  DEPT_GROUP: 'info',
+  WBS: '',
+  PLACEHOLDER: 'info',
 }
 
 async function doAutoFill() {
@@ -299,7 +319,7 @@ async function doAutoFill() {
       userId: targetUserId.value,
       weekStart: weekStart.value,
       dryRun: autoFillDryRun.value,
-      overwrite: autoFillOverwrite.value
+      overwrite: autoFillOverwrite.value,
     })
     autoFillResult.value = r
     autoFillDialog.value = true
@@ -319,15 +339,18 @@ async function doAutoFillBatch() {
   try {
     await ElMessageBox.confirm(
       `批量自动填报 ${weekStart.value} 全员, 需 ${autoFillOverwrite.value ? '覆盖' : '跳过'}已存在 entry. 继续?`,
-      '批量自动填报', { type: 'warning' }
+      '批量自动填报',
+      { type: 'warning' },
     )
-  } catch { return }
+  } catch {
+    return
+  }
   autoFillBatchLoading.value = true
   try {
     const r = await timesheetApi.autoFillBatch({
       weekStart: weekStart.value,
       dryRun: autoFillDryRun.value,
-      overwrite: autoFillOverwrite.value
+      overwrite: autoFillOverwrite.value,
     })
     autoFillBatchResult.value = r
     autoFillBatchDialog.value = true
@@ -346,169 +369,267 @@ async function doAutoFillBatch() {
   <div class="page">
     <el-tabs v-model="activeTab" class="ts-tabs">
       <el-tab-pane label="我的工时" name="mine">
-    <el-card>
-      <template #header>
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px">
-          <div>
-            <el-icon style="vertical-align: middle"><Calendar /></el-icon>
-            <span style="font-size: 16px; font-weight: 600">工时周报</span>
-            <span style="color: #909399; margin-left: 8px">每周维度,PM 录入,PMO/EXEC 审批</span>
-          </div>
-          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
-            <el-date-picker
-              v-model="weekStart"
-              type="date"
-              placeholder="选择周一"
-              format="YYYY-MM-DD"
-              value-format="YYYY-MM-DD"
-              style="width: 160px"
-              @change="loadCurrent"
-            />
-            <el-button-group>
-              <el-button @click="shiftWeek(-1)">← 上周</el-button>
-              <el-button @click="weekStart = fmt(thisMonday); loadCurrent()">本周</el-button>
-              <el-button @click="shiftWeek(1)">下周 →</el-button>
-            </el-button-group>
-            <el-select
-              v-if="isApprover"
-              v-model="editUserId"
-              placeholder="切换为他人"
-              clearable
-              style="width: 200px"
-              @change="loadCurrent(); loadHistory()"
+        <el-card>
+          <template #header>
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 8px;
+              "
             >
-              <el-option :value="auth.user?.id ?? 0" :label="`${auth.user?.fullName ?? '我'} (自己)`" />
-              <el-option v-for="p in (projects as any[])" :key="p.id" :value="p.pmUserId ?? p.id" :label="`${p.name}`" />
-            </el-select>
+              <div>
+                <el-icon style="vertical-align: middle"><Calendar /></el-icon>
+                <span style="font-size: 16px; font-weight: 600">工时周报</span>
+                <span style="color: #909399; margin-left: 8px">每周维度,PM 录入,PMO/EXEC 审批</span>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
+                <el-date-picker
+                  v-model="weekStart"
+                  type="date"
+                  placeholder="选择周一"
+                  format="YYYY-MM-DD"
+                  value-format="YYYY-MM-DD"
+                  style="width: 160px"
+                  @change="loadCurrent"
+                />
+                <el-button-group>
+                  <el-button @click="shiftWeek(-1)">← 上周</el-button>
+                  <el-button
+                    @click="weekStart = fmt(thisMonday); loadCurrent()"
+                  >
+                    本周
+                  </el-button>
+                  <el-button @click="shiftWeek(1)">下周 →</el-button>
+                </el-button-group>
+                <el-select
+                  v-if="isApprover"
+                  v-model="editUserId"
+                  placeholder="切换为他人"
+                  clearable
+                  style="width: 200px"
+                  @change="loadCurrent(); loadHistory()"
+                >
+                  <el-option :value="auth.user?.id ?? 0" :label="`${auth.user?.fullName ?? '我'} (自己)`" />
+                  <el-option
+                    v-for="p in projects as any[]"
+                    :key="p.id"
+                    :value="p.pmUserId ?? p.id"
+                    :label="`${p.name}`"
+                  />
+                </el-select>
+              </div>
+            </div>
+          </template>
+
+          <div
+            v-if="current"
+            style="margin-bottom: 12px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center"
+          >
+            <el-tag :type="statusTag(current.status) as any" size="large">{{ current.status }}</el-tag>
+            <span>
+              用户
+              <b>{{ current.userName }}</b>
+            </span>
+            <span>周 {{ current.weekStart }} ~ {{ current.weekEnd }}</span>
+            <span>
+              合计
+              <b :style="{ color: totalHours > 60 ? '#f56c6c' : totalHours > 40 ? '#e6a23c' : '#67c23a' }">
+                {{ totalHours }}h
+              </b>
+            </span>
+            <el-tag
+              v-for="(d, i) in weekDays"
+              :key="i"
+              :type="(byDay.get(fmt(d)) ?? 0) > 8 ? 'danger' : 'info'"
+              effect="plain"
+            >
+              周{{ ['日', '一', '二', '三', '四', '五', '六'][d.getDay()] }} {{ byDay.get(fmt(d)) ?? 0 }}h
+            </el-tag>
           </div>
-        </div>
-      </template>
 
-      <div v-if="current" style="margin-bottom: 12px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center">
-        <el-tag :type="statusTag(current.status) as any" size="large">{{ current.status }}</el-tag>
-        <span>用户 <b>{{ current.userName }}</b></span>
-        <span>周 {{ current.weekStart }} ~ {{ current.weekEnd }}</span>
-        <span>合计 <b :style="{ color: totalHours > 60 ? '#f56c6c' : totalHours > 40 ? '#e6a23c' : '#67c23a' }">{{ totalHours }}h</b></span>
-        <el-tag v-for="(d, i) in weekDays" :key="i" :type="(byDay.get(fmt(d)) ?? 0) > 8 ? 'danger' : 'info'" effect="plain">
-          周{{ ['日','一','二','三','四','五','六'][d.getDay()] }} {{ byDay.get(fmt(d)) ?? 0 }}h
-        </el-tag>
-      </div>
+          <el-table
+            v-if="current"
+            :data="current.entries ?? []"
+            border
+            style="width: 100%"
+            empty-text="本周无明细,点击下方按钮添加"
+          >
+            <el-table-column label="日期" width="160">
+              <template #default="{ row }">
+                <el-date-picker
+                  v-model="row.workDate"
+                  type="date"
+                  value-format="YYYY-MM-DD"
+                  format="YYYY-MM-DD"
+                  style="width: 150px"
+                  :disabled="current.status !== 'DRAFT'"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="项目" min-width="200">
+              <template #default="{ row }">
+                <el-select
+                  v-model="row.projectId"
+                  filterable
+                  placeholder="选项目"
+                  style="width: 100%"
+                  :disabled="current.status !== 'DRAFT'"
+                >
+                  <el-option
+                    v-for="p in projects"
+                    :key="p.id"
+                    :value="p.id"
+                    :label="`${p.code ?? ''} ${p.name}`"
+                  />
+                </el-select>
+              </template>
+            </el-table-column>
+            <el-table-column label="工时" width="120">
+              <template #default="{ row }">
+                <el-input-number
+                  v-model="row.hours"
+                  :min="0"
+                  :max="24"
+                  :step="0.5"
+                  :disabled="current.status !== 'DRAFT'"
+                  style="width: 110px"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="描述" min-width="220">
+              <template #default="{ row }">
+                <el-input
+                  v-model="row.description"
+                  placeholder="做了什么"
+                  :disabled="current.status !== 'DRAFT'"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="80" v-if="current.status === 'DRAFT'">
+              <template #default="{ $index }">
+                <el-button type="danger" link @click="removeRow($index)">删</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
 
-      <el-table
-        v-if="current"
-        :data="current.entries ?? []"
-        border
-        style="width: 100%"
-        empty-text="本周无明细,点击下方按钮添加"
-      >
-        <el-table-column label="日期" width="160">
-          <template #default="{ row }">
-            <el-date-picker v-model="row.workDate" type="date" value-format="YYYY-MM-DD" format="YYYY-MM-DD" style="width: 150px" :disabled="current.status !== 'DRAFT'" />
-          </template>
-        </el-table-column>
-        <el-table-column label="项目" min-width="200">
-          <template #default="{ row }">
-            <el-select v-model="row.projectId" filterable placeholder="选项目" style="width: 100%" :disabled="current.status !== 'DRAFT'">
-              <el-option v-for="p in projects" :key="p.id" :value="p.id" :label="`${p.code ?? ''} ${p.name}`" />
-            </el-select>
-          </template>
-        </el-table-column>
-        <el-table-column label="工时" width="120">
-          <template #default="{ row }">
-            <el-input-number v-model="row.hours" :min="0" :max="24" :step="0.5" :disabled="current.status !== 'DRAFT'" style="width: 110px" />
-          </template>
-        </el-table-column>
-        <el-table-column label="描述" min-width="220">
-          <template #default="{ row }">
-            <el-input v-model="row.description" placeholder="做了什么" :disabled="current.status !== 'DRAFT'" />
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="80" v-if="current.status === 'DRAFT'">
-          <template #default="{ $index }">
-            <el-button type="danger" link @click="removeRow($index)">删</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <!--
+          <!--
         V4.34 自动填报按钮区
         - 试算(dryRun=true)对所有 current 状态开放, 仅在前端预演结果, 不写库
         - 真实写库(非试算)由后端 TimesheetAutoFillService 校验: 仅 DRAFT/REJECTED 接受写库, 其他状态返回 409
         - 批量按钮仅审批者(PMO_ADMIN/ADMIN/EXEC)可见
       -->
-      <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
-        <el-checkbox v-model="autoFillOverwrite">覆盖已存在</el-checkbox>
-        <el-checkbox v-model="autoFillDryRun">仅试算 (不写)</el-checkbox>
-        <el-button type="warning" :icon="MagicStick" :loading="autoFillLoading" @click="doAutoFill">⚡ 自动填报</el-button>
-        <el-button v-if="isApprover" type="danger" :icon="MagicStick" :loading="autoFillBatchLoading" @click="doAutoFillBatch">⚡ 批量自动填报 (全员)</el-button>
-      </div>
+          <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
+            <el-checkbox v-model="autoFillOverwrite">覆盖已存在</el-checkbox>
+            <el-checkbox v-model="autoFillDryRun">仅试算 (不写)</el-checkbox>
+            <el-button type="warning" :icon="MagicStick" :loading="autoFillLoading" @click="doAutoFill">
+              ⚡ 自动填报
+            </el-button>
+            <el-button
+              v-if="isApprover"
+              type="danger"
+              :icon="MagicStick"
+              :loading="autoFillBatchLoading"
+              @click="doAutoFillBatch"
+            >
+              ⚡ 批量自动填报 (全员)
+            </el-button>
+          </div>
 
-      <div v-if="current?.status === 'DRAFT'" style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
-        <el-button @click="addAllDays" :icon="Plus">填充 7 天空白行</el-button>
-        <el-button @click="addRow(fmt(weekDays[0]))">+ 周一</el-button>
-        <el-button @click="addRow(fmt(weekDays[1]))">+ 周二</el-button>
-        <el-button @click="addRow(fmt(weekDays[2]))">+ 周三</el-button>
-        <el-button @click="addRow(fmt(weekDays[3]))">+ 周四</el-button>
-        <el-button @click="addRow(fmt(weekDays[4]))">+ 周五</el-button>
-        <el-button @click="addRow(fmt(weekDays[5]))">+ 周六</el-button>
-        <el-button @click="addRow(fmt(weekDays[6]))">+ 周日</el-button>
-        <div style="flex: 1"></div>
-        <el-button type="primary" :icon="Check" :loading="saving" @click="save">保存草稿</el-button>
-        <el-button type="success" :icon="Check" :loading="saving" @click="submit">提交审批</el-button>
-      </div>
-    </el-card>
+          <div
+            v-if="current?.status === 'DRAFT'"
+            style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center"
+          >
+            <el-button @click="addAllDays" :icon="Plus">填充 7 天空白行</el-button>
+            <el-button @click="addRow(fmt(weekDays[0]))">+ 周一</el-button>
+            <el-button @click="addRow(fmt(weekDays[1]))">+ 周二</el-button>
+            <el-button @click="addRow(fmt(weekDays[2]))">+ 周三</el-button>
+            <el-button @click="addRow(fmt(weekDays[3]))">+ 周四</el-button>
+            <el-button @click="addRow(fmt(weekDays[4]))">+ 周五</el-button>
+            <el-button @click="addRow(fmt(weekDays[5]))">+ 周六</el-button>
+            <el-button @click="addRow(fmt(weekDays[6]))">+ 周日</el-button>
+            <div style="flex: 1"></div>
+            <el-button type="primary" :icon="Check" :loading="saving" @click="save">保存草稿</el-button>
+            <el-button type="success" :icon="Check" :loading="saving" @click="submit">提交审批</el-button>
+          </div>
+        </el-card>
 
-    <el-card style="margin-top: 16px">
-      <template #header>
-        <div style="display: flex; justify-content: space-between; align-items: center">
-          <span><el-icon><Document /></el-icon> 历史周报 ({{ historyTotal }})</span>
-          <el-button :icon="Refresh" link @click="loadHistory">刷新</el-button>
-        </div>
-      </template>
-      <el-table :data="history" v-loading="loading" border>
-        <el-table-column prop="weekStart" label="周" width="180">
-          <template #default="{ row }">{{ row.weekStart }} ~ {{ row.weekEnd }}</template>
-        </el-table-column>
-        <el-table-column prop="userName" label="用户" width="120" />
-        <el-table-column prop="status" label="状态" width="100">
-          <template #default="{ row }">
-            <el-tag :type="statusTag(row.status) as any" size="small">{{ row.status }}</el-tag>
+        <el-card style="margin-top: 16px">
+          <template #header>
+            <div style="display: flex; justify-content: space-between; align-items: center">
+              <span>
+                <el-icon><Document /></el-icon>
+                历史周报 ({{ historyTotal }})
+              </span>
+              <el-button :icon="Refresh" link @click="loadHistory">刷新</el-button>
+            </div>
           </template>
-        </el-table-column>
-        <el-table-column prop="totalHours" label="工时" width="80" />
-        <el-table-column prop="projectCount" label="项目" width="70" />
-        <el-table-column prop="entryCount" label="行数" width="70" />
-        <el-table-column prop="submittedAt" label="提交时间" width="180">
-          <template #default="{ row }">{{ row.submittedAt ? row.submittedAt.replace('T',' ').slice(0,19) : '-' }}</template>
-        </el-table-column>
-        <el-table-column prop="approverName" label="审批人" width="120" />
-        <el-table-column label="操作" width="180" v-if="isApprover">
-          <template #default="{ row }">
-            <el-button v-if="row.status === 'SUBMITTED'" type="success" size="small" @click="approve(row.id)">批准</el-button>
-            <el-button size="small" link @click="current = { ...row, entries: [] } as any; weekStart = row.weekStart">查看</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-pagination
-        v-model:current-page="histPage"
-        v-model:page-size="histSize"
-        :total="historyTotal"
-        layout="total, prev, pager, next, sizes"
-        :page-sizes="[5, 10, 20]"
-        style="margin-top: 12px; justify-content: flex-end"
-        @current-change="loadHistory"
-        @size-change="loadHistory"
-      />
-    </el-card>
+          <el-table :data="history" v-loading="loading" border>
+            <el-table-column prop="weekStart" label="周" width="180">
+              <template #default="{ row }">{{ row.weekStart }} ~ {{ row.weekEnd }}</template>
+            </el-table-column>
+            <el-table-column prop="userName" label="用户" width="120" />
+            <el-table-column prop="status" label="状态" width="100">
+              <template #default="{ row }">
+                <el-tag :type="statusTag(row.status) as any" size="small">{{ row.status }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="totalHours" label="工时" width="80" />
+            <el-table-column prop="projectCount" label="项目" width="70" />
+            <el-table-column prop="entryCount" label="行数" width="70" />
+            <el-table-column prop="submittedAt" label="提交时间" width="180">
+              <template #default="{ row }">
+                {{ row.submittedAt ? row.submittedAt.replace('T', ' ').slice(0, 19) : '-' }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="approverName" label="审批人" width="120" />
+            <el-table-column label="操作" width="180" v-if="isApprover">
+              <template #default="{ row }">
+                <el-button
+                  v-if="row.status === 'SUBMITTED'"
+                  type="success"
+                  size="small"
+                  @click="approve(row.id)"
+                >
+                  批准
+                </el-button>
+                <el-button
+                  size="small"
+                  link
+                  @click="current = { ...row, entries: [] } as any; weekStart = row.weekStart"
+                >
+                  查看
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-pagination
+            v-model:current-page="histPage"
+            v-model:page-size="histSize"
+            :total="historyTotal"
+            layout="total, prev, pager, next, sizes"
+            :page-sizes="[5, 10, 20]"
+            style="margin-top: 12px; justify-content: flex-end"
+            @current-change="loadHistory"
+            @size-change="loadHistory"
+          />
+        </el-card>
       </el-tab-pane>
 
       <el-tab-pane v-if="isApprover" :label="`待我审批 (${pendingCount})`" name="approval">
         <el-card>
           <template #header>
             <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
-              <span><el-icon><Check /></el-icon> 待我审批 — SUBMITTED 状态(全员)</span>
+              <span>
+                <el-icon><Check /></el-icon>
+                待我审批 — SUBMITTED 状态(全员)
+              </span>
               <div style="display: flex; gap: 8px">
-                <el-button size="small" @click="$router.push('/timesheets/approvals')">打开独立审批中心 →</el-button>
+                <el-button size="small" @click="$router.push('/timesheets/approvals')">
+                  打开独立审批中心 →
+                </el-button>
                 <el-button :icon="Refresh" link @click="loadPending">刷新</el-button>
               </div>
             </div>
@@ -522,7 +643,9 @@ async function doAutoFillBatch() {
             <el-table-column prop="projectCount" label="项目" width="70" />
             <el-table-column prop="entryCount" label="行数" width="70" />
             <el-table-column prop="submittedAt" label="提交时间" width="180">
-              <template #default="{ row }">{{ row.submittedAt ? row.submittedAt.replace('T',' ').slice(0,19) : '-' }}</template>
+              <template #default="{ row }">
+                {{ row.submittedAt ? row.submittedAt.replace('T', ' ').slice(0, 19) : '-' }}
+              </template>
             </el-table-column>
             <el-table-column label="操作" width="200" fixed="right">
               <template #default="{ row }">
@@ -573,9 +696,7 @@ async function doAutoFillBatch() {
           </el-table-column>
           <el-table-column label="工时" width="70">
             <template #default="{ row }">
-              <span :style="{ color: row.skipped ? '#909399' : '#67c23a' }">
-                {{ row.hours }}h
-              </span>
+              <span :style="{ color: row.skipped ? '#909399' : '#67c23a' }">{{ row.hours }}h</span>
               <el-tag v-if="row.skipped" type="info" size="small" effect="plain">跳过</el-tag>
             </template>
           </el-table-column>

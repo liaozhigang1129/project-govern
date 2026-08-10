@@ -24,11 +24,11 @@ interface AssignableRole {
 const props = defineProps<{
   visible: boolean
   mode: 'single' | 'batch'
-  userId?: number           // single 必填
-  username?: string         // single 显示用
-  userIds?: number[]        // batch 必填
-  userLabels?: string[]     // batch 显示用
-  userPrimaryRoleCode?: string  // 防止自我降级提示
+  userId?: number // single 必填
+  username?: string // single 显示用
+  userIds?: number[] // batch 必填
+  userLabels?: string[] // batch 显示用
+  userPrimaryRoleCode?: string // 防止自我降级提示
 }>()
 
 const emit = defineEmits<{
@@ -45,7 +45,7 @@ const assignMode = ref<'REPLACE' | 'ADD' | 'REMOVE'>('REPLACE')
 const submitting = ref(false)
 
 // 模式
-const modeLabel = computed(() => props.mode === 'batch' ? '批量授权' : '角色授权')
+const modeLabel = computed(() => (props.mode === 'batch' ? '批量授权' : '角色授权'))
 const title = computed(() => {
   if (props.mode === 'batch') {
     const n = props.userIds?.length ?? 0
@@ -65,8 +65,8 @@ const userSummary = computed(() => {
 })
 
 // V4.18: 批量模式未选用户标记
-const userSummaryEmpty = computed(() =>
-  props.mode === 'batch' && (!props.userIds || props.userIds.length === 0)
+const userSummaryEmpty = computed(
+  () => props.mode === 'batch' && (!props.userIds || props.userIds.length === 0),
 )
 
 // ============================================================
@@ -101,7 +101,7 @@ const tableRef = ref()
 let syncing = false
 function onSelectionChange(rows: AssignableRole[]) {
   if (syncing) return
-  selectedRoleIds.value = rows.map(r => r.id)
+  selectedRoleIds.value = rows.map((r) => r.id)
 }
 async function applySelection() {
   if (syncing) return
@@ -117,19 +117,24 @@ async function applySelection() {
       }
     })
   } finally {
-    nextTick(() => { syncing = false })
+    nextTick(() => {
+      syncing = false
+    })
   }
 }
 watch([allRoles, selectedRoleIds], applySelection, { flush: 'post' })
 
-watch(() => props.visible, (v) => {
-  if (v) {
-    selectedRoleIds.value = []
-    assignMode.value = 'REPLACE'
-    loadAll()
-    loadCurrentRoles()
-  }
-})
+watch(
+  () => props.visible,
+  (v) => {
+    if (v) {
+      selectedRoleIds.value = []
+      assignMode.value = 'REPLACE'
+      loadAll()
+      loadCurrentRoles()
+    }
+  },
+)
 
 // ============================================================
 // 提交
@@ -152,8 +157,7 @@ async function submit() {
         ElMessage.success(`已更新 ${props.username} 的角色`)
       } else {
         // ADD / REMOVE 用批量端点
-        const r = await userApi.batchAssignRoles(
-          [props.userId], selectedRoleIds.value, assignMode.value)
+        const r = await userApi.batchAssignRoles([props.userId], selectedRoleIds.value, assignMode.value)
         if (r.failed > 0) {
           ElMessage.warning(`失败: ${r.errors[0] ?? '未知'}`)
           return
@@ -161,11 +165,8 @@ async function submit() {
         ElMessage.success(`已${assignMode.value === 'ADD' ? '追加' : '移除'} ${props.username} 的角色`)
       }
     } else if (props.mode === 'batch' && props.userIds) {
-      const r = await userApi.batchAssignRoles(
-        props.userIds, selectedRoleIds.value, assignMode.value)
-      const msg = r.failed > 0
-        ? `成功 ${r.success}, 失败 ${r.failed}`
-        : `成功更新 ${r.success} 个用户的角色`
+      const r = await userApi.batchAssignRoles(props.userIds, selectedRoleIds.value, assignMode.value)
+      const msg = r.failed > 0 ? `成功 ${r.success}, 失败 ${r.failed}` : `成功更新 ${r.success} 个用户的角色`
       if (r.failed > 0) {
         ElMessage.warning(msg + (r.errors[0] ? ` (${r.errors[0]})` : ''))
       } else {
@@ -206,22 +207,30 @@ onMounted(() => {
       style="margin-bottom: 16px"
     >
       <div v-if="userSummaryEmpty" style="color: #e6a23c">
-        ⚠️ 目标用户为空: 请先在用户管理列表 <b>勾选要授权的用户</b>, 然后再次打开本弹窗。
+        ⚠️ 目标用户为空: 请先在用户管理列表
+        <b>勾选要授权的用户</b>
+        , 然后再次打开本弹窗。
       </div>
-      <div v-else>目标用户: <b>{{ userSummary }}</b></div>
+      <div v-else>
+        目标用户:
+        <b>{{ userSummary }}</b>
+      </div>
     </el-alert>
 
     <el-form label-width="80px">
       <el-form-item label="操作模式">
         <el-radio-group v-model="assignMode">
           <el-radio value="REPLACE">
-            全量替换 <span style="color: #909399; font-size: 12px">(覆盖现有)</span>
+            全量替换
+            <span style="color: #909399; font-size: 12px">(覆盖现有)</span>
           </el-radio>
           <el-radio value="ADD">
-            追加 <span style="color: #909399; font-size: 12px">(保留现有 + 加新)</span>
+            追加
+            <span style="color: #909399; font-size: 12px">(保留现有 + 加新)</span>
           </el-radio>
           <el-radio value="REMOVE">
-            移除 <span style="color: #909399; font-size: 12px">(从现有中删除)</span>
+            移除
+            <span style="color: #909399; font-size: 12px">(从现有中删除)</span>
           </el-radio>
         </el-radio-group>
       </el-form-item>
@@ -251,7 +260,9 @@ onMounted(() => {
 
       <el-form-item>
         <span style="color: #909399; font-size: 12px">
-          已选 <b style="color: #409eff">{{ selectedRoleIds.length }}</b> / {{ allRoles.length }} 个角色
+          已选
+          <b style="color: #409eff">{{ selectedRoleIds.length }}</b>
+          / {{ allRoles.length }} 个角色
         </span>
       </el-form-item>
     </el-form>

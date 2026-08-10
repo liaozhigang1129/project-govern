@@ -54,49 +54,53 @@ const formRef = ref()
 // ============================================================
 // 打开时, 把 props.task 拷贝到 form
 // ============================================================
-watch(() => [props.modelValue, props.task], ([v, t]) => {
-  if (v) {
-    if (t) {
-      const task = t as WbsTaskNode
-      form.value = {
-        ...form.value,
-        ...task,
-        deliverable: task.deliverable ?? '',
-        remark: task.remark ?? '',
-        predecessorIds: task.predecessorIds ? [...task.predecessorIds] : [],
-      }
-    } else {
-      // 新建: 兜底
-      form.value = {
-        id: undefined,
-        projectId: props.projectId,
-        parentId: props.parent?.id ?? null,
-        wbsCode: '',
-        name: '',
-        taskType: 'EXECUTION',
-        status: 'NOT_STARTED',
-        ownerUserId: null,
-        planStartDate: null,
-        planEndDate: null,
-        actualStartDate: null,
-        actualEndDate: null,
-        planHours: 0,
-        actualHours: 0,
-        progressPct: 0,
-        weight: 1,
-        critical: false,
-        milestone: false,
-        milestoneId: null,
-        predecessorIds: [],
-        deliverable: '',
-        remark: '',
+watch(
+  () => [props.modelValue, props.task],
+  ([v, t]) => {
+    if (v) {
+      if (t) {
+        const task = t as WbsTaskNode
+        form.value = {
+          ...form.value,
+          ...task,
+          deliverable: task.deliverable ?? '',
+          remark: task.remark ?? '',
+          predecessorIds: task.predecessorIds ? [...task.predecessorIds] : [],
+        }
+      } else {
+        // 新建: 兜底
+        form.value = {
+          id: undefined,
+          projectId: props.projectId,
+          parentId: props.parent?.id ?? null,
+          wbsCode: '',
+          name: '',
+          taskType: 'EXECUTION',
+          status: 'NOT_STARTED',
+          ownerUserId: null,
+          planStartDate: null,
+          planEndDate: null,
+          actualStartDate: null,
+          actualEndDate: null,
+          planHours: 0,
+          actualHours: 0,
+          progressPct: 0,
+          weight: 1,
+          critical: false,
+          milestone: false,
+          milestoneId: null,
+          predecessorIds: [],
+          deliverable: '',
+          remark: '',
+        }
       }
     }
-  }
-}, { immediate: true })
+  },
+  { immediate: true },
+)
 
 const isEdit = computed(() => !!form.value.id)
-const title = computed(() => isEdit.value ? '编辑 WBS 任务' : '新增 WBS 任务')
+const title = computed(() => (isEdit.value ? '编辑 WBS 任务' : '新增 WBS 任务'))
 
 const breadcrumb = computed(() => {
   const parts = [props.parent?.wbsCode, form.value.wbsCode].filter(Boolean)
@@ -108,13 +112,11 @@ const breadcrumb = computed(() => {
 // ============================================================
 const rules = {
   wbsCode: [{ required: true, message: '请输入 WBS 编码', trigger: 'blur' }],
-  name:    [{ required: true, message: '请输入任务名称', trigger: 'blur' }],
-  taskType:[{ required: true, message: '请选择任务类型', trigger: 'change' }],
-  status:  [{ required: true, message: '请选择状态', trigger: 'change' }],
-  weight:  [{ required: true, message: '请输入权重', trigger: 'blur' }],
-  progressPct: [
-    { type: 'number', min: 0, max: 100, message: '进度需在 0-100', trigger: 'blur' },
-  ],
+  name: [{ required: true, message: '请输入任务名称', trigger: 'blur' }],
+  taskType: [{ required: true, message: '请选择任务类型', trigger: 'change' }],
+  status: [{ required: true, message: '请选择状态', trigger: 'change' }],
+  weight: [{ required: true, message: '请输入权重', trigger: 'blur' }],
+  progressPct: [{ type: 'number', min: 0, max: 100, message: '进度需在 0-100', trigger: 'blur' }],
 }
 
 // ============================================================
@@ -150,13 +152,12 @@ function onCancel() {
     @update:model-value="(v: boolean) => emit('update:modelValue', v)"
   >
     <!-- 面包屑 -->
-    <el-alert
-      type="info"
-      :closable="false"
-      style="margin-bottom: 16px"
-    >
+    <el-alert type="info" :closable="false" style="margin-bottom: 16px">
       <template #title>
-        <span>位置: <b>{{ breadcrumb }}</b></span>
+        <span>
+          位置:
+          <b>{{ breadcrumb }}</b>
+        </span>
         <span v-if="parent" style="margin-left: 12px; color: #909399; font-size: 12px">
           父任务: {{ parent.name }}
         </span>
@@ -184,10 +185,10 @@ function onCancel() {
 
       <el-form-item label="任务类型" prop="taskType">
         <el-select v-model="form.taskType" style="width: 100%">
-          <el-option label="📁 SUMMARY  -  汇总节点"     value="SUMMARY" />
-          <el-option label="📋 EXECUTION  -  执行任务"    value="EXECUTION" />
-          <el-option label="◆  MILESTONE  -  里程碑"     value="MILESTONE" />
-          <el-option label="📦 DELIVERABLE  -  交付物"   value="DELIVERABLE" />
+          <el-option label="📁 SUMMARY  -  汇总节点" value="SUMMARY" />
+          <el-option label="📋 EXECUTION  -  执行任务" value="EXECUTION" />
+          <el-option label="◆  MILESTONE  -  里程碑" value="MILESTONE" />
+          <el-option label="📦 DELIVERABLE  -  交付物" value="DELIVERABLE" />
         </el-select>
       </el-form-item>
 
@@ -204,31 +205,17 @@ function onCancel() {
       <el-row :gutter="12">
         <el-col :span="8">
           <el-form-item label="权重" prop="weight">
-            <el-input-number
-              v-model="form.weight"
-              :min="1" :max="10"
-              style="width: 100%"
-            />
+            <el-input-number v-model="form.weight" :min="1" :max="10" style="width: 100%" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="进度(%)" prop="progressPct">
-            <el-input-number
-              v-model="form.progressPct"
-              :min="0" :max="100"
-              :step="5"
-              style="width: 100%"
-            />
+            <el-input-number v-model="form.progressPct" :min="0" :max="100" :step="5" style="width: 100%" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="负责人" prop="ownerUserId">
-            <el-input-number
-              v-model="form.ownerUserId"
-              :min="1"
-              placeholder="user_id"
-              style="width: 100%"
-            />
+            <el-input-number v-model="form.ownerUserId" :min="1" placeholder="user_id" style="width: 100%" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -282,20 +269,12 @@ function onCancel() {
       <el-row :gutter="12">
         <el-col :span="12">
           <el-form-item label="计划工时(h)">
-            <el-input-number
-              v-model="form.planHours"
-              :min="0" :step="0.5"
-              style="width: 100%"
-            />
+            <el-input-number v-model="form.planHours" :min="0" :step="0.5" style="width: 100%" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="实际工时(h)">
-            <el-input-number
-              v-model="form.actualHours"
-              :min="0" :step="0.5"
-              style="width: 100%"
-            />
+            <el-input-number v-model="form.actualHours" :min="0" :step="0.5" style="width: 100%" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -304,28 +283,16 @@ function onCancel() {
         <el-input
           :model-value="form.predecessorIds.join(', ')"
           placeholder="逗号分隔的任务 id, 例如 1, 3, 5"
-          @update:model-value="(v: string) => form.predecessorIds = v.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n))"
+          @update:model-value="(v: string) => (form.predecessorIds = v.split(',').map((s) => parseInt(s.trim())).filter((n) => !isNaN(n)))"
         />
       </el-form-item>
 
       <el-form-item label="交付物">
-        <el-input
-          v-model="form.deliverable"
-          type="textarea"
-          :rows="2"
-          maxlength="2000"
-          show-word-limit
-        />
+        <el-input v-model="form.deliverable" type="textarea" :rows="2" maxlength="2000" show-word-limit />
       </el-form-item>
 
       <el-form-item label="备注">
-        <el-input
-          v-model="form.remark"
-          type="textarea"
-          :rows="2"
-          maxlength="2000"
-          show-word-limit
-        />
+        <el-input v-model="form.remark" type="textarea" :rows="2" maxlength="2000" show-word-limit />
       </el-form-item>
 
       <el-form-item>

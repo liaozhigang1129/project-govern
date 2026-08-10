@@ -51,14 +51,16 @@ const form = ref({
   code: '',
   title: '',
   description: '' as string,
-  category: 'TECHNICAL' as 'TECHNICAL' | 'SCHEDULE' | 'COST' | 'QUALITY' | 'EXTERNAL' | 'ORGANIZATIONAL' | 'OTHER',
-  probability: 3 as number,    // 默认中
-  impact: 3 as number,          // 默认中
+  category: 'TECHNICAL' as
+    'TECHNICAL' | 'SCHEDULE' | 'COST' | 'QUALITY' | 'EXTERNAL' | 'ORGANIZATIONAL' | 'OTHER',
+  probability: 3 as number, // 默认中
+  impact: 3 as number, // 默认中
   status: 'OPEN' as 'OPEN' | 'MITIGATING' | 'CLOSED' | 'OCCURRED' | 'ACCEPTED',
   ownerUserId: null as number | null,
   mitigation: '' as string,
   contingency: '' as string,
-  responseStrategy: null as null | 'AVOID' | 'MITIGATE' | 'TRANSFER' | 'ACCEPT' | 'EXPLOIT' | 'ENHANCE' | 'SHARE',
+  responseStrategy: null as
+    null | 'AVOID' | 'MITIGATE' | 'TRANSFER' | 'ACCEPT' | 'EXPLOIT' | 'ENHANCE' | 'SHARE',
   identifiedDate: null as string | null,
   targetCloseDate: null as string | null,
   relatedWbsTaskId: null as number | null,
@@ -72,72 +74,78 @@ const liveScore = computed(() => form.value.probability * form.value.impact)
 function levelOf(score: number): RiskLevel {
   if (score >= 16) return 'CRITICAL'
   if (score >= 10) return 'HIGH'
-  if (score >= 5)  return 'MEDIUM'
+  if (score >= 5) return 'MEDIUM'
   return 'LOW'
 }
 const liveLevel = computed<RiskLevel>(() => levelOf(liveScore.value))
 
 function levelTagType(l: RiskLevel) {
-  return { CRITICAL: 'danger', HIGH: 'warning', MEDIUM: '', LOW: 'success' }[l] as '' | 'success' | 'warning' | 'danger'
+  return { CRITICAL: 'danger', HIGH: 'warning', MEDIUM: '', LOW: 'success' }[l] as
+    '' | 'success' | 'warning' | 'danger'
 }
 
 // ============================================================
 // 打开时回填 / 重置
 // ============================================================
-watch(() => [props.modelValue, props.risk], ([v, r]) => {
-  if (!v) return
-  if (r) {
-    // 编辑
-    const t = r as RiskItem
-    form.value = {
-      id: t.id,
-      projectId: t.projectId,
-      code: t.code,
-      title: t.title,
-      description: t.description ?? '',
-      category: (t.category ?? 'OTHER') as 'TECHNICAL' | 'SCHEDULE' | 'COST' | 'QUALITY' | 'EXTERNAL' | 'ORGANIZATIONAL' | 'OTHER',
-      probability: t.probability,
-      impact: t.impact,
-      status: t.status,
-      ownerUserId: t.ownerUserId,
-      mitigation: t.mitigation ?? '',
-      contingency: t.contingency ?? '',
-      responseStrategy: (t.responseStrategy as any) ?? null,
-      identifiedDate: t.identifiedDate,
-      targetCloseDate: t.targetCloseDate,
-      relatedWbsTaskId: t.relatedWbsTaskId,
-      relatedMilestoneId: t.relatedMilestoneId,
+watch(
+  () => [props.modelValue, props.risk],
+  ([v, r]) => {
+    if (!v) return
+    if (r) {
+      // 编辑
+      const t = r as RiskItem
+      form.value = {
+        id: t.id,
+        projectId: t.projectId,
+        code: t.code,
+        title: t.title,
+        description: t.description ?? '',
+        category: (t.category ?? 'OTHER') as
+          'TECHNICAL' | 'SCHEDULE' | 'COST' | 'QUALITY' | 'EXTERNAL' | 'ORGANIZATIONAL' | 'OTHER',
+        probability: t.probability,
+        impact: t.impact,
+        status: t.status,
+        ownerUserId: t.ownerUserId,
+        mitigation: t.mitigation ?? '',
+        contingency: t.contingency ?? '',
+        responseStrategy: (t.responseStrategy as any) ?? null,
+        identifiedDate: t.identifiedDate,
+        targetCloseDate: t.targetCloseDate,
+        relatedWbsTaskId: t.relatedWbsTaskId,
+        relatedMilestoneId: t.relatedMilestoneId,
+      }
+    } else {
+      // 新建: 给一个建议编号 R-001, 后续用户可改
+      const suggestCode = suggestNextCode()
+      form.value = {
+        id: undefined,
+        projectId: props.projectId,
+        code: suggestCode,
+        title: '',
+        description: '',
+        category: 'TECHNICAL',
+        probability: 3,
+        impact: 3,
+        status: 'OPEN',
+        ownerUserId: null,
+        mitigation: '',
+        contingency: '',
+        responseStrategy: null,
+        identifiedDate: new Date().toISOString().slice(0, 10),
+        targetCloseDate: null,
+        relatedWbsTaskId: null,
+        relatedMilestoneId: null,
+      }
     }
-  } else {
-    // 新建: 给一个建议编号 R-001, 后续用户可改
-    const suggestCode = suggestNextCode()
-    form.value = {
-      id: undefined,
-      projectId: props.projectId,
-      code: suggestCode,
-      title: '',
-      description: '',
-      category: 'TECHNICAL',
-      probability: 3,
-      impact: 3,
-      status: 'OPEN',
-      ownerUserId: null,
-      mitigation: '',
-      contingency: '',
-      responseStrategy: null,
-      identifiedDate: new Date().toISOString().slice(0, 10),
-      targetCloseDate: null,
-      relatedWbsTaskId: null,
-      relatedMilestoneId: null,
-    }
-  }
-}, { immediate: true })
+  },
+  { immediate: true },
+)
 
 /** 从 store 已有的 listByProject 找下一个 R-XXX */
 function suggestNextCode(): string {
   const existing = store.listByProject.get(props.projectId) ?? []
   const max = existing
-    .map(r => parseInt((r.code.match(/R-(\d+)/)?.[1] ?? '0'), 10))
+    .map((r) => parseInt(r.code.match(/R-(\d+)/)?.[1] ?? '0', 10))
     .reduce((a, b) => Math.max(a, b), 0)
   return `R-${String(max + 1).padStart(3, '0')}`
 }
@@ -155,9 +163,11 @@ const rules = {
     { required: true, message: '请输入风险标题', trigger: 'blur' },
     { max: 256, message: '最多 256 字符', trigger: 'blur' },
   ],
-  category:    [{ required: true, message: '请选择分类', trigger: 'change' }],
-  probability: [{ required: true, type: 'number', min: 1, max: 5, message: '概率需在 1-5', trigger: 'change' }],
-  impact:      [{ required: true, type: 'number', min: 1, max: 5, message: '影响需在 1-5', trigger: 'change' }],
+  category: [{ required: true, message: '请选择分类', trigger: 'change' }],
+  probability: [
+    { required: true, type: 'number', min: 1, max: 5, message: '概率需在 1-5', trigger: 'change' },
+  ],
+  impact: [{ required: true, type: 'number', min: 1, max: 5, message: '影响需在 1-5', trigger: 'change' }],
 }
 
 // ============================================================
@@ -173,7 +183,12 @@ async function loadUsers() {
   }
 }
 onMounted(loadUsers)
-watch(() => props.modelValue, (v) => { if (v) loadUsers() })
+watch(
+  () => props.modelValue,
+  (v) => {
+    if (v) loadUsers()
+  },
+)
 
 // ============================================================
 // 提交
@@ -226,23 +241,12 @@ function onCancel() {
     :close-on-click-modal="false"
     @update:model-value="(v: boolean) => emit('update:modelValue', v)"
   >
-    <el-form
-      ref="formRef"
-      :model="form"
-      :rules="rules"
-      label-width="100px"
-      label-position="right"
-    >
+    <el-form ref="formRef" :model="form" :rules="rules" label-width="100px" label-position="right">
       <!-- 基础信息 -->
       <el-row :gutter="12">
         <el-col :span="8">
           <el-form-item label="编号" prop="code">
-            <el-input
-              v-model="form.code"
-              placeholder="R-001"
-              maxlength="32"
-              show-word-limit
-            />
+            <el-input v-model="form.code" placeholder="R-001" maxlength="32" show-word-limit />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -295,7 +299,8 @@ function onCancel() {
           <el-form-item label="概率 (P)">
             <el-slider
               v-model="form.probability"
-              :min="1" :max="5"
+              :min="1"
+              :max="5"
               :marks="{ 1: '极低', 2: '低', 3: '中', 4: '高', 5: '极高' }"
               show-stops
             />
@@ -305,7 +310,8 @@ function onCancel() {
           <el-form-item label="影响 (I)">
             <el-slider
               v-model="form.impact"
-              :min="1" :max="5"
+              :min="1"
+              :max="5"
               :marks="{ 1: '轻微', 2: '较小', 3: '中等', 4: '较大', 5: '严重' }"
               show-stops
             />
@@ -328,13 +334,13 @@ function onCancel() {
         <el-col :span="12">
           <el-form-item label="应对策略">
             <el-select v-model="form.responseStrategy" placeholder="未选择" clearable style="width: 100%">
-              <el-option label="规避 AVOID"     value="AVOID" />
-              <el-option label="缓解 MITIGATE"  value="MITIGATE" />
-              <el-option label="转移 TRANSFER"  value="TRANSFER" />
-              <el-option label="接受 ACCEPT"    value="ACCEPT" />
-              <el-option label="开拓 EXPLOIT"   value="EXPLOIT" />
-              <el-option label="提高 ENHANCE"   value="ENHANCE" />
-              <el-option label="分享 SHARE"     value="SHARE" />
+              <el-option label="规避 AVOID" value="AVOID" />
+              <el-option label="缓解 MITIGATE" value="MITIGATE" />
+              <el-option label="转移 TRANSFER" value="TRANSFER" />
+              <el-option label="接受 ACCEPT" value="ACCEPT" />
+              <el-option label="开拓 EXPLOIT" value="EXPLOIT" />
+              <el-option label="提高 ENHANCE" value="ENHANCE" />
+              <el-option label="分享 SHARE" value="SHARE" />
             </el-select>
           </el-form-item>
         </el-col>
@@ -423,8 +429,16 @@ function onCancel() {
   font-weight: 700;
   line-height: 1;
 }
-.score-num.lvl-LOW      { color: #67c23a; }
-.score-num.lvl-MEDIUM   { color: #909399; }
-.score-num.lvl-HIGH     { color: #e6a23c; }
-.score-num.lvl-CRITICAL { color: #f56c6c; }
+.score-num.lvl-LOW {
+  color: #67c23a;
+}
+.score-num.lvl-MEDIUM {
+  color: #909399;
+}
+.score-num.lvl-HIGH {
+  color: #e6a23c;
+}
+.score-num.lvl-CRITICAL {
+  color: #f56c6c;
+}
 </style>

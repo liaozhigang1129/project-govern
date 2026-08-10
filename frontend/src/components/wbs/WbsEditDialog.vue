@@ -9,19 +9,16 @@
         <button class="wbs-dialog__close" @click="close" type="button" aria-label="Close">×</button>
       </header>
       <main class="wbs-dialog__body">
-        <el-form
-          v-if="form"
-          :model="form"
-          label-width="100px"
-          label-position="right"
-          size="default"
-        >
+        <el-form v-if="form" :model="form" label-width="100px" label-position="right" size="default">
           <el-row :gutter="16">
             <el-col :span="12">
               <el-form-item label="WBS 编码">
                 <el-input v-model="form.wbsCode" disabled>
                   <template #append>
-                    <el-tooltip content="切换上级任务时自动重算 (顶级=最大编号+1 / 子级=父.子编号+1)" placement="top">
+                    <el-tooltip
+                      content="切换上级任务时自动重算 (顶级=最大编号+1 / 子级=父.子编号+1)"
+                      placement="top"
+                    >
                       <el-icon><span>🔄</span></el-icon>
                     </el-tooltip>
                   </template>
@@ -82,12 +79,7 @@
             <el-col :span="12">
               <el-form-item label="责任人">
                 <el-select v-model="form.ownerUserId" placeholder="选择责任人" clearable style="width: 100%">
-                  <el-option
-                    v-for="(name, id) in owners"
-                    :key="id"
-                    :label="name"
-                    :value="Number(id)"
-                  />
+                  <el-option v-for="(name, id) in owners" :key="id" :label="name" :value="Number(id)" />
                 </el-select>
               </el-form-item>
             </el-col>
@@ -288,13 +280,21 @@ function close() {
   max-height: calc(100vh - 32px);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 12px 48px 8px rgba(0, 0, 0, 0.18), 0 0 1px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 12px 48px 8px rgba(0, 0, 0, 0.18),
+    0 0 1px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   animation: wbsDlgIn 0.18s ease-out;
 }
 @keyframes wbsDlgIn {
-  from { transform: translateY(-12px) scale(0.98); opacity: 0; }
-  to   { transform: translateY(0) scale(1); opacity: 1; }
+  from {
+    transform: translateY(-12px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
 .wbs-dialog__header {
   display: flex;
@@ -328,10 +328,12 @@ function close() {
   color: #909399;
   cursor: pointer;
   padding: 0 4px;
-  transition: color 0.15s, transform 0.15s;
+  transition:
+    color 0.15s,
+    transform 0.15s;
 }
 .wbs-dialog__close:hover {
-  color: #F56C6C;
+  color: #f56c6c;
   transform: rotate(90deg);
 }
 .wbs-dialog__body {
@@ -340,8 +342,13 @@ function close() {
   flex: 1 1 auto;
   background: #fafbfc;
 }
-.wbs-dialog__body :deep(.el-form-item) { margin-bottom: 18px; }
-.wbs-dialog__body :deep(.el-form-item__label) { font-weight: 500; color: #606266; }
+.wbs-dialog__body :deep(.el-form-item) {
+  margin-bottom: 18px;
+}
+.wbs-dialog__body :deep(.el-form-item__label) {
+  font-weight: 500;
+  color: #606266;
+}
 .wbs-dialog__footer {
   padding: 14px 24px;
   border-top: 1px solid var(--pmo-border, #e4e7ed);

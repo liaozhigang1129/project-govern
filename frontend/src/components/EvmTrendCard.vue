@@ -39,7 +39,7 @@ const snapping = ref(false)
 const days = ref<number>(30)
 
 const DAYS_OPTIONS = [
-  { value: 7,  label: '近 7 天' },
+  { value: 7, label: '近 7 天' },
   { value: 30, label: '近 30 天' },
   { value: 90, label: '近 90 天' },
 ]
@@ -47,7 +47,10 @@ const DAYS_OPTIONS = [
 // ============================================================
 // 健康度灯
 // ============================================================
-function healthLevel(cpi: number, spi: number): {
+function healthLevel(
+  cpi: number,
+  spi: number,
+): {
   level: 'GOOD' | 'WARN' | 'BAD'
   color: string
   bg: string
@@ -63,7 +66,7 @@ function healthLevel(cpi: number, spi: number): {
   return { level: 'WARN', color: '#e6a23c', bg: '#fdf6ec', text: '关注' }
 }
 
-const latest = computed(() => trend.value.length ? trend.value[trend.value.length - 1] : null)
+const latest = computed(() => (trend.value.length ? trend.value[trend.value.length - 1] : null))
 const health = computed(() => {
   if (!latest.value) return null
   return healthLevel(Number(latest.value.cpi), Number(latest.value.spi))
@@ -85,12 +88,12 @@ const sv = computed(() => {
 const chartOption = computed(() => {
   if (trend.value.length === 0) return {}
 
-  const xData = trend.value.map(s => s.snapshotDate)
-  const pvData = trend.value.map(s => Number(s.pv))
-  const evData = trend.value.map(s => Number(s.ev))
-  const acData = trend.value.map(s => Number(s.ac))
-  const cpiData = trend.value.map(s => Number(s.cpi))
-  const spiData = trend.value.map(s => Number(s.spi))
+  const xData = trend.value.map((s) => s.snapshotDate)
+  const pvData = trend.value.map((s) => Number(s.pv))
+  const evData = trend.value.map((s) => Number(s.ev))
+  const acData = trend.value.map((s) => Number(s.ac))
+  const cpiData = trend.value.map((s) => Number(s.cpi))
+  const spiData = trend.value.map((s) => Number(s.spi))
 
   return {
     grid: { left: 60, right: 60, top: 40, bottom: 40 },
@@ -101,11 +104,12 @@ const chartOption = computed(() => {
         const date = params[0]?.axisValue
         let html = `<b>${date}</b><br/>`
         for (const p of params) {
-          const v = typeof p.value === 'number'
-            ? (p.seriesName.includes('CPI') || p.seriesName.includes('SPI')
+          const v =
+            typeof p.value === 'number'
+              ? p.seriesName.includes('CPI') || p.seriesName.includes('SPI')
                 ? p.value.toFixed(3)
-                : '¥' + p.value.toLocaleString())
-            : p.value
+                : '¥' + p.value.toLocaleString()
+              : p.value
           html += `${p.marker} ${p.seriesName}: <b>${v}</b><br/>`
         }
         return html
@@ -127,7 +131,7 @@ const chartOption = computed(() => {
         name: '金额 (¥)',
         position: 'left',
         axisLabel: {
-          formatter: (v: number) => v >= 10000 ? `${(v / 10000).toFixed(0)}万` : v.toString(),
+          formatter: (v: number) => (v >= 10000 ? `${(v / 10000).toFixed(0)}万` : v.toString()),
           fontSize: 11,
         },
       },
@@ -142,16 +146,22 @@ const chartOption = computed(() => {
       },
     ],
     series: [
-      { name: 'PV 计划值', type: 'line', data: pvData, smooth: true,  itemStyle: { color: '#909399' } },
-      { name: 'EV 挣值',   type: 'line', data: evData, smooth: true,  itemStyle: { color: '#409eff' } },
+      { name: 'PV 计划值', type: 'line', data: pvData, smooth: true, itemStyle: { color: '#909399' } },
+      { name: 'EV 挣值', type: 'line', data: evData, smooth: true, itemStyle: { color: '#409eff' } },
       { name: 'AC 实际成本', type: 'line', data: acData, smooth: true, itemStyle: { color: '#e6a23c' } },
       {
-        name: 'CPI', type: 'line', yAxisIndex: 1, data: cpiData,
+        name: 'CPI',
+        type: 'line',
+        yAxisIndex: 1,
+        data: cpiData,
         markLine: { data: [{ yAxis: 1, label: { formatter: '基准 1.0' } }] },
         itemStyle: { color: '#67c23a' },
       },
       {
-        name: 'SPI', type: 'line', yAxisIndex: 1, data: spiData,
+        name: 'SPI',
+        type: 'line',
+        yAxisIndex: 1,
+        data: spiData,
         markLine: { data: [{ yAxis: 1 }] },
         itemStyle: { color: '#9c27b0' },
       },
@@ -202,7 +212,10 @@ defineExpose({ load, latest })
       <div class="evm-card-header">
         <span>
           <b>📈 EVM 挣值分析</b>
-          <el-tag v-if="health" :style="{ marginLeft: '8px', background: health.bg, color: health.color, border: 'none' }">
+          <el-tag
+            v-if="health"
+            :style="{ marginLeft: '8px', background: health.bg, color: health.color, border: 'none' }"
+          >
             {{ health.text }}
           </el-tag>
         </span>
@@ -210,9 +223,7 @@ defineExpose({ load, latest })
           <el-select v-model="days" size="small" style="width: 110px" @change="onDaysChange">
             <el-option v-for="o in DAYS_OPTIONS" :key="o.value" :value="o.value" :label="o.label" />
           </el-select>
-          <el-button size="small" type="primary" :loading="snapping" @click="onSnapshot">
-            触发快照
-          </el-button>
+          <el-button size="small" type="primary" :loading="snapping" @click="onSnapshot">触发快照</el-button>
         </div>
       </div>
     </template>
@@ -269,17 +280,8 @@ defineExpose({ load, latest })
 
     <!-- 趋势图 -->
     <div v-loading="loading" class="evm-chart-wrap">
-      <v-chart
-        v-if="trend.length > 0"
-        :option="chartOption"
-        autoresize
-        style="height: 320px; width: 100%"
-      />
-      <el-empty
-        v-else
-        description="尚无 EVM 快照,点右上「触发快照」生成首次"
-        :image-size="80"
-      />
+      <v-chart v-if="trend.length > 0" :option="chartOption" autoresize style="height: 320px; width: 100%" />
+      <el-empty v-else description="尚无 EVM 快照,点右上「触发快照」生成首次" :image-size="80" />
     </div>
   </el-card>
 </template>
@@ -290,7 +292,10 @@ defineExpose({ load, latest })
   justify-content: space-between;
   align-items: center;
 }
-.evm-card-actions { display: flex; gap: 8px; }
+.evm-card-actions {
+  display: flex;
+  gap: 8px;
+}
 
 .evm-kpi-row {
   display: grid;
@@ -304,12 +309,32 @@ defineExpose({ load, latest })
   border-radius: 6px;
   text-align: center;
 }
-.evm-kpi-label { font-size: 11px; color: #909399; }
-.evm-kpi-value { font-size: 18px; font-weight: 600; color: #303133; margin-top: 2px; }
-.evm-kpi-hint  { font-size: 11px; color: #909399; margin-top: 2px; }
-.evm-kpi-idx   { background: #fdf6ec; }
-.evm-ev        { color: #409eff; }
-.evm-ac        { color: #e6a23c; }
+.evm-kpi-label {
+  font-size: 11px;
+  color: #909399;
+}
+.evm-kpi-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+  margin-top: 2px;
+}
+.evm-kpi-hint {
+  font-size: 11px;
+  color: #909399;
+  margin-top: 2px;
+}
+.evm-kpi-idx {
+  background: #fdf6ec;
+}
+.evm-ev {
+  color: #409eff;
+}
+.evm-ac {
+  color: #e6a23c;
+}
 
-.evm-chart-wrap { min-height: 320px; }
+.evm-chart-wrap {
+  min-height: 320px;
+}
 </style>

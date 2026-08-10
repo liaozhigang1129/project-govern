@@ -21,11 +21,11 @@ export interface OpportunityKpis {
   lostCount: number
   openAmount: number
   wonAmount: number
-  winRate: number              // %
-  weightedPipeline: number     // amount × probability 加权
-  totalOpportunities: number   // 总商机数 (含 CLOSED)
-  buCount: number              // 涉及 BU 数
-  avgDealSize: number          // 平均成交单额 (万)
+  winRate: number // %
+  weightedPipeline: number // amount × probability 加权
+  totalOpportunities: number // 总商机数 (含 CLOSED)
+  buCount: number // 涉及 BU 数
+  avgDealSize: number // 平均成交单额 (万)
 }
 
 /** 漏斗单段 */
@@ -40,11 +40,11 @@ export interface FunnelStage {
 export interface ConversionRate {
   from: string
   to: string
-  rate: number                 // %
+  rate: number // %
 }
 
 export interface MonthlyTrend {
-  month: string                // 2026-06
+  month: string // 2026-06
   wonCount: number
   wonAmount: number
 }

@@ -58,8 +58,11 @@
         <div style="display: flex; justify-content: space-between; align-items: center">
           <span style="font-weight: 600">🤖 AI 智能 WBS 转化</span>
           <el-button
-            type="primary" :loading="generating" :disabled="!sowFiles.length"
-            :icon="MagicStick" @click="triggerGenerate"
+            type="primary"
+            :loading="generating"
+            :disabled="!sowFiles.length"
+            :icon="MagicStick"
+            @click="triggerGenerate"
           >
             {{ aiDraft ? '重新生成' : '生成 WBS 草稿' }}
           </el-button>
@@ -76,7 +79,8 @@
           style="margin-bottom: 12px"
         >
           <template #title>
-            {{ aiDraft.sourceMeta.extractedFiles }} / {{ aiDraft.sourceMeta.usedFiles }} 个 SOW 文件成功抽取文本,{{ aiDraft.sourceMeta.failedFiles }} 个失败
+            {{ aiDraft.sourceMeta.extractedFiles }} / {{ aiDraft.sourceMeta.usedFiles }} 个 SOW
+            文件成功抽取文本,{{ aiDraft.sourceMeta.failedFiles }} 个失败
           </template>
           <div style="font-size: 12px; margin-top: 4px; color: #606266">
             失败文件可能是扫描件 / 加密 PDF / 损坏文件,AI 没法读到内容。建议:
@@ -94,7 +98,8 @@
           style="margin-bottom: 12px"
         >
           <template #title>
-            {{ aiDraft.sourceMeta.extractedFiles }} / {{ aiDraft.sourceMeta.usedFiles }} 个 SOW 文件已抽取,AI 基于这些内容生成
+            {{ aiDraft.sourceMeta.extractedFiles }} / {{ aiDraft.sourceMeta.usedFiles }} 个 SOW 文件已抽取,AI
+            基于这些内容生成
           </template>
         </el-alert>
       </template>
@@ -102,56 +107,52 @@
       <el-empty v-if="!aiDraft" description="先上传 SOW 文件,然后点击「生成 WBS 草稿」" :image-size="80" />
 
       <template v-else>
-<!-- V4.23: 抽到的内容统计 -->
-      <el-row v-if="aiDraft?.sourceMeta" :gutter="16" style="margin-bottom: 12px">
-        <el-col :span="6">
-          <el-statistic title="里程碑" :value="aiDraft.milestones.length" />
-        </el-col>
-        <el-col :span="6">
-          <el-statistic
-            title="工作包"
-            :value="aiDraft.milestones.reduce((a, m) => a + m.workPackages.length, 0)"
-          />
-        </el-col>
-        <el-col :span="6">
-          <el-statistic
-            title="风险项"
-            :value="aiDraft.risks.length"
-            :value-style="{ color: '#F56C6C' }"
-          />
-        </el-col>
-        <el-col :span="6">
-          <el-statistic
-            title="高/极高风险"
-            :value="aiDraft.risks.filter(r => r.level === 'HIGH' || r.level === 'CRITICAL').length"
-            :value-style="{ color: '#E6A23C' }"
-          />
-        </el-col>
-      </el-row>
+        <!-- V4.23: 抽到的内容统计 -->
+        <el-row v-if="aiDraft?.sourceMeta" :gutter="16" style="margin-bottom: 12px">
+          <el-col :span="6">
+            <el-statistic title="里程碑" :value="aiDraft.milestones.length" />
+          </el-col>
+          <el-col :span="6">
+            <el-statistic
+              title="工作包"
+              :value="aiDraft.milestones.reduce((a, m) => a + m.workPackages.length, 0)"
+            />
+          </el-col>
+          <el-col :span="6">
+            <el-statistic title="风险项" :value="aiDraft.risks.length" :value-style="{ color: '#F56C6C' }" />
+          </el-col>
+          <el-col :span="6">
+            <el-statistic
+              title="高/极高风险"
+              :value="aiDraft.risks.filter((r) => r.level === 'HIGH' || r.level === 'CRITICAL').length"
+              :value-style="{ color: '#E6A23C' }"
+            />
+          </el-col>
+        </el-row>
 
-      <!-- V4.23: SOW 文件抽取明细表 — 让用户精确知道"哪份 PDF 没抽到 / 为什么" -->
-      <el-collapse v-if="aiDraft?.sourceMeta?.fileExtractions?.length" style="margin-bottom: 12px">
-        <el-collapse-item title="🔍 SOW 文件抽取明细 (V4.23)" name="extract">
-          <el-table :data="aiDraft.sourceMeta.fileExtractions" size="small" border>
-            <el-table-column prop="fileName" label="文件名" min-width="220" show-overflow-tooltip />
-            <el-table-column label="状态" width="100" align="center">
-              <template #default="{ row }">
-                <el-tag v-if="row.extracted" type="success" size="small">✓ 已抽取</el-tag>
-                <el-tag v-else type="danger" size="small">✗ 未抽取</el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column label="抽取字符" width="100" align="right">
-              <template #default="{ row }">{{ row.chars.toLocaleString() }}</template>
-            </el-table-column>
-            <el-table-column label="失败原因" min-width="240" show-overflow-tooltip>
-              <template #default="{ row }">
-                <span v-if="row.extracted" style="color: #67c23a">文本已并入 AI 输入</span>
-                <span v-else style="color: #f56c6c">{{ explainReason(row.reason) }}</span>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-collapse-item>
-      </el-collapse>
+        <!-- V4.23: SOW 文件抽取明细表 — 让用户精确知道"哪份 PDF 没抽到 / 为什么" -->
+        <el-collapse v-if="aiDraft?.sourceMeta?.fileExtractions?.length" style="margin-bottom: 12px">
+          <el-collapse-item title="🔍 SOW 文件抽取明细 (V4.23)" name="extract">
+            <el-table :data="aiDraft.sourceMeta.fileExtractions" size="small" border>
+              <el-table-column prop="fileName" label="文件名" min-width="220" show-overflow-tooltip />
+              <el-table-column label="状态" width="100" align="center">
+                <template #default="{ row }">
+                  <el-tag v-if="row.extracted" type="success" size="small">✓ 已抽取</el-tag>
+                  <el-tag v-else type="danger" size="small">✗ 未抽取</el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column label="抽取字符" width="100" align="right">
+                <template #default="{ row }">{{ row.chars.toLocaleString() }}</template>
+              </el-table-column>
+              <el-table-column label="失败原因" min-width="240" show-overflow-tooltip>
+                <template #default="{ row }">
+                  <span v-if="row.extracted" style="color: #67c23a">文本已并入 AI 输入</span>
+                  <span v-else style="color: #f56c6c">{{ explainReason(row.reason) }}</span>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-collapse-item>
+        </el-collapse>
 
         <el-tabs v-model="activeTab">
           <el-tab-pane label="里程碑 + 工作包" name="ms">
@@ -159,9 +160,7 @@
               <div class="milestone-header">
                 <el-tag type="primary" effect="dark">M{{ m.sequence }}</el-tag>
                 <span class="milestone-name">{{ m.name }}</span>
-                <el-tag v-if="m.targetWeek" size="small" type="info">
-                  目标 W{{ m.targetWeek }}
-                </el-tag>
+                <el-tag v-if="m.targetWeek" size="small" type="info">目标 W{{ m.targetWeek }}</el-tag>
               </div>
               <el-table :data="m.workPackages" size="small" :show-header="false" style="margin-top: 8px">
                 <el-table-column label="工作包" prop="name" min-width="200" />
@@ -180,7 +179,9 @@
 
           <el-tab-pane label="交付风险" name="rk">
             <el-alert
-              type="warning" :closable="false" show-icon
+              type="warning"
+              :closable="false"
+              show-icon
               title="如风险与 SOW 无实质关联,请点击「删除」剔除,避免纳入项目交付风险清单。"
               style="margin-bottom: 12px"
             />
@@ -207,10 +208,9 @@
               <el-table-column prop="suggestion" label="建议" min-width="220" show-overflow-tooltip />
               <el-table-column label="操作" width="180" align="center" fixed="right">
                 <template #default="{ row, $index }">
-                  <el-button
-                    size="small" link type="primary"
-                    :icon="View" @click="showEvidenceDialog(row)"
-                  >查看证据</el-button>
+                  <el-button size="small" link type="primary" :icon="View" @click="showEvidenceDialog(row)">
+                    查看证据
+                  </el-button>
                   <el-popconfirm
                     title="确认从风险清单中删除此条?"
                     confirm-button-text="删除"
@@ -247,9 +247,15 @@
           <el-descriptions-item label="Evidence 关键词">
             <template v-if="evidenceDialogData.evidence.length">
               <el-tag
-                v-for="(k, i) in evidenceDialogData.evidence" :key="i"
-                size="small" type="success" effect="plain" style="margin-right: 6px"
-              >{{ k }}</el-tag>
+                v-for="(k, i) in evidenceDialogData.evidence"
+                :key="i"
+                size="small"
+                type="success"
+                effect="plain"
+                style="margin-right: 6px"
+              >
+                {{ k }}
+              </el-tag>
             </template>
             <span v-else style="color: #f56c6c">无 evidence — 该风险在 SOW 中没有可定位的依据</span>
           </el-descriptions-item>
@@ -258,17 +264,21 @@
         <div style="font-weight: 600; margin-bottom: 8px">SOW 原文命中片段</div>
         <template v-if="evidenceDialogData.snippets.length">
           <el-card
-            v-for="(s, i) in evidenceDialogData.snippets" :key="i"
-            shadow="never" style="margin-bottom: 8px"
+            v-for="(s, i) in evidenceDialogData.snippets"
+            :key="i"
+            shadow="never"
+            style="margin-bottom: 8px"
           >
             <div style="font-size: 12px; color: #909399; margin-bottom: 4px">
-              关键词: <el-tag size="small" type="success">{{ s.kw }}</el-tag>
+              关键词:
+              <el-tag size="small" type="success">{{ s.kw }}</el-tag>
             </div>
             <div style="white-space: pre-wrap; color: #303133; line-height: 1.6">{{ s.context }}</div>
           </el-card>
         </template>
         <el-empty
-          v-else description="后端未下发 SOW 原文摘要,evidence 关键词是从风险桶触发规则而来,无法定位原文位置"
+          v-else
+          description="后端未下发 SOW 原文摘要,evidence 关键词是从风险桶触发规则而来,无法定位原文位置"
           :image-size="80"
         />
       </div>
@@ -282,10 +292,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import {
-  Upload, MagicStick, View, Delete,
-  CircleCheckFilled, WarningFilled,
-} from '@element-plus/icons-vue'
+import { Upload, MagicStick, View, Delete, CircleCheckFilled, WarningFilled } from '@element-plus/icons-vue'
 import api, { type SowFile, type AiWbsDraft, type AiWbsRisk } from '@/api/client'
 
 const props = defineProps<{
@@ -389,7 +396,7 @@ async function triggerGenerate() {
     if (meta) {
       if (meta.failedFiles > 0) {
         ElMessage.warning(
-          `AI 已生成,但 ${meta.failedFiles} / ${meta.usedFiles} 个 SOW 文件抽取失败 ��� 点下方"SOW 文件抽取明细"看详情`
+          `AI 已生成,但 ${meta.failedFiles} / ${meta.usedFiles} 个 SOW 文件抽取失败 ��� 点下方"SOW 文件抽取明细"看详情`,
         )
       } else if (meta.usedFiles > 0 && meta.extractedFiles === meta.usedFiles) {
         ElMessage.success(`已生成 WBS 草稿 (基于 ${meta.extractedFiles} 个 SOW 文件)`)
@@ -474,9 +481,7 @@ function showEvidenceDialog(row: any) {
   const ev = getEvidence(row)
   // 从后端 sourceMeta 拿到 SOW 原文片段
   const snippets: Array<{ kw: string; context: string }> = []
-  const sowText = (aiDraft.value as any)?.sourceMeta?.sowText
-    ?? (aiDraft.value as any)?.sowText
-    ?? ''
+  const sowText = (aiDraft.value as any)?.sourceMeta?.sowText ?? (aiDraft.value as any)?.sowText ?? ''
   if (sowText && ev.length) {
     for (const kw of ev) {
       if (!kw) continue

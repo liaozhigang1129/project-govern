@@ -34,15 +34,18 @@ const userList = ref<AppUser[]>([])
 // 级联:选 BU 后,PL 下拉只显示该 BU 下的
 const plListFiltered = computed(() => {
   if (!queryForm.value.buId) return plListAll.value
-  return plListAll.value.filter(pl => pl.bu?.id === queryForm.value.buId)
+  return plListAll.value.filter((pl) => pl.bu?.id === queryForm.value.buId)
 })
 
 // 切换 BU 时清 PL 过滤
-watch(() => queryForm.value.buId, (newBu, oldBu) => {
-  if (newBu !== oldBu) {
-    queryForm.value.plId = undefined
-  }
-})
+watch(
+  () => queryForm.value.buId,
+  (newBu, oldBu) => {
+    if (newBu !== oldBu) {
+      queryForm.value.plId = undefined
+    }
+  },
+)
 
 async function loadDictionaries() {
   try {
@@ -50,12 +53,20 @@ async function loadDictionaries() {
       api.get<BusinessUnit[]>('/dict/bus'),
       api.get<ProductLine[]>('/dict/pls'),
       api.get<RelatedProduct[]>('/dict/related-products'),
-      api.get<{ id: number; username: string; fullName: string; primaryRoleCode: string; departmentId: number | null }[]>('/users/options'),
+      api.get<
+        {
+          id: number
+          username: string
+          fullName: string
+          primaryRoleCode: string
+          departmentId: number | null
+        }[]
+      >('/users/options'),
     ])
     buList.value = bus ?? []
     plListAll.value = pls ?? []
     rpList.value = rps ?? []
-    userList.value = (users ?? []).map(u => ({
+    userList.value = (users ?? []).map((u) => ({
       id: u.id,
       username: u.username,
       fullName: u.fullName,
@@ -165,19 +176,8 @@ onMounted(() => {
         </el-form-item>
 
         <el-form-item label="业务单元 (BU)">
-          <el-select
-            v-model="queryForm.buId"
-            placeholder="全部 BU"
-            clearable
-            filterable
-            style="width: 160px"
-          >
-            <el-option
-              v-for="b in buList"
-              :key="b.id"
-              :label="b.name"
-              :value="b.id"
-            />
+          <el-select v-model="queryForm.buId" placeholder="全部 BU" clearable filterable style="width: 160px">
+            <el-option v-for="b in buList" :key="b.id" :label="b.name" :value="b.id" />
           </el-select>
         </el-form-item>
 
@@ -190,12 +190,7 @@ onMounted(() => {
             :disabled="!queryForm.buId"
             style="width: 160px"
           >
-            <el-option
-              v-for="p in plListFiltered"
-              :key="p.id"
-              :label="p.name"
-              :value="p.id"
-            />
+            <el-option v-for="p in plListFiltered" :key="p.id" :label="p.name" :value="p.id" />
           </el-select>
         </el-form-item>
 
@@ -207,12 +202,7 @@ onMounted(() => {
             filterable
             style="width: 180px"
           >
-            <el-option
-              v-for="u in userList"
-              :key="u.id"
-              :label="u.fullName"
-              :value="u.id"
-            />
+            <el-option v-for="u in userList" :key="u.id" :label="u.fullName" :value="u.id" />
           </el-select>
         </el-form-item>
 
@@ -241,13 +231,7 @@ onMounted(() => {
       </el-form>
 
       <!-- 项目列表 -->
-      <el-table
-        v-loading="loading"
-        :data="projects"
-        stripe
-        @row-click="goDetail"
-        style="cursor: pointer"
-      >
+      <el-table v-loading="loading" :data="projects" stripe @row-click="goDetail" style="cursor: pointer">
         <el-table-column prop="code" label="编号" width="160" />
         <el-table-column prop="name" label="名称" min-width="200" />
         <el-table-column label="BU" width="120">
@@ -308,11 +292,11 @@ onMounted(() => {
         <el-table-column prop="planEndDate" label="计划结束" width="120" />
         <el-table-column label="操作" width="160" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" link type="primary" @click.stop="goConfig(row)">
-              配置
-            </el-button>
+            <el-button size="small" link type="primary" @click.stop="goConfig(row)">配置</el-button>
             <el-button
-              size="small" link type="danger"
+              size="small"
+              link
+              type="danger"
               :loading="deleteLoadingId === row.id"
               @click.stop="confirmDelete(row)"
             >

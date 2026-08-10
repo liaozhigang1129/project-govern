@@ -22,12 +22,7 @@ export type Severity = 'CRITICAL' | 'WARNING' | 'INFO'
 export type AdvisoryStatus = 'PENDING' | 'APPLIED' | 'REJECTED' | 'EXPIRED'
 
 /** 5 维信号类型 */
-export type SignalType =
-  | 'OVERDUE'
-  | 'SPI'
-  | 'PHASE_LAG'
-  | 'VELOCITY'
-  | 'HISTORICAL'
+export type SignalType = 'OVERDUE' | 'SPI' | 'PHASE_LAG' | 'VELOCITY' | 'HISTORICAL'
 
 /** 批跑范围 */
 export type RunScope = 'PROJECT' | 'BU' | 'PL' | 'PORTFOLIO' | 'ALL'
@@ -36,9 +31,9 @@ export type RunScope = 'PROJECT' | 'BU' | 'PL' | 'PORTFOLIO' | 'ALL'
 export interface MilestoneAiSignalDto {
   id?: number
   signalType: SignalType
-  intensity: number           // 0-100
-  weight: number              // 0-1
-  score: number               // intensity × weight
+  intensity: number // 0-100
+  weight: number // 0-1
+  score: number // intensity × weight
   description: string
   missing: boolean
 }
@@ -56,18 +51,18 @@ export interface MilestoneAiAdvisoryDto {
   milestonePlanDate?: string | null
   milestoneStatusCode?: string | null
   severity: Severity
-  score: number               // 0-100
-  confidence: number          // 0-1
+  score: number // 0-100
+  confidence: number // 0-1
   signalOverdue: number
   signalSpi: number
   signalPhaseLag: number
   signalVelocity: number
   signalHistorical: number
-  reasonsJson: string[]       // 字符串数组
+  reasonsJson: string[] // 字符串数组
   suggestionsJson: Array<{ signal: SignalType; action: string; priority?: number }>
   category: 'SCHEDULE' | 'COST' | 'SCOPE' | 'QUALITY' | 'RESOURCE' | 'EXTERNAL'
   suggestedProbability: number // 1-5
-  suggestedImpact: number      // 1-5
+  suggestedImpact: number // 1-5
   status: AdvisoryStatus
   modelVersion: string
   fingerprint: number
@@ -106,7 +101,7 @@ export interface RunBatchParams {
   scope: RunScope
   buId?: number | null
   plId?: number | null
-  daysToPlan?: number   // 只看 plan_date 距离今天 N 天内 (默认 60)
+  daysToPlan?: number // 只看 plan_date 距离今天 N 天内 (默认 60)
 }
 
 // ============================================================
@@ -115,11 +110,7 @@ export interface RunBatchParams {
 
 /** 单里程碑分析: 立即跑规则引擎, 落库 */
 export function runAdvisor(projectId: number, milestoneId: number) {
-  return api.post<MilestoneAiAdvisoryDto>(
-    '/milestone-ai/run',
-    null,
-    { params: { projectId, milestoneId } }
-  )
+  return api.post<MilestoneAiAdvisoryDto>('/milestone-ai/run', null, { params: { projectId, milestoneId } })
 }
 
 /** 取建议详情 (含 5 维信号明细) */
@@ -143,19 +134,14 @@ export function getSummary(projectId: number) {
 
 /** 一键落地: 建议 → Risk (后端调 RiskService.save) */
 export function applyAdvisory(advisoryId: number, ownerUserId?: number) {
-  return api.post<MilestoneAiAdvisoryDto>(
-    `/milestone-ai/apply/${advisoryId}`,
-    null,
-    { params: ownerUserId != null ? { ownerUserId } : {} }
-  )
+  return api.post<MilestoneAiAdvisoryDto>(`/milestone-ai/apply/${advisoryId}`, null, {
+    params: ownerUserId != null ? { ownerUserId } : {},
+  })
 }
 
 /** 拒绝: 标 REJECTED + 写理由 */
 export function rejectAdvisory(advisoryId: number, reason: string) {
-  return api.post<MilestoneAiAdvisoryDto>(
-    `/milestone-ai/reject/${advisoryId}`,
-    { reason } as RejectRequest
-  )
+  return api.post<MilestoneAiAdvisoryDto>(`/milestone-ai/reject/${advisoryId}`, { reason } as RejectRequest)
 }
 
 /** 批量跑: 范围 PROJECT / BU / PL / PORTFOLIO / ALL */
@@ -163,11 +149,13 @@ export function runBatch(params: RunBatchParams) {
   return api.post<{ scanned: number; newAdvisories: number; skipped: number; durationMs: number }>(
     '/milestone-ai/run-batch',
     null,
-    { params: {
-      scope: params.scope,
-      buId: params.buId ?? null,
-      plId: params.plId ?? null,
-      daysToPlan: params.daysToPlan ?? 60
-    } }
+    {
+      params: {
+        scope: params.scope,
+        buId: params.buId ?? null,
+        plId: params.plId ?? null,
+        daysToPlan: params.daysToPlan ?? 60,
+      },
+    },
   )
 }

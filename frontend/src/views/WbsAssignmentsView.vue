@@ -28,9 +28,7 @@ const projectId = computed(() => Number(route.params.id))
             </el-tag>
           </span>
           <div>
-            <el-button @click="router.push(`/projects/${projectId}`)">
-              返回项目详情
-            </el-button>
+            <el-button @click="router.push(`/projects/${projectId}`)">返回项目详情</el-button>
             <el-button type="primary" @click="router.push(`/projects/${projectId}/wbs`)">
               打开 WBS 树
             </el-button>
@@ -44,5 +42,8 @@ const projectId = computed(() => Number(route.params.id))
 </template>
 
 <style scoped>
-.asn-page { display: flex; flex-direction: column; }
+.asn-page {
+  display: flex;
+  flex-direction: column;
+}
 </style>

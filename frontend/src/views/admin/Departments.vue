@@ -66,9 +66,13 @@ const dlg = ref<{
 
 function emptyForm(): DialogForm {
   return {
-    id: 0, mode: 'create',
-    code: '', name: '',
-    parentId: null, sortOrder: 0, enabled: true,
+    id: 0,
+    mode: 'create',
+    code: '',
+    name: '',
+    parentId: null,
+    sortOrder: 0,
+    enabled: true,
     submitting: false,
   }
 }
@@ -98,19 +102,24 @@ function openEdit(node: DepartmentNode) {
 
 function nextSortOrderFor(parentId: number | null): number {
   // 找同 parent 下的最大 sortOrder + 10
-  const siblings = [...flatMap.value.values()].filter(n => n.parentId === parentId)
+  const siblings = [...flatMap.value.values()].filter((n) => n.parentId === parentId)
   if (!siblings.length) return 0
-  return Math.max(...siblings.map(s => s.sortOrder)) + 10
+  return Math.max(...siblings.map((s) => s.sortOrder)) + 10
 }
 
 async function submit() {
   const f = dlg.value.form
-  if (!f.name.trim()) { ElMessage.warning('请填写部门名'); return }
+  if (!f.name.trim()) {
+    ElMessage.warning('请填写部门名')
+    return
+  }
   if (f.mode === 'create' && !f.code.trim()) {
-    ElMessage.warning('请填写部门 code'); return
+    ElMessage.warning('请填写部门 code')
+    return
   }
   if (f.mode === 'edit' && f.parentId === f.id) {
-    ElMessage.warning('父级不能是自己'); return
+    ElMessage.warning('父级不能是自己')
+    return
   }
   f.submitting = true
   try {
@@ -149,12 +158,10 @@ async function submit() {
 async function toggleEnabled(node: DepartmentNode) {
   const op = node.enabled ? '停用' : '启用'
   try {
-    await ElMessageBox.confirm(
-      `确认${op}部门 "${node.name}"?`,
-      `${op}确认`,
-      { type: 'warning' }
-    )
-  } catch { return }
+    await ElMessageBox.confirm(`确认${op}部门 "${node.name}"?`, `${op}确认`, { type: 'warning' })
+  } catch {
+    return
+  }
   try {
     await departmentApi.setEnabled(node.id, !node.enabled)
     ElMessage.success(`${op}成功`)
@@ -174,12 +181,10 @@ async function onDelete(node: DepartmentNode) {
     return
   }
   try {
-    await ElMessageBox.confirm(
-      `确认删除部门 "${node.name}" (${node.code})?`,
-      '删除确认',
-      { type: 'error' }
-    )
-  } catch { return }
+    await ElMessageBox.confirm(`确认删除部门 "${node.name}" (${node.code})?`, '删除确认', { type: 'error' })
+  } catch {
+    return
+  }
   try {
     await departmentApi.delete(node.id)
     ElMessage.success('已删除')
@@ -202,12 +207,7 @@ onMounted(load)
         </div>
       </template>
 
-      <el-alert
-        v-if="!loading && tree.length === 0"
-        type="info"
-        :closable="false"
-        show-icon
-      >
+      <el-alert v-if="!loading && tree.length === 0" type="info" :closable="false" show-icon>
         暂无部门, 点击右上角 "新建根部门" 开始
       </el-alert>
 
@@ -231,11 +231,7 @@ onMounted(load)
         </el-table-column>
         <el-table-column label="直属成员" width="120" align="center">
           <template #default="{ row }">
-            <el-tag
-              :type="row.memberCount > 0 ? 'primary' : 'info'"
-              effect="plain"
-              size="small"
-            >
+            <el-tag :type="row.memberCount > 0 ? 'primary' : 'info'" effect="plain" size="small">
               {{ row.memberCount }} 人
             </el-tag>
           </template>
@@ -249,12 +245,8 @@ onMounted(load)
         <el-table-column prop="sortOrder" label="排序" width="80" align="center" />
         <el-table-column label="操作" width="320" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" link type="primary" @click="openCreate(row.id)">
-              + 子部门
-            </el-button>
-            <el-button size="small" link type="primary" @click="openEdit(row)">
-              编辑
-            </el-button>
+            <el-button size="small" link type="primary" @click="openCreate(row.id)">+ 子部门</el-button>
+            <el-button size="small" link type="primary" @click="openEdit(row)">编辑</el-button>
             <el-button
               size="small"
               link
@@ -296,7 +288,14 @@ onMounted(load)
             show-word-limit
           />
           <div style="color: #909399; font-size: 12px">
-            内置: <code>ROOT</code> / <code>RD</code> / <code>PD</code> / <code>DL</code>
+            内置:
+            <code>ROOT</code>
+            /
+            <code>RD</code>
+            /
+            <code>PD</code>
+            /
+            <code>DL</code>
           </div>
         </el-form-item>
         <el-form-item label="父级部门">
@@ -313,12 +312,7 @@ onMounted(load)
           />
         </el-form-item>
         <el-form-item label="排序号">
-          <el-input-number
-            v-model="dlg.form.sortOrder"
-            :min="0"
-            :max="9999"
-            :step="10"
-          />
+          <el-input-number v-model="dlg.form.sortOrder" :min="0" :max="9999" :step="10" />
         </el-form-item>
         <el-form-item v-if="dlg.form.mode === 'edit'" label="启用">
           <el-switch v-model="dlg.form.enabled" />
@@ -326,19 +320,20 @@ onMounted(load)
       </el-form>
       <template #footer>
         <el-button @click="dlg.visible = false">取消</el-button>
-        <el-button
-          type="primary"
-          :loading="dlg.form.submitting"
-          @click="submit"
-        >
-          确认
-        </el-button>
+        <el-button type="primary" :loading="dlg.form.submitting" @click="submit">确认</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <style scoped>
-.page { padding: 16px; }
-code { background: #f5f7fa; padding: 1px 6px; border-radius: 3px; font-size: 12px; }
+.page {
+  padding: 16px;
+}
+code {
+  background: #f5f7fa;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+}
 </style>

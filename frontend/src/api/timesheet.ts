@@ -10,7 +10,7 @@ import api from './client'
 
 export interface Entry {
   id?: number
-  workDate: string            // YYYY-MM-DD
+  workDate: string // YYYY-MM-DD
   projectId: number
   milestoneId?: number
   hours: number
@@ -61,37 +61,27 @@ async function call<T>(p: Promise<unknown>): Promise<T> {
 }
 
 export const timesheetApi = {
-  list: (params: {
-    userId?: number
-    status?: string
-    from?: string
-    to?: string
-    page?: number
-    size?: number
-  } = {}) => call<PageResult<TimesheetSummary>>(
-    api.get('/timesheets', { params })
-  ),
-  get: (id: number) => call<TimesheetDetail>(
-    api.get(`/timesheets/${id}`)
-  ),
-  create: (userId: number, weekStart: string) => call<TimesheetDetail>(
-    api.post('/timesheets', { userId, weekStart })
-  ),
-  upsertEntries: (id: number, entries: Entry[]) => call<TimesheetDetail>(
-    api.put(`/timesheets/${id}/entries`, { entries })
-  ),
-  submit: (id: number, note?: string) => call<TimesheetDetail>(
-    api.post(`/timesheets/${id}/submit`, { note: note ?? '' })
-  ),
-  approve: (id: number) => call<TimesheetDetail>(
-    api.post(`/timesheets/${id}/approve`, {})
-  ),
-  reject: (id: number, comment: string) => call<TimesheetDetail>(
-    api.post(`/timesheets/${id}/reject`, { comment })
-  ),
-  batchApprove: (ids: number[]) => call<TimesheetDetail[]>(
-    api.post(`/timesheets/batch-approve`, { ids })
-  ),
+  list: (
+    params: {
+      userId?: number
+      status?: string
+      from?: string
+      to?: string
+      page?: number
+      size?: number
+    } = {},
+  ) => call<PageResult<TimesheetSummary>>(api.get('/timesheets', { params })),
+  get: (id: number) => call<TimesheetDetail>(api.get(`/timesheets/${id}`)),
+  create: (userId: number, weekStart: string) =>
+    call<TimesheetDetail>(api.post('/timesheets', { userId, weekStart })),
+  upsertEntries: (id: number, entries: Entry[]) =>
+    call<TimesheetDetail>(api.put(`/timesheets/${id}/entries`, { entries })),
+  submit: (id: number, note?: string) =>
+    call<TimesheetDetail>(api.post(`/timesheets/${id}/submit`, { note: note ?? '' })),
+  approve: (id: number) => call<TimesheetDetail>(api.post(`/timesheets/${id}/approve`, {})),
+  reject: (id: number, comment: string) =>
+    call<TimesheetDetail>(api.post(`/timesheets/${id}/reject`, { comment })),
+  batchApprove: (ids: number[]) => call<TimesheetDetail[]>(api.post(`/timesheets/batch-approve`, { ids })),
   remove: (id: number) => call<void>(api.delete(`/timesheets/${id}`)),
 
   // ============================================================
@@ -116,7 +106,7 @@ export const timesheetApi = {
    * @param body.overwrite  可选
    */
   autoFillBatch: (body: { weekStart: string; userIds?: number[]; dryRun?: boolean; overwrite?: boolean }) =>
-    call<BatchAutoFillResult>(api.post('/timesheets/_auto-fill-batch', body))
+    call<BatchAutoFillResult>(api.post('/timesheets/_auto-fill-batch', body)),
 }
 
 export interface DayFillResult {

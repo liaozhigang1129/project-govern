@@ -16,46 +16,61 @@
  *  - 在本页查 userId=张三, month=2026-06
  *  - 期望 totalCost = 24000
  */
-import { onMounted, ref, computed, watch } from "vue"
-import { ElMessage } from "element-plus"
+import { onMounted, ref, computed, watch } from 'vue'
+import { ElMessage } from 'element-plus'
+import { Search, DataAnalysis, Money, Document } from '@element-plus/icons-vue'
 import {
-  Search, DataAnalysis, Money, Document,
-} from "@element-plus/icons-vue"
-import { costApi, type UserMonthCostResponse, type UserDayCostResponse, type CostBreakdownItem } from "@/api/cost"
+  costApi,
+  type UserMonthCostResponse,
+  type UserDayCostResponse,
+  type CostBreakdownItem,
+} from '@/api/cost'
 
-const YUAN = "¥"
+const YUAN = '¥'
 
 // ===== 输入 =====
 const userId = ref<number | null>(null)
-const month = ref("")
+const month = ref('')
 const loading = ref(false)
 const data = ref<UserMonthCostResponse | null>(null)
 
 // 初始化默认月份 = 当前月
 function initMonth() {
   const now = new Date()
-  month.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
+  month.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
 }
 
 async function query() {
-  if (!userId.value) { ElMessage.warning("请填 userId"); return }
-  if (!month.value) { ElMessage.warning("请选月份"); return }
+  if (!userId.value) {
+    ElMessage.warning('请填 userId')
+    return
+  }
+  if (!month.value) {
+    ElMessage.warning('请选月份')
+    return
+  }
   loading.value = true
   try {
     data.value = await costApi.userMonthCost(userId.value, month.value)
   } catch (e: any) {
-    ElMessage.error(e?.message ?? "查询失败")
+    ElMessage.error(e?.message ?? '查询失败')
     data.value = null
-  } finally { loading.value = false }
+  } finally {
+    loading.value = false
+  }
 }
 
 // ===== 5 个 RateSource 分账柱状条 =====
-const BREAKDOWN_META: { key: keyof UserMonthCostResponse["rateSourceBreakdown"]; label: string; color: string }[] = [
-  { key: "userOverrideHours", label: "USER_OVERRIDE",     color: "#f56c6c" },
-  { key: "roleOverrideHours", label: "ROLE_OVERRIDE",     color: "#e6a23c" },
-  { key: "roleDefaultHours",  label: "ROLE_COST_DEFAULT", color: "#67c23a" },
-  { key: "userDefaultHours",  label: "USER_DEFAULT",      color: "#409eff" },
-  { key: "noneHours",         label: "NONE (rate=0)",     color: "#909399" },
+const BREAKDOWN_META: {
+  key: keyof UserMonthCostResponse['rateSourceBreakdown']
+  label: string
+  color: string
+}[] = [
+  { key: 'userOverrideHours', label: 'USER_OVERRIDE', color: '#f56c6c' },
+  { key: 'roleOverrideHours', label: 'ROLE_OVERRIDE', color: '#e6a23c' },
+  { key: 'roleDefaultHours', label: 'ROLE_COST_DEFAULT', color: '#67c23a' },
+  { key: 'userDefaultHours', label: 'USER_DEFAULT', color: '#409eff' },
+  { key: 'noneHours', label: 'NONE (rate=0)', color: '#909399' },
 ]
 
 const totalBreakdownHours = computed(() => {
@@ -66,14 +81,14 @@ const totalBreakdownHours = computed(() => {
 
 function pctOfBreakdown(n: number): string {
   const t = totalBreakdownHours.value
-  if (!t) return "0%"
-  return `${(n / t * 100).toFixed(1)}%`
+  if (!t) return '0%'
+  return `${((n / t) * 100).toFixed(1)}%`
 }
 
 // ===== 单日下钻 =====
 const dayDialog = ref({
   visible: false,
-  date: "",
+  date: '',
   data: null as UserDayCostResponse | null,
   loading: false,
 })
@@ -82,24 +97,29 @@ async function openDay(row: CostBreakdownItem) {
   if (!userId.value) return
   // 没有 entry.workDate 字段(响应没带), 用 row 没有日期 — 简化: 弹窗让用户填日期
   // 实际更好的做法: 后端在 CostBreakdownItem 加 workDate 字段,这里先用 dialog 让用户选日期
-  dayDialog.value.date = ""
+  dayDialog.value.date = ''
   dayDialog.value.data = null
   dayDialog.value.visible = true
 }
 
 async function queryDay() {
-  if (!userId.value || !dayDialog.value.date) { ElMessage.warning("请填日期"); return }
+  if (!userId.value || !dayDialog.value.date) {
+    ElMessage.warning('请填日期')
+    return
+  }
   dayDialog.value.loading = true
   try {
     dayDialog.value.data = await costApi.userDayCost(userId.value, dayDialog.value.date)
   } catch (e: any) {
-    ElMessage.error(e?.message ?? "查询失败")
+    ElMessage.error(e?.message ?? '查询失败')
     dayDialog.value.data = null
-  } finally { dayDialog.value.loading = false }
+  } finally {
+    dayDialog.value.loading = false
+  }
 }
 
 function fmtMoney(n: number): string {
-  return `${YUAN}${n.toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  return `${YUAN}${n.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
 // 按 projectId 聚合显示(后端 items 是按 (work_date, project, milestone) 拆的,
@@ -109,7 +129,10 @@ const projectGroups = computed(() => {
   const map = new Map<number, { projectId: number; hours: number; cost: number; rateSources: Set<string> }>()
   for (const it of data.value.items) {
     const e = map.get(it.projectId) ?? {
-      projectId: it.projectId, hours: 0, cost: 0, rateSources: new Set<string>(),
+      projectId: it.projectId,
+      hours: 0,
+      cost: 0,
+      rateSources: new Set<string>(),
     }
     e.hours += it.hours
     e.cost += it.cost
@@ -130,7 +153,7 @@ onMounted(() => {
   initMonth()
   // 试一下: 从 URL ?userId= 自动填
   const params = new URLSearchParams(window.location.search)
-  const uid = params.get("userId")
+  const uid = params.get('userId')
   if (uid) userId.value = Number(uid)
 })
 </script>
@@ -149,12 +172,20 @@ onMounted(() => {
       </template>
       <div style="display: flex; gap: 12px; align-items: center">
         <span>用户 ID:</span>
-        <el-input-number v-model="userId" :min="1" controls-position="right" placeholder="如 1 (张三)" style="width: 180px" />
+        <el-input-number
+          v-model="userId"
+          :min="1"
+          controls-position="right"
+          placeholder="如 1 (张三)"
+          style="width: 180px"
+        />
         <span>月份:</span>
         <el-input v-model="month" placeholder="YYYY-MM" style="width: 160px" />
         <el-button type="primary" :icon="Search" :loading="loading" @click="query">查询</el-button>
         <span style="margin-left: auto; color: #909399; font-size: 12px">
-          只统计 <b>APPROVED</b> 周报 · DRAFT/SUBMITTED 不计入
+          只统计
+          <b>APPROVED</b>
+          周报 · DRAFT/SUBMITTED 不计入
         </span>
       </div>
     </el-card>
@@ -168,7 +199,8 @@ onMounted(() => {
             <span>工时合计</span>
           </div>
           <div style="font-size: 28px; font-weight: 600; margin-top: 8px">
-            {{ data.totalHours.toFixed(2) }} <span style="font-size: 14px; color: #909399">小时</span>
+            {{ data.totalHours.toFixed(2) }}
+            <span style="font-size: 14px; color: #909399">小时</span>
           </div>
         </el-card>
 
@@ -179,7 +211,9 @@ onMounted(() => {
           </div>
           <div
             :style="{
-              fontSize: '28px', fontWeight: 600, marginTop: '8px',
+              fontSize: '28px',
+              fontWeight: 600,
+              marginTop: '8px',
               color: isAcceptanceMatch ? '#67c23a' : '#f56c6c',
             }"
           >
@@ -210,15 +244,21 @@ onMounted(() => {
         <div v-for="b in BREAKDOWN_META" :key="b.key" style="margin-bottom: 10px">
           <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px">
             <span>
-              <code style="background: #f0f4f8; padding: 1px 6px; border-radius: 4px; font-size: 11px">{{ b.label }}</code>
+              <code style="background: #f0f4f8; padding: 1px 6px; border-radius: 4px; font-size: 11px">
+                {{ b.label }}
+              </code>
             </span>
             <span style="color: #606266">
               <b>{{ data.rateSourceBreakdown[b.key] }}h</b>
-              <span style="color: #909399; margin-left: 6px">({{ pctOfBreakdown(data.rateSourceBreakdown[b.key]) }})</span>
+              <span style="color: #909399; margin-left: 6px">
+                ({{ pctOfBreakdown(data.rateSourceBreakdown[b.key]) }})
+              </span>
             </span>
           </div>
           <el-progress
-            :percentage="totalBreakdownHours === 0 ? 0 : data.rateSourceBreakdown[b.key] / totalBreakdownHours * 100"
+            :percentage="
+              totalBreakdownHours === 0 ? 0 : (data.rateSourceBreakdown[b.key] / totalBreakdownHours) * 100
+            "
             :color="b.color"
             :show-text="false"
             :stroke-width="14"
@@ -243,7 +283,15 @@ onMounted(() => {
           </el-table-column>
           <el-table-column label="费率来源">
             <template #default="{ row }">
-              <el-tag v-for="s in row.rateSources" :key="s" size="small" type="info" style="margin-right: 4px">{{ s }}</el-tag>
+              <el-tag
+                v-for="s in row.rateSources"
+                :key="s"
+                size="small"
+                type="info"
+                style="margin-right: 4px"
+              >
+                {{ s }}
+              </el-tag>
             </template>
           </el-table-column>
         </el-table>
@@ -286,7 +334,9 @@ onMounted(() => {
       <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px">
         <span>日期:</span>
         <el-input v-model="dayDialog.date" placeholder="YYYY-MM-DD" style="width: 200px" />
-        <el-button type="primary" :icon="Search" :loading="dayDialog.loading" @click="queryDay">查询</el-button>
+        <el-button type="primary" :icon="Search" :loading="dayDialog.loading" @click="queryDay">
+          查询
+        </el-button>
       </div>
       <template v-if="dayDialog.data">
         <el-descriptions :column="2" border>
@@ -294,7 +344,9 @@ onMounted(() => {
           <el-descriptions-item label="用户">{{ dayDialog.data.userName }}</el-descriptions-item>
           <el-descriptions-item label="工时">{{ dayDialog.data.hours.toFixed(2) }} h</el-descriptions-item>
           <el-descriptions-item label="成本">{{ fmtMoney(dayDialog.data.cost) }}</el-descriptions-item>
-          <el-descriptions-item label="时薪">{{ YUAN }}{{ dayDialog.data.rate.toFixed(2) }}</el-descriptions-item>
+          <el-descriptions-item label="时薪">
+            {{ YUAN }}{{ dayDialog.data.rate.toFixed(2) }}
+          </el-descriptions-item>
           <el-descriptions-item label="来源">{{ dayDialog.data.rateSource }}</el-descriptions-item>
         </el-descriptions>
       </template>
@@ -306,5 +358,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-code { font-family: 'SF Mono', Menlo, Consolas, monospace; }
+code {
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+}
 </style>

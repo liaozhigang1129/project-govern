@@ -6,34 +6,36 @@
         <template #header>
           <div style="display: flex; justify-content: space-between; align-items: center">
             <span style="font-weight: 600">📊 预算明细 (实时联动)</span>
-            <el-button size="small" :icon="RefreshRight" @click="loadAll" :loading="loading">
-              刷新
-            </el-button>
+            <el-button size="small" :icon="RefreshRight" @click="loadAll" :loading="loading">刷新</el-button>
           </div>
         </template>
 
         <el-descriptions :column="1" border size="default">
           <el-descriptions-item label="📄 合同金额 (联动立项)">
-            <span style="font-weight: 600; font-size: 16px; color: #409EFF">
-              ¥ {{ fmt(contractAmount) }}
-            </span>
+            <span style="font-weight: 600; font-size: 16px; color: #409eff">¥ {{ fmt(contractAmount) }}</span>
             <el-tag
-              v-if="contractAmount > 0" type="success" size="small" effect="plain" style="margin-left: 8px"
-            >来自立项表</el-tag>
-            <span v-else style="color: #F56C6C; font-size: 12px; margin-left: 8px">
+              v-if="contractAmount > 0"
+              type="success"
+              size="small"
+              effect="plain"
+              style="margin-left: 8px"
+            >
+              来自立项表
+            </el-tag>
+            <span v-else style="color: #f56c6c; font-size: 12px; margin-left: 8px">
               ⚠️ 立项未填合同金额,请回 Step 1 填写
             </span>
           </el-descriptions-item>
 
           <el-descriptions-item label="👥 资源派遣小计 (Step 4)">
-            <span style="color: #E6A23C; font-weight: 600">¥ {{ fmt(resourceCost) }}</span>
+            <span style="color: #e6a23c; font-weight: 600">¥ {{ fmt(resourceCost) }}</span>
             <span style="color: #909399; font-size: 12px; margin-left: 8px">
               后端汇总: {{ resourceCount }} 条派遣 · 只读
             </span>
           </el-descriptions-item>
 
           <el-descriptions-item label="⚠️ 风险应对小计 (Step 5)">
-            <span style="color: #E6A23C; font-weight: 600">¥ {{ fmt(riskCost) }}</span>
+            <span style="color: #e6a23c; font-weight: 600">¥ {{ fmt(riskCost) }}</span>
             <span style="color: #909399; font-size: 12px; margin-left: 8px">
               后端汇总: {{ riskCount }} 项应对 · 只读
             </span>
@@ -42,35 +44,37 @@
           <el-descriptions-item label="📦 其他成本 (差旅/采购)">
             <el-input-number
               v-model="otherCost"
-              :min="0" :step="1000" :precision="2" :controls="false"
-              size="default" style="width: 220px"
+              :min="0"
+              :step="1000"
+              :precision="2"
+              :controls="false"
+              size="default"
+              style="width: 220px"
             />
-            <span style="color: #909399; font-size: 12px; margin-left: 8px">
-              本页可调,冻结时锁定
-            </span>
+            <span style="color: #909399; font-size: 12px; margin-left: 8px">本页可调,冻结时锁定</span>
           </el-descriptions-item>
 
           <el-descriptions-item label="💸 总成本">
-            <span style="color: #F56C6C; font-weight: 700; font-size: 18px">
-              ¥ {{ fmt(totalCost) }}
-            </span>
+            <span style="color: #f56c6c; font-weight: 700; font-size: 18px">¥ {{ fmt(totalCost) }}</span>
           </el-descriptions-item>
 
           <el-descriptions-item label="📐 计算公式">
-            <code style="color: #606266">
-              毛利 = 合同金额 - 总成本 = 合同 - (资源 + 风险 + 其他)
-            </code>
+            <code style="color: #606266">毛利 = 合同金额 - 总成本 = 合同 - (资源 + 风险 + 其他)</code>
           </el-descriptions-item>
         </el-descriptions>
 
         <el-alert
-          v-if="!validationOk" type="error" :closable="false" style="margin-top: 12px"
+          v-if="!validationOk"
+          type="error"
+          :closable="false"
+          style="margin-top: 12px"
           :title="validationMsg"
         />
 
         <!-- ⚠️ 浮动预览:点了「冻结」后才真正生效 -->
         <el-card
-          shadow="never" style="margin-top: 12px; background: #fafbfc"
+          shadow="never"
+          style="margin-top: 12px; background: #fafbfc"
           header-class-name="preview-header"
         >
           <template #header>
@@ -92,9 +96,15 @@
             冻结预算 & 计算毛利
           </el-button>
           <el-button
-            v-if="frozen" type="warning" :icon="RefreshRight"
-            plain style="margin-left: 8px" @click="loadAll"
-          >重新载入</el-button>
+            v-if="frozen"
+            type="warning"
+            :icon="RefreshRight"
+            plain
+            style="margin-left: 8px"
+            @click="loadAll"
+          >
+            重新载入
+          </el-button>
         </div>
       </el-card>
     </el-col>
@@ -138,7 +148,7 @@
           <el-icon><Lock /></el-icon>
           预算已冻结于 {{ fmtDt(frozenAt) }} · 快照 ID #{{ frozenId }}
         </div>
-        <div v-else class="frozen-tag" style="color: #E6A23C; background: #fdf6ec">
+        <div v-else class="frozen-tag" style="color: #e6a23c; background: #fdf6ec">
           <el-icon><Warning /></el-icon>
           当前是预览值,点击「冻结预算」才会正式生效并写入 budget_freeze
         </div>
@@ -185,24 +195,21 @@ async function loadAll() {
     initiationContract.value = Number(init.contractAmount ?? 0)
 
     // 2) 资源派遣:列表 + 汇总
-    const resources = await api.get<any[]>(`/initiations/${props.initiationId}/resource-plans`)
+    const resources = await api
+      .get<any[]>(`/initiations/${props.initiationId}/resource-plans`)
       .catch(() => [])
     resourceCount.value = (resources ?? []).length
-    resourceCost.value = (resources ?? []).reduce(
-      (a: number, r: any) => a + Number(r.costAmount ?? 0), 0
-    )
+    resourceCost.value = (resources ?? []).reduce((a: number, r: any) => a + Number(r.costAmount ?? 0), 0)
 
     // 3) 风险应对:列表 + 汇总
-    const risks = await api.get<any[]>(`/initiations/${props.initiationId}/risks`)
-      .catch(() => [])
+    const risks = await api.get<any[]>(`/initiations/${props.initiationId}/risks`).catch(() => [])
     riskCount.value = (risks ?? []).length
-    riskCost.value = (risks ?? []).reduce(
-      (a: number, r: any) => a + Number(r.responseCost ?? 0), 0
-    )
+    riskCost.value = (risks ?? []).reduce((a: number, r: any) => a + Number(r.responseCost ?? 0), 0)
 
     // 4) 已冻结快照
-    const f = await api.get<BudgetFreeze>(`/initiations/${props.initiationId}/budget-freeze/latest`)
-      .catch(() => null) as any
+    const f = (await api
+      .get<BudgetFreeze>(`/initiations/${props.initiationId}/budget-freeze/latest`)
+      .catch(() => null)) as any
     if (f && f.id) {
       frozen.value = true
       frozenAt.value = f.frozenAt ?? ''
@@ -226,31 +233,25 @@ async function loadAll() {
 
 // ==================== 派生量 ====================
 const contractAmount = computed(() => initiationContract.value)
-const totalCost = computed(() =>
-  (resourceCost.value ?? 0) + (riskCost.value ?? 0) + (otherCost.value ?? 0)
-)
+const totalCost = computed(() => (resourceCost.value ?? 0) + (riskCost.value ?? 0) + (otherCost.value ?? 0))
 const previewMargin = computed(() => contractAmount.value - totalCost.value)
 const previewMarginPct = computed(() =>
-  contractAmount.value ? (previewMargin.value / contractAmount.value) * 100 : 0
+  contractAmount.value ? (previewMargin.value / contractAmount.value) * 100 : 0,
 )
 
 // 已冻结视图显示快照值,否则显示预览值
-const displayContract = computed(() =>
-  frozen.value ? snapshotContract.value : contractAmount.value
-)
+const displayContract = computed(() => (frozen.value ? snapshotContract.value : contractAmount.value))
 const displayTotal = computed(() =>
-  frozen.value
-    ? ((resourceCost.value ?? 0) + (riskCost.value ?? 0) + (otherCost.value ?? 0))
-    : totalCost.value
+  frozen.value ? (resourceCost.value ?? 0) + (riskCost.value ?? 0) + (otherCost.value ?? 0) : totalCost.value,
 )
 const displayMargin = computed(() => displayContract.value - displayTotal.value)
 const displayMarginPct = computed(() =>
-  displayContract.value ? (displayMargin.value / displayContract.value) * 100 : 0
+  displayContract.value ? (displayMargin.value / displayContract.value) * 100 : 0,
 )
 
 const validationOk = computed(() => contractAmount.value > 0)
 const validationMsg = computed(() =>
-  contractAmount.value <= 0 ? '请先在 Step 1「基础信息」中填写合同金额' : ''
+  contractAmount.value <= 0 ? '请先在 Step 1「基础信息」中填写合同金额' : '',
 )
 
 function fmt(v: number | undefined) {
@@ -267,10 +268,10 @@ async function freeze() {
   }
   freezing.value = true
   try {
-    const r = await api.post<BudgetFreeze>(`/initiations/${props.initiationId}/budget-freeze`, {
+    const r = (await api.post<BudgetFreeze>(`/initiations/${props.initiationId}/budget-freeze`, {
       otherCost: otherCost.value,
-      contractAmountOverride: null,   // 使用立项表的合同金额
-    }) as any
+      contractAmountOverride: null, // 使用立项表的合同金额
+    })) as any
     frozen.value = true
     frozenAt.value = r.frozenAt ?? ''
     frozenId.value = r.id ?? null
@@ -285,10 +286,16 @@ async function freeze() {
   }
 }
 
-watch(() => props.initiationId, () => {
+watch(
+  () => props.initiationId,
+  () => {
+    if (props.initiationId) loadAll()
+  },
+  { immediate: true },
+)
+onMounted(() => {
   if (props.initiationId) loadAll()
-}, { immediate: true })
-onMounted(() => { if (props.initiationId) loadAll() })
+})
 
 defineExpose({ loadAll })
 </script>

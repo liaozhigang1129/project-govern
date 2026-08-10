@@ -192,7 +192,7 @@ export interface WbsGanttRow {
   status: 'NOT_STARTED' | 'IN_PROGRESS' | 'BLOCKED' | 'COMPLETED' | 'CANCELLED'
   ownerUserId: number | null
   ownerName: string | null
-  planStart: string | null       // YYYY-MM-DD
+  planStart: string | null // YYYY-MM-DD
   planEnd: string | null
   actualStart: string | null
   actualEnd: string | null

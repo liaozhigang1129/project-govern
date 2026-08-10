@@ -12,11 +12,7 @@ import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { workloadApi } from '@/api/workload'
-import {
-  type GanttBar,
-  type GanttMilestone,
-  type GanttResponse,
-} from '@/components/GanttView.vue'
+import { type GanttBar, type GanttMilestone, type GanttResponse } from '@/components/GanttView.vue'
 
 /** GanttQuery 仅供 loadGantt 内构造 params,放这里 */
 type GanttQuery = {
@@ -46,15 +42,23 @@ const loading = ref(false)
 const includeCompleted = ref(true)
 const fromInput = ref('')
 const toInput = ref('')
-const pmFilter = ref<number | null>(null)        // 选某 PM
-const deptFilter = ref<number | null>(null)      // 选某部门
+const pmFilter = ref<number | null>(null) // 选某 PM
+const deptFilter = ref<number | null>(null) // 选某部门
 
 /** PM 列表(从 /users 拉,只挑 enabled) */
-interface UserOption { id: number; username: string; fullName: string }
+interface UserOption {
+  id: number
+  username: string
+  fullName: string
+}
 const pmOptions = ref<UserOption[]>([])
 
 /** 部门列表(从 /departments 拉) */
-interface DeptOption { id: number; code: string; name: string }
+interface DeptOption {
+  id: number
+  code: string
+  name: string
+}
 const deptOptions = ref<DeptOption[]>([])
 
 /** 当前用户 id(用于"PM 选我") */
@@ -157,7 +161,11 @@ function leftPct(date: string | null | undefined, rangeFrom: string): number {
   const ms = new Date(date).getTime() - new Date(rangeFrom).getTime()
   return (ms / 86400000 / totalDays.value) * 100
 }
-function widthPct(start: string | null | undefined, end: string | null | undefined, rangeFrom: string): number {
+function widthPct(
+  start: string | null | undefined,
+  end: string | null | undefined,
+  rangeFrom: string,
+): number {
   if (!start || !end) return 0
   const ms = new Date(end).getTime() - new Date(start).getTime()
   return (ms / 86400000 / totalDays.value) * 100
@@ -194,8 +202,12 @@ function onBarMouseDown(e: MouseEvent, bar: GanttBar, mode: 'bar-move' | 'bar-re
     projectId: bar.projectId,
     origStart: bar.planStart,
     origEnd: bar.planEnd,
-    setStart: (iso) => { bar.planStart = iso },
-    setEnd: (iso) => { bar.planEnd = iso },
+    setStart: (iso) => {
+      bar.planStart = iso
+    },
+    setEnd: (iso) => {
+      bar.planEnd = iso
+    },
     getCurrent: () => ({
       planStart: bar.planStart ?? '',
       planEnd: bar.planEnd ?? '',
@@ -252,7 +264,9 @@ function onMilestoneMouseDown(e: MouseEvent, m: GanttMilestone, _bar: GanttBar) 
     kind: 'milestone',
     milestoneId: m.id,
     origDate: m.planDate,
-    setDate: (iso) => { m.planDate = iso },
+    setDate: (iso) => {
+      m.planDate = iso
+    },
     getCurrent: () => m.planDate ?? m.actualDate ?? '',
   }
   startDrag('milestone-move', target, e.clientX)
@@ -338,9 +352,7 @@ function goToday() {
             <el-checkbox v-model="includeCompleted" @change="load" style="margin-left: 8px">
               含已完成
             </el-checkbox>
-            <el-button type="primary" size="small" @click="load" :loading="loading">
-              加载
-            </el-button>
+            <el-button type="primary" size="small" @click="load" :loading="loading">加载</el-button>
             <el-button size="small" @click="goToday">回到今天</el-button>
             <el-button-group size="small">
               <el-button @click="pxPerDay = Math.max(2, pxPerDay - 2)">-</el-button>
@@ -351,19 +363,28 @@ function goToday() {
       </template>
 
       <div v-if="data" style="margin-bottom: 12px; color: #606266; font-size: 13px">
-        时间范围: <b>{{ data.rangeFrom }}</b> → <b>{{ data.rangeTo }}</b> · 共
-        <b>{{ data.projectCount }}</b> 个项目
+        时间范围:
+        <b>{{ data.rangeFrom }}</b>
+        →
+        <b>{{ data.rangeTo }}</b>
+        · 共
+        <b>{{ data.projectCount }}</b>
+        个项目
       </div>
 
       <div v-if="loading" v-loading="true" style="height: 200px"></div>
 
-      <div v-else-if="data && data.bars.length === 0" class="gantt-empty">
-        暂无项目
-      </div>
+      <div v-else-if="data && data.bars.length === 0" class="gantt-empty">暂无项目</div>
 
-      <div v-else-if="data" class="gantt-container" :class="{ 'is-dragging-active': active }" v-loading="saving" element-loading-text="保存中…">
+      <div
+        v-else-if="data"
+        class="gantt-container"
+        :class="{ 'is-dragging-active': active }"
+        v-loading="saving"
+        element-loading-text="保存中…"
+      >
         <!-- 月份标尺 -->
-        <div class="gantt-months" :style="{ width: (widthPx + 280) + 'px' }">
+        <div class="gantt-months" :style="{ width: widthPx + 280 + 'px' }">
           <div class="gantt-months-spacer"></div>
           <div
             v-for="(m, i) in months"
@@ -376,16 +397,19 @@ function goToday() {
         </div>
 
         <!-- 项目行 -->
-        <div
-          v-for="bar in data.bars"
-          :key="bar.projectId"
-          class="gantt-row"
-          @click="openProject(bar)"
-        >
+        <div v-for="bar in data.bars" :key="bar.projectId" class="gantt-row" @click="openProject(bar)">
           <div class="gantt-row-label">
             {{ bar.projectCode }} {{ bar.projectName }}
             <!-- P3 修复:无排期数据时给个 badge,让用户知道不是渲染 bug -->
-            <el-tag v-if="!bar.planStart && !bar.actualStart" type="info" size="small" effect="plain" style="margin-left: 6px">未排期</el-tag>
+            <el-tag
+              v-if="!bar.planStart && !bar.actualStart"
+              type="info"
+              size="small"
+              effect="plain"
+              style="margin-left: 6px"
+            >
+              未排期
+            </el-tag>
           </div>
           <div class="gantt-row-timeline" :style="{ width: widthPx + 'px' }">
             <!-- 今天竖线 — 在范围内才显示 -->
@@ -401,7 +425,10 @@ function goToday() {
             <div
               v-if="bar.planStart && bar.planEnd"
               class="gantt-bar plan"
-              :class="{ 'is-dragging': active && active.target?.kind === 'bar' && active.target?.projectId === bar.projectId }"
+              :class="{
+                'is-dragging':
+                  active && active.target?.kind === 'bar' && active.target?.projectId === bar.projectId,
+              }"
               :style="{
                 left: leftPct(bar.planStart, data.rangeFrom) + '%',
                 width: widthPct(bar.planStart, bar.planEnd, data.rangeFrom) + '%',
@@ -409,8 +436,14 @@ function goToday() {
               :title="`计划: ${bar.planStart} → ${bar.planEnd}  拖动改期`"
               @mousedown="onBarMouseDown($event, bar, 'bar-move')"
             >
-              <div class="gantt-bar-handle gantt-bar-handle-l" @mousedown="onBarMouseDown($event, bar, 'bar-resize-l')"></div>
-              <div class="gantt-bar-handle gantt-bar-handle-r" @mousedown="onBarMouseDown($event, bar, 'bar-resize-r')"></div>
+              <div
+                class="gantt-bar-handle gantt-bar-handle-l"
+                @mousedown="onBarMouseDown($event, bar, 'bar-resize-l')"
+              ></div>
+              <div
+                class="gantt-bar-handle gantt-bar-handle-r"
+                @mousedown="onBarMouseDown($event, bar, 'bar-resize-r')"
+              ></div>
             </div>
             <!-- 实际区间(前景条 + 进度)
                  P3 修复:actualEnd 经常为 null(项目进行中),退化为 planEnd 显示 -->
@@ -439,7 +472,10 @@ function goToday() {
               v-for="m in bar.milestones"
               :key="m.id"
               class="gantt-milestone"
-              :class="{ 'is-dragging': active && active.target?.kind === 'milestone' && active.target?.milestoneId === m.id }"
+              :class="{
+                'is-dragging':
+                  active && active.target?.kind === 'milestone' && active.target?.milestoneId === m.id,
+              }"
               :style="{
                 left: leftPct(m.planDate, data.rangeFrom) + '%',
               }"
@@ -456,11 +492,28 @@ function goToday() {
 </template>
 
 <style scoped>
-.gantt-page { padding: 16px; }
-.gantt-header { display: flex; justify-content: space-between; align-items: center; }
-.gantt-tools { display: flex; align-items: center; gap: 6px; }
-.gantt-empty { padding: 60px; text-align: center; color: #909399; }
-.gantt-container { overflow-x: auto; padding-top: 8px; }
+.gantt-page {
+  padding: 16px;
+}
+.gantt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.gantt-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.gantt-empty {
+  padding: 60px;
+  text-align: center;
+  color: #909399;
+}
+.gantt-container {
+  overflow-x: auto;
+  padding-top: 8px;
+}
 .gantt-months {
   display: flex;
   border-bottom: 1px solid var(--pmo-border);
@@ -487,7 +540,9 @@ function goToday() {
   cursor: pointer;
   min-height: 40px;
 }
-.gantt-row:hover { background: #f5f7fa; }
+.gantt-row:hover {
+  background: #f5f7fa;
+}
 .gantt-row-label {
   width: 280px;
   padding: 8px 12px;
@@ -504,14 +559,13 @@ function goToday() {
 .gantt-row-timeline {
   position: relative;
   height: 40px;
-  background:
-    repeating-linear-gradient(
-      to right,
-      transparent 0,
-      transparent 79px,
-      rgba(0, 0, 0, 0.04) 79px,
-      rgba(0, 0, 0, 0.04) 80px
-    );
+  background: repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent 79px,
+    rgba(0, 0, 0, 0.04) 79px,
+    rgba(0, 0, 0, 0.04) 80px
+  );
 }
 .gantt-today-line {
   position: absolute;
@@ -551,7 +605,9 @@ function goToday() {
   border-radius: 4px;
   transition: opacity 0.15s;
 }
-.gantt-bar:hover { opacity: 0.85; }
+.gantt-bar:hover {
+  opacity: 0.85;
+}
 .gantt-bar.plan {
   background: #e6f0ff;
   border: 1px dashed #909399;
@@ -573,9 +629,15 @@ function goToday() {
   cursor: ew-resize;
   z-index: 1;
 }
-.gantt-bar-handle-l { left: 0; }
-.gantt-bar-handle-r { right: 0; }
-.gantt-bar-handle:hover { background: rgba(64, 158, 255, 0.25); }
+.gantt-bar-handle-l {
+  left: 0;
+}
+.gantt-bar-handle-r {
+  right: 0;
+}
+.gantt-bar-handle:hover {
+  background: rgba(64, 158, 255, 0.25);
+}
 .gantt-bar.actual {
   display: flex;
   align-items: center;
@@ -586,7 +648,10 @@ function goToday() {
   font-weight: 600;
   overflow: hidden;
 }
-.gantt-bar-label { position: relative; z-index: 1; }
+.gantt-bar-label {
+  position: relative;
+  z-index: 1;
+}
 .gantt-bar-progress {
   position: absolute;
   left: 0;
@@ -604,7 +669,9 @@ function goToday() {
   padding: 0 6px;
   user-select: none;
 }
-.gantt-milestone:hover { color: #f00; }
+.gantt-milestone:hover {
+  color: #f00;
+}
 .gantt-milestone.is-dragging {
   cursor: grabbing;
   color: #f00;

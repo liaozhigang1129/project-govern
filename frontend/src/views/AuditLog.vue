@@ -22,7 +22,7 @@ export interface AuditLogDetail {
   resourceType: string
   resourceId: number | null
   action: string
-  payload: string  // JSON 字符串
+  payload: string // JSON 字符串
   ipAddress: string | null
   createdAt: string
 }
@@ -48,7 +48,7 @@ const filter = ref({
   resourceType: '',
   userId: null as number | null,
   action: '',
-  start: '',  // ISO 字符串,空 = 默认 7 天窗口(后端控制)
+  start: '', // ISO 字符串,空 = 默认 7 天窗口(后端控制)
   end: '',
 })
 
@@ -56,12 +56,28 @@ const pagination = ref({ page: 0, size: 20 })
 
 // 选项(从后端 /initiations 等已枚举的列表里抽)
 const resourceTypes = ref<string[]>([
-  'AUTH', 'INITIATION', 'MILESTONE', 'PROJECT', 'HEALTH_ADVISOR', 'TIMESHEET',
+  'AUTH',
+  'INITIATION',
+  'MILESTONE',
+  'PROJECT',
+  'HEALTH_ADVISOR',
+  'TIMESHEET',
 ])
 const actions = ref<string[]>([
-  'LOGIN', 'REFRESH', 'LOGOUT', 'CREATE', 'UPDATE', 'UPDATE_ENTRIES',
-  'UPDATE_STATUS', 'DELETE', 'SUBMIT', 'APPROVE', 'REJECT', 'BATCH_APPROVE',
-  'RESUBMIT', 'RUN_BATCH',
+  'LOGIN',
+  'REFRESH',
+  'LOGOUT',
+  'CREATE',
+  'UPDATE',
+  'UPDATE_ENTRIES',
+  'UPDATE_STATUS',
+  'DELETE',
+  'SUBMIT',
+  'APPROVE',
+  'REJECT',
+  'BATCH_APPROVE',
+  'RESUBMIT',
+  'RUN_BATCH',
 ])
 
 // 7 天前(后端默认窗口起始),给个参考
@@ -143,9 +159,10 @@ function resultTagType(r: string) {
 
 function actionColor(a: string) {
   if (a.includes('DELETE') || a.includes('REJECT')) return 'danger'
-  if (a.includes('UPDATE') || a.includes('STATUS') || a.includes('RESUBMIT') || a === 'SUBMIT') return 'warning'
+  if (a.includes('UPDATE') || a.includes('STATUS') || a.includes('RESUBMIT') || a === 'SUBMIT')
+    return 'warning'
   if (a.includes('LOGIN') || a.includes('LOGOUT')) return 'info'
-  return 'success'  // CREATE / APPROVE / BATCH_APPROVE / RUN_BATCH
+  return 'success' // CREATE / APPROVE / BATCH_APPROVE / RUN_BATCH
 }
 </script>
 
@@ -167,7 +184,13 @@ function actionColor(a: string) {
           </el-select>
         </el-form-item>
         <el-form-item label="用户ID">
-          <el-input-number v-model="filter.userId" :min="1" placeholder="任意" style="width: 140px" controls-position="right" />
+          <el-input-number
+            v-model="filter.userId"
+            :min="1"
+            placeholder="任意"
+            style="width: 140px"
+            controls-position="right"
+          />
         </el-form-item>
         <el-form-item label="起始时间">
           <el-date-picker
@@ -250,18 +273,19 @@ function actionColor(a: string) {
           :page-sizes="[10, 20, 50, 100]"
           layout="total, sizes, prev, pager, next, jumper"
           @current-change="load"
-          @size-change="(s: number) => { pagination.size = s; pagination.page = 0; load() }"
+          @size-change="
+            (s: number) => {
+              pagination.size = s
+              pagination.page = 0
+              load()
+            }
+          "
         />
       </div>
     </el-card>
 
     <!-- 详情抽屉 -->
-    <el-drawer
-      v-model="detailVisible"
-      title="审计日志详情"
-      size="60%"
-      :destroy-on-close="true"
-    >
+    <el-drawer v-model="detailVisible" title="审计日志详情" size="60%" :destroy-on-close="true">
       <div v-loading="detailLoading">
         <template v-if="detail">
           <el-descriptions :column="1" border style="margin-bottom: 16px">
@@ -284,9 +308,17 @@ function actionColor(a: string) {
           </el-descriptions>
 
           <h4>Payload</h4>
-          <pre style="background: #1e1e1e; color: #d4d4d4; padding: 12px;
-                       border-radius: 4px; overflow: auto; max-height: 60vh;
-                       font-size: 12px; line-height: 1.5"
+          <pre
+            style="
+              background: #1e1e1e;
+              color: #d4d4d4;
+              padding: 12px;
+              border-radius: 4px;
+              overflow: auto;
+              max-height: 60vh;
+              font-size: 12px;
+              line-height: 1.5;
+            "
           ><code>{{ prettyPayload }}</code></pre>
         </template>
       </div>
