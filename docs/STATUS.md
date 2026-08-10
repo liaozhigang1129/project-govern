@@ -1,7 +1,7 @@
 ---
 status: active
 created: 2026-08-07
-updated: 2026-08-07
+updated: 2026-08-07T18:30
 summary: 全局项目计划执行情况(里程碑进度、积压、风险、当前快照)
 ---
 
@@ -17,7 +17,7 @@ summary: 全局项目计划执行情况(里程碑进度、积压、风险、当�
 
 ## 1. 当前快照(One-liner)
 
-project-govern 当前处于 **v4.0.0 基线盘点 + 启动 v5 (AI·移动·治理) 立项**阶段。代码侧 19 个后端模块 / 35 个 Controller / 78 JUnit 测试 / 33 OpenAPI paths 已就绪;M1-M3 老基线已通过,M4-M6 启动中。下一次门禁 = **M4 阶段门禁**(预期 2026-09-04)。
+project-govern 当前处于 **v4.0.0 重启 + 文档治理 + CI 治理**阶段。本次会话已完成基线盘点(M1-M3)、重命名(`pmo-pms` → `project-govern`)、文档骨架(sift 风格 + STATUS/WBS 分轨)、主题化 spec 拆分(10 份 + 索引)、3 个 in-flight 工作包(WP-M4-03 / WP-M5-02 / WP-M6-03)的实现计划、3 份 ADR(001/002/003)、docs-lint 脚本 + CI 集成、ESLint 9 + Prettier 3 前端静态检查 + CI 集成,代码层 0 错误构建通过。下一次门禁 = **M4 阶段门禁**(预期 2026-09-04)。
 
 ---
 
@@ -36,17 +36,21 @@ project-govern 当前处于 **v4.0.0 基线盘点 + 启动 v5 (AI·移动·治�
 | **M6** | IM 通知多通道(企业微信/钉钉/飞书)(老 P2-A) | 🟡 active | 70% | M6 门禁:3 通道灰度 + 失败隔离 | IM 平台回调接入待评估 |
 | **M7** | v5 立项:AI·移动·治理(老 P3plus-v2) | ⏸ draft | 0% | 立项评审通过 | 范围未冻结 |
 
+> **本会话调整**(2026-08-07):M4-M6 三条均启动中,且为本次会议唯一重点在制品(WP-M4-03 / WP-M5-02 / WP-M6-03);M7 仍为草案。
+
 > 状态图例:✅ done / 🟡 active / ⏸ draft / ⏸ paused / ❌ abandoned / 🔁 superseded
 
 ---
 
 ## 3. 当前在制品(WIP)
 
+> 本轮会话唯一交付块。3 个工作包计划文件已落地 `plans/2026-08-07-wp-*.md`,起点与计划交付日期同步锁定。详细任务结构见 [WBS.md](WBS.md) 对应章节。
+
 | 工作包 | 里程碑 | 负责人 | 起点 | 计划交付 | 阻塞 |
 |---|---|---|---|---|---|
-| WP-M4-03 财务-成本对账 | M4 | 待分配 | 2026-08-07 | 2026-08-21 | 对账口径待定 |
-| WP-M5-02 预警控制器 | M5 | 待分配 | 2026-08-07 | 2026-08-28 | 无 |
-| WP-M6-03 IM 回调接入评估 | M6 | 待分配 | 2026-08-07 | 2026-08-21 | IM 平台 OAuth 待评估 |
+| **WP-M4-03** 财务-成本对账 | M4 | 待分配 | 2026-08-07 | 2026-08-21 | 对账口径待定 |
+| **WP-M5-02** 预警控制器 | M5 | 待分配 | 2026-08-07 | 2026-08-28 | 无 |
+| **WP-M6-03** IM 回调接入评估 | M6 | 待分配 | 2026-08-07 | 2026-08-21 | IM 平台 OAuth 待评估 |
 
 ---
 
@@ -55,8 +59,10 @@ project-govern 当前处于 **v4.0.0 基线盘点 + 启动 v5 (AI·移动·治�
 | ID | 风险 | 影响 | 缓解 | 负责人 |
 |---|---|---|---|---|
 | R-001 | 财务-成本对账口径未对齐 | M4 门禁延期 | 8/14 前开一次口径评审会 | PMO |
-| R-002 | IM 平台 OAuth 接入工作量未评估 | M6 范围漂移 | 先做技术 spike,再决定是否进 M6 | 架构组 |
-| R-003 | 文档老基线未结构化(本次重构首次落地) | 代理上下文加载混乱 | 本轮 STATUS/WBS/AGENTS 整改落地 | 代理(本次会话) |
+| R-002 | IM 平台 OAuth 接入工作量未评估 | M6 范围漂移 | 先做技术 spike(本会话已落地 T-01/T-02 任务),再决定是否进 M6 | 架构组 |
+| R-003 | 文档老基线未结构化 | 代理上下文加载混乱 | ✅ 本轮 STATUS/WBS/AGENTS 整改完成;主题 spec 拆分完成;docs-lint CI 护栏已就位 | 代理(本次会话) |
+| R-004 | 前端 `no-explicit-any` 存量 warning(349 处) | 代码质量债 | CI 现以 `--max-warnings 1000` 上限告警,不挡;后续逐文件清理 | 前端 |
+| R-005 | 前端 prettier 与 vue 模板多行 `@event=` 属性表达式冲突 | `pnpm format` 会破坏已折叠好的 handler | CI 中 `format:check` 以 `continue-on-error` 运行(仅告警),本地提供 `pnpm format` 手动调 | 前端 |
 
 ---
 
@@ -95,9 +101,11 @@ project-govern 当前处于 **v4.0.0 基线盘点 + 启动 v5 (AI·移动·治�
 - 前端:18 视图 / 17 API 客户端 / 13+ 组件
 - Flyway:PostgreSQL ~40 个版本 / MySQL ~36 个版本(以 V4.13 为最高)
 - 数据库表:A1 数据字典覆盖 79 张表(详见 `drafts/扩展文档/A1-数据字典/`)
+- **构建验证(本会话)**:Java 后端 `mvn clean compile` + `mvn test-compile` BUILD SUCCESS(399+50 源文件);前端 `pnpm build` 成功(打包后 ~987KB gz=317KB);`vue-tsc --noEmit` 0 错误;ESLint 0 错误 349 warning
 
 ---
 
 ## 8. 更新日志(本文件)
 
 - **2026-08-07**:首版。基于老仓库 v4.0.0 重启,基线盘点 + M4-M6 进度初始化。落地 STATUS/WBS 双轨决策(003)。
+- **2026-08-07(同日)**:项目重命名 `pmo-pms` → `project-govern`(Java 包 `com.hex.projectgovern`、DB `project_govern`、OpenAPI title 同步);创建 3 份 ADR(001/002/003);创建 10 份主题化 spec + 索引;创建 3 份 in-flight 工作包实现计划(WP-M4-03 / WP-M5-02 / WP-M6-03);落地 docs-lint 脚本 + CI 集成(github action job 5);落地 ESLint 9 + Prettier 3 前端静态检查 + CI 集成(job 6);补全风险登记 R-003/R-004/R-005。
