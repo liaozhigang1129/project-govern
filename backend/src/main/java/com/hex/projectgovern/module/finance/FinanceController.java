@@ -6,10 +6,17 @@ import com.hex.projectgovern.common.security.SecurityUtils;
 import com.hex.projectgovern.module.finance.dto.FinanceDtos.*;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * F3 财务闭环 — 合同/发票/付款/成本项 HTTP 入口 (P1)
@@ -31,6 +38,7 @@ public class FinanceController {
     private final PaymentService paymentService;
     private final CostItemService costItemService;
     private final SecurityUtils securityUtils;
+    private final ReconciliationService reconciliationService;
 
     // ============================================================
     // 合同
@@ -222,5 +230,91 @@ public class FinanceController {
     @Operation(summary = "手工录入成本项 (差旅/服务费等)")
     public ApiResponse<CostItemDto> createCostItem(@RequestBody CostItemUpsertRequest req) {
         return ApiResponse.ok(costItemService.createManual(req));
+    }
+
+    // ============================================================
+    // 3-way match 对账 (V5.0 / WP-M4-03 / T-05)
+    // ============================================================
+
+    /**
+     * 对账列表 (分页 + 多条件)
+     * - page 默认 0, size 默认 20, 最大 100
+     * - 排序: reconciledAt DESC
+     */
+    @GetMapping("/reconciliation")
+    @PreAuthorize("hasAnyRole(\'PMO_ADMIN\',\'ADMIN\',\'FINANCE\',\'EXEC\')")
+    @Operation(summary = "财务-成本对账列表 (V5.0)")
+    public ApiResponse<Map<String, Object>> listReconciliation(
+            @RequestParam(required = false) Long projectId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant to,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        if (size <= 0 || size > 100) size = 20;
+        if (page < 0) page = 0;
+
+        CostReconciliation.MatchStatus statusEnum = null;
+        if (status != null && !status.isBlank()) {
+            try {
+                statusEnum = CostReconciliation.MatchStatus.valueOf(status.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return ApiResponse.fail(400,
+                    "Invalid status: " + status + " (allowed: "
+                    + java.util.Arrays.toString(CostReconciliation.MatchStatus.values()) + ")");
+            }
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "reconciledAt"));
+        var pg = reconciliationService.search(projectId, statusEnum, from, to, pageable);
+
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("total", pg.getTotalElements());
+        data.put("page", pg.getNumber());
+        data.put("size", pg.getSize());
+        data.put("totalPages", pg.getTotalPages());
+        data.put("items", pg.getContent());
+        return ApiResponse.ok(data);
+    }
+
+    /** 单条对账详情 */
+    @GetMapping("/reconciliation/{id}")
+    @PreAuthorize("hasAnyRole(\'PMO_ADMIN\',\'ADMIN\',\'FINANCE\',\'EXEC\')")
+    @Operation(summary = "对账详情 (V5.0)")
+    public ApiResponse<ReconciliationDto> getReconciliation(@PathVariable Long id) {
+        ReconciliationDto dto = reconciliationService.get(id);
+        if (dto == null) return ApiResponse.fail(404, "Reconciliation not found: " + id);
+        return ApiResponse.ok(dto);
+    }
+
+    /**
+     * 重跑单条对账 (实际重算整 project)
+     */
+    @PostMapping("/reconciliation/retry/{id}")
+    @PreAuthorize("hasAnyRole(\'PMO_ADMIN\',\'ADMIN\',\'FINANCE\')")
+    @AuditLog(module = "FINANCE", action = "RETRY_RECONCILIATION")
+    @Operation(summary = "重跑单条对账 (重算整 project)")
+    public ApiResponse<ReconciliationDto> retryReconciliation(@PathVariable Long id) {
+        Long operatorUserId = securityUtils.currentUserId();
+        return ApiResponse.ok(reconciliationService.retry(id, operatorUserId));
+    }
+
+    /** 对账健康度聚合 */
+    @GetMapping("/reconciliation/health")
+    @PreAuthorize("hasAnyRole(\'PMO_ADMIN\',\'ADMIN\',\'FINANCE\',\'EXEC\')")
+    @Operation(summary = "对账健康度聚合 (V5.0)")
+    public ApiResponse<Map<String, Object>> reconciliationHealth(
+            @RequestParam(required = false) Long projectId) {
+        var h = reconciliationService.health(projectId);
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("projectId", projectId);
+        data.put("total", h.total());
+        data.put("matched", h.matched());
+        data.put("mismatch", h.mismatch());
+        data.put("partial", h.partial());
+        data.put("pending", h.pending());
+        data.put("totalDiff", h.totalDiff());
+        data.put("greenRate", h.greenRate());
+        return ApiResponse.ok(data);
     }
 }
