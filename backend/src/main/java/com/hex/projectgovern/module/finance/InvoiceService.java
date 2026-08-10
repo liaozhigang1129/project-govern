@@ -2,9 +2,13 @@ package com.hex.projectgovern.module.finance;
 
 import com.hex.projectgovern.common.exception.BusinessException;
 import com.hex.projectgovern.module.finance.dto.FinanceDtos.*;
+import com.hex.projectgovern.module.finance.event.InvoiceConfirmedEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,6 +29,7 @@ public class InvoiceService {
 
     private final InvoiceRepository repo;
     private final ContractService contractService;
+    private final ApplicationEventPublisher events;
 
     @Transactional
     public InvoiceDto create(InvoiceUpsertRequest req) {
@@ -83,7 +88,12 @@ public class InvoiceService {
             i.setVendorId(c.getVendorId());
         }
 
-        return InvoiceDto.from(repo.save(i));
+        InvoiceDto dto = InvoiceDto.from(repo.save(i));
+
+        // 触发对账:事务提交后才发布 (避免主业务回滚后误导对账)
+        publishAfterCommit(new InvoiceConfirmedEvent(i.getId(), operatorUserId));
+
+        return dto;
     }
 
     /**
@@ -109,7 +119,9 @@ public class InvoiceService {
         i.setMatchedAt(LocalDate.now());
         i.setMatchedByUserId(operatorUserId);
 
-        return InvoiceDto.from(repo.save(i));
+        InvoiceDto dto = InvoiceDto.from(repo.save(i));
+        publishAfterCommit(new InvoiceConfirmedEvent(i.getId(), operatorUserId));
+        return dto;
     }
 
     @Transactional
@@ -120,6 +132,19 @@ public class InvoiceService {
         }
         i.setStatus(Invoice.Status.REJECTED);
         return InvoiceDto.from(repo.save(i));
+    }
+
+    /** 事务提交后才发布事件 (避免主业务回滚后误导对账) */
+    private void publishAfterCommit(Object event) {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override public void afterCommit() {
+                    events.publishEvent(event);
+                }
+            });
+        } else {
+            events.publishEvent(event);
+        }
     }
 
     /** Payment 触发: MATCHED → PAID */

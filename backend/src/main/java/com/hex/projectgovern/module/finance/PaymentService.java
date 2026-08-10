@@ -2,9 +2,13 @@ package com.hex.projectgovern.module.finance;
 
 import com.hex.projectgovern.common.exception.BusinessException;
 import com.hex.projectgovern.module.finance.dto.FinanceDtos.*;
+import com.hex.projectgovern.module.finance.event.PaymentConfirmedEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -25,6 +29,7 @@ public class PaymentService {
     private final InvoiceService invoiceService;
     private final ContractService contractService;
     private final CostItemService costItemService;
+    private final ApplicationEventPublisher events;
 
     @Transactional
     public PaymentDto create(PaymentUpsertRequest req) {
@@ -98,7 +103,22 @@ public class PaymentService {
             }
         }
 
+        // 触发对账
+        publishAfterCommit(new PaymentConfirmedEvent(saved.getId(), inv.getId(), operatorUserId));
+
         return PaymentDto.from(saved);
+    }
+
+    private void publishAfterCommit(Object event) {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override public void afterCommit() {
+                    events.publishEvent(event);
+                }
+            });
+        } else {
+            events.publishEvent(event);
+        }
     }
 
     @Transactional

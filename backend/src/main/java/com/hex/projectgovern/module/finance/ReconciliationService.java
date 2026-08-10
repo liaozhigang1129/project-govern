@@ -301,4 +301,17 @@ public class ReconciliationService {
 
     /** 检测到成本差异时发布(由 alert 模块订阅) */
     public record CostDiffDetectedEvent(Long projectId, int affectedBuckets) {}
+
+    /**
+     * 从 invoiceId 反查 projectId (invoice → contract → project)。
+     * 供 ReconciliationEventListener 调用。
+     * 返回 null = invoice 不存在 / 无合同 / 合同无 projectId。
+     */
+    @Transactional(readOnly = true)
+    public Long resolveProjectByInvoice(Long invoiceId) {
+        var inv = invoiceRepo.findByIdAndDeletedFalse(invoiceId);
+        if (inv.isEmpty() || inv.get().getContractId() == null) return null;
+        var c = contractRepo.findByIdAndDeletedFalse(inv.get().getContractId());
+        return c.map(Contract::getProjectId).orElse(null);
+    }
 }
