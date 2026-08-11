@@ -2,7 +2,7 @@
 status: active
 created: 2026-08-07
 updated: 2026-08-11T17:00
-last_head: 2195679
+last_head: 66c26ef
 summary: 全局项目计划执行情况(里程碑进度、积压、风险、当前快照)
 ---
 
