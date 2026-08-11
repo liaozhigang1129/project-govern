@@ -89,6 +89,12 @@ function setDefaultRange() {
   to.value = end.toISOString().slice(0, 10)
 }
 
+/** 恢复默认区间 + 加载 (从按钮 @click 调用) */
+function resetToDefaultRange() {
+  setDefaultRange()
+  load()
+}
+
 async function load() {
   loading.value = true
   try {
@@ -486,11 +492,7 @@ function shortDate(s: string) {
             />
             <el-button-group>
               <el-button @click="shiftWeeks(-1)">← 上一区间</el-button>
-              <el-button
-                @click="setDefaultRange(); load()"
-              >
-                默认 4 周
-              </el-button>
+              <el-button @click="resetToDefaultRange">默认 4 周</el-button>
               <el-button @click="shiftWeeks(1)">下一区间 →</el-button>
             </el-button-group>
             <el-button :icon="Refresh" @click="load">刷新</el-button>

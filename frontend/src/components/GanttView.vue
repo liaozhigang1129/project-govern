@@ -499,6 +499,11 @@ function clearSelection() {
   lastClickedId.value = null
 }
 
+/** gantt 背景区点击:只在点击空白时清除选中 (避免拖到任务条上误清) */
+function onScrollerClick(e: MouseEvent) {
+  if (e.target === e.currentTarget) clearSelection()
+}
+
 // 键盘改期:记录"键盘焦点"的里程碑(用 Tab 选)
 const focusedId = ref<number | null>(null)
 
@@ -1089,7 +1094,7 @@ const todayX = computed(() => {
       :class="{ 'gantt-scroller-dragging': !!dragCtx }"
       @wheel="onWheel"
       tabindex="0"
-      @click="(e) => {; if (e.target === e.currentTarget) clearSelection(); }"
+      @click="onScrollerClick"
     >
       <div
         class="gantt-inner"

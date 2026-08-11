@@ -92,6 +92,18 @@ async function loadRates() {
   }
 }
 
+/** 刷新所有数据 (角色档 + 费率表) */
+async function refreshAll() {
+  await loadRoleDefaults()
+  await loadRates()
+}
+
+/** 清空过滤条件 */
+function resetFilters() {
+  filterUserId.value = null
+  searchKw.value = ''
+}
+
 const dlg = ref({
   visible: false,
   mode: 'create' as 'create' | 'edit',
@@ -276,13 +288,7 @@ onMounted(() => {
   <div style="padding: 16px">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px">
       <h2 style="margin: 0">工时费率</h2>
-      <el-button
-        :icon="Refresh"
-        @click="loadRoleDefaults(); loadRates()"
-        plain
-      >
-        刷新
-      </el-button>
+      <el-button :icon="Refresh" @click="refreshAll" plain>刷新</el-button>
     </div>
 
     <el-card shadow="never" style="margin-bottom: 16px">
@@ -354,11 +360,7 @@ onMounted(() => {
           style="width: 200px"
           clearable
         />
-        <el-button
-          @click="filterUserId = null; searchKw = ''"
-        >
-          清空过滤
-        </el-button>
+        <el-button @click="resetFilters">清空过滤</el-button>
       </div>
 
       <el-alert type="info" :closable="false" style="margin-bottom: 12px">

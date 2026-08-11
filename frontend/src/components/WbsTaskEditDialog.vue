@@ -141,6 +141,19 @@ async function onSave() {
 function onCancel() {
   emit('update:modelValue', false)
 }
+
+/** el-dialog 关闭事件转发 */
+function onVisibleChange(v: boolean) {
+  emit('update:modelValue', v)
+}
+
+/** 紧前任务输入解析: '1, 3, 5' → [1, 3, 5] */
+function onPredecessorInput(v: string) {
+  form.value.predecessorIds = v
+    .split(',')
+    .map((s) => parseInt(s.trim()))
+    .filter((n) => !isNaN(n))
+}
 </script>
 
 <template>
@@ -149,7 +162,7 @@ function onCancel() {
     :title="title"
     width="640px"
     :close-on-click-modal="false"
-    @update:model-value="(v: boolean) => emit('update:modelValue', v)"
+    @update:model-value="onVisibleChange"
   >
     <!-- 面包屑 -->
     <el-alert type="info" :closable="false" style="margin-bottom: 16px">
@@ -283,7 +296,7 @@ function onCancel() {
         <el-input
           :model-value="form.predecessorIds.join(', ')"
           placeholder="逗号分隔的任务 id, 例如 1, 3, 5"
-          @update:model-value="(v: string) => (form.predecessorIds = v.split(',').map((s) => parseInt(s.trim())).filter((n) => !isNaN(n)))"
+          @update:model-value="onPredecessorInput"
         />
       </el-form-item>
 

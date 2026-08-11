@@ -231,6 +231,11 @@ async function onSave() {
 function onCancel() {
   emit('update:modelValue', false)
 }
+
+/** el-dialog 关闭事件转发 */
+function onVisibleChange(v: boolean) {
+  emit('update:modelValue', v)
+}
 </script>
 
 <template>
@@ -239,7 +244,7 @@ function onCancel() {
     :title="isEdit ? `编辑风险 #${risk?.id}  ${risk?.code}` : '新建风险'"
     width="720px"
     :close-on-click-modal="false"
-    @update:model-value="(v: boolean) => emit('update:modelValue', v)"
+    @update:model-value="onVisibleChange"
   >
     <el-form ref="formRef" :model="form" :rules="rules" label-width="100px" label-position="right">
       <!-- 基础信息 -->

@@ -128,6 +128,12 @@ function goResource(n: Notification) {
   }
 }
 
+/** 行点击:标记已读 + 跳转资源 */
+function handleRowClick(n: Notification) {
+  markOne(n)
+  goResource(n)
+}
+
 const badge = computed(() => (unread.value > 99 ? '99+' : String(unread.value)))
 const hasUnread = computed(() => unread.value > 0)
 
@@ -174,7 +180,7 @@ function fmt(d: string | null) {
         v-for="n in rows"
         :key="n.id"
         :class="['notif-item', n.status === 'UNREAD' ? 'is-unread' : '']"
-        @click="markOne(n); goResource(n)"
+        @click="handleRowClick(n)"
       >
         <div class="notif-head">
           <el-tag

@@ -112,6 +112,24 @@ async function loadCurrent() {
   await ensureCurrentWeek()
 }
 
+/** 跳转到本周一 + 加载 */
+function goToThisWeek() {
+  weekStart.value = fmt(thisMonday)
+  loadCurrent()
+}
+
+/** 审批人切换: 同时刷新当前周 + 历史 */
+function onApproverSwitch() {
+  loadCurrent()
+  loadHistory()
+}
+
+/** 查看历史工时某一行:克隆为可编辑 current + 跳到对应周 */
+function viewRow(row: any) {
+  current.value = { ...row, entries: [] } as any
+  weekStart.value = row.weekStart
+}
+
 async function loadHistory() {
   loading.value = true
   try {
@@ -397,11 +415,7 @@ async function doAutoFillBatch() {
                 />
                 <el-button-group>
                   <el-button @click="shiftWeek(-1)">← 上周</el-button>
-                  <el-button
-                    @click="weekStart = fmt(thisMonday); loadCurrent()"
-                  >
-                    本周
-                  </el-button>
+                  <el-button @click="goToThisWeek">本周</el-button>
                   <el-button @click="shiftWeek(1)">下周 →</el-button>
                 </el-button-group>
                 <el-select
@@ -410,7 +424,7 @@ async function doAutoFillBatch() {
                   placeholder="切换为他人"
                   clearable
                   style="width: 200px"
-                  @change="loadCurrent(); loadHistory()"
+                  @change="onApproverSwitch"
                 >
                   <el-option :value="auth.user?.id ?? 0" :label="`${auth.user?.fullName ?? '我'} (自己)`" />
                   <el-option
@@ -595,13 +609,7 @@ async function doAutoFillBatch() {
                 >
                   批准
                 </el-button>
-                <el-button
-                  size="small"
-                  link
-                  @click="current = { ...row, entries: [] } as any; weekStart = row.weekStart"
-                >
-                  查看
-                </el-button>
+                <el-button size="small" link @click="viewRow(row)">查看</el-button>
               </template>
             </el-table-column>
           </el-table>

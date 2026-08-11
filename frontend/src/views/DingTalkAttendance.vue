@@ -76,6 +76,12 @@ function resetFilters() {
   loadList()
 }
 
+/** 筛选条件变更后:页码重置 + 重载列表 (用于多个 @change/@keyup/@click) */
+function resetPaginationAndLoad() {
+  page.value = 1
+  loadList()
+}
+
 async function loadList() {
   loading.value = true
   try {
@@ -424,7 +430,7 @@ watch([page, size], () => {
             placeholder="起始日期"
             value-format="YYYY-MM-DD"
             style="width: 150px"
-            @change="page = 1; loadList()"
+            @change="resetPaginationAndLoad"
           />
           <el-date-picker
             v-model="filterDateTo"
@@ -432,31 +438,26 @@ watch([page, size], () => {
             placeholder="结束日期"
             value-format="YYYY-MM-DD"
             style="width: 150px"
-            @change="page = 1; loadList()"
+            @change="resetPaginationAndLoad"
           />
           <el-input
             v-model="filterUseridKeyword"
             placeholder="userid/姓名"
             clearable
             style="width: 180px"
-            @keyup.enter="page = 1; loadList()"
+            @keyup.enter="resetPaginationAndLoad"
           />
           <el-select
             v-model="filterIsAbnormal"
             placeholder="异常"
             clearable
             style="width: 110px"
-            @change="page = 1; loadList()"
+            @change="resetPaginationAndLoad"
           >
             <el-option label="仅异常" :value="true" />
             <el-option label="仅正常" :value="false" />
           </el-select>
-          <el-button
-            type="primary"
-            @click="page = 1; loadList()"
-          >
-            查询
-          </el-button>
+          <el-button type="primary" @click="resetPaginationAndLoad">查询</el-button>
           <el-button @click="resetFilters">重置</el-button>
         </div>
         <el-table

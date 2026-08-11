@@ -186,6 +186,11 @@ function cancel() {
   emit('update:visible', false)
 }
 
+/** el-dialog 关闭事件转发 */
+function onVisibleChange(v: boolean) {
+  emit('update:visible', v)
+}
+
 onMounted(() => {
   if (props.visible) loadAll()
 })
@@ -196,7 +201,7 @@ onMounted(() => {
     :model-value="visible"
     :title="title"
     width="560px"
-    @update:model-value="(v: boolean) => emit('update:visible', v)"
+    @update:model-value="onVisibleChange"
     @close="cancel"
   >
     <el-alert

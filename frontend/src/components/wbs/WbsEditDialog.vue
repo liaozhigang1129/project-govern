@@ -33,7 +33,7 @@
                   clearable
                   filterable
                   style="width: 100%"
-                  @update:model-value="(v: number | null | undefined) => emit('parent-change', v ?? null)"
+                  @update:model-value="onParentChange"
                 >
                   <el-option
                     v-for="t in parentCandidates"
@@ -256,6 +256,11 @@ const emit = defineEmits<{
 
 function close() {
   emit('update:modelValue', false)
+}
+
+/** 父任务变更: 转发到父组件 (number | null | undefined → number | null) */
+function onParentChange(v: number | null | undefined) {
+  emit('parent-change', v ?? null)
 }
 </script>
 
