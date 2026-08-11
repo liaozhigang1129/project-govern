@@ -218,6 +218,8 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
   - [`specs/reporting-api.md`](specs/reporting-api.md) — 报表 API 契约
   - [`specs/mobile-h5.md`](specs/mobile-h5.md) — 移动端 H5
 - **Plan**:[`plans/2026-08-07-wp-m7-01-v5-scope-freeze.md`](plans/2026-08-07-wp-m7-01-v5-scope-freeze.md)(264 行,8 项决策)
+- **D+7 整合会议 agenda**:[`reviews/2026-08-18-wp-m7-01-d7-integration-meeting.md`](reviews/2026-08-18-wp-m7-01-d7-integration-meeting.md)(60 min,8 项决策拍板)
+- **评审意见汇总模板**:[`reviews/2026-08-07-wp-m7-01-review.md`](reviews/2026-08-07-wp-m7-01-review.md)(D+1~D+6 异步)
 - **ADR**:[ADR-005 v5 立项范围与关键决策](decisions/005-m7-v5-scope.md)(proposed → 拍板后 accepted)
 - **状态**:🟡 active(2026-08-07 启动评审,D+7 整合会议)
 

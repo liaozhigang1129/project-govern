@@ -103,6 +103,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **修订** [`docs/WBS.md`](WBS.md): WP-M7-04 状态 → 🟡 active,plan 引用
 - **注**: 等 WP-M7-03 后端 API 落地后才能启动前端消费
 
+### M7-01 D+7 整合会议 agenda(2026-08-11)
+
+- **新增** [D+7 整合会议 agenda](reviews/2026-08-18-wp-m7-01-d7-integration-meeting.md):10018 字节 / 60 min / 8 项决策拍板
+  - **会议信息**: 2026-08-18(周二)14:00-15:00,线下 + 钉钉/飞书,Sponsor 必到
+  - **8 项决策逐项议程**: 每项 5-6 min (1 min 陈述 + 2 min 意见摘要 + 2 min 讨论 + 1 min 拍板)
+    - D1 AI 模型: 集成第三方 (通义/文心) - 选 A
+    - D2 AI 上线: 影子模式 4 周 → 灰度 → 全量 - 选 A
+    - D3 移动形态: Web H5 + 响应式 (本期不原生) - 选 A (关键决策,讨论时间 8 min)
+    - D4 报表实现: 后端聚合 + ECharts + 4 格式导出 - 选 A
+    - D5 数据集: 预聚合 + 物化 (禁实时跨表 JOIN) - 选 A
+    - D6 订阅分发: Email + IM + 链接分享 (3 通道) - 选 A
+    - D7 数据安全: 加密 + 用户水印 + TTL 24h - 选 A
+    - D8 验收门禁: 6 项 v5 专项门禁 - 选 A
+  - **会前准备** (D+1~D+6): 评审意见汇总到 [review.md](reviews/2026-08-07-wp-m7-01-review.md) (9 角色 checklist)
+  - **会后 Actions** (D+7 24h 内): A1-A10 10 个 action, 包括签字版 ADR-005 + 4 个 sub-plan 启动实施 + V7.0 Flyway 迁移
+  - **风险预案**: Sponsor 临时不到 / 3 项以上决策不通过 / 评审意见迟到 / 安全合规强保留意见
+- **新增** [评审意见汇总模板](reviews/2026-08-07-wp-m7-01-review.md):144 行,D+1~D+6 异步评审 9 角色 checklist
+- **修订** [`docs/WBS.md`](WBS.md): WP-M7-01 加 D+7 agenda + review 模板引用
+
 ---
 
 ## [4.0.0] — 2026-06-13 · 🎯 **V4 大版本:成本 + 财务 + 预警**
