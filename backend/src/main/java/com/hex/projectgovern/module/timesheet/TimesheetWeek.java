@@ -37,6 +37,9 @@ public class TimesheetWeek extends SoftDeletableEntity {
     @Column(name = "approver_id")  private Long approverId;
     @Column(name = "approved_at")  private Instant approvedAt;
 
+    /** WP-M7-04: 通用审批引擎 instance.id (kind="timesheet") */
+    @Column(name = "approval_instance_id") private Long approvalInstanceId;
+
     @OneToMany(mappedBy = "timesheet", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<TimesheetEntry> entries = new ArrayList<>();
 

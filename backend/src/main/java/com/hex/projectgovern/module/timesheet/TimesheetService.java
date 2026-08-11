@@ -42,6 +42,7 @@ public class TimesheetService {
     private final TimesheetWeekRepository repo;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final com.hex.projectgovern.module.approval.TimesheetApprovalAdapter approvalAdapter;
 
     // ============================================================
     // 1) 创建/查询
@@ -175,21 +176,19 @@ public class TimesheetService {
         t.setSubmittedAt(Instant.now());
         t.setSubmitterNote(req.getSubmitterNote());
 
-        // P3: 事务提交后发事件(防止主事务回滚导致虚假通知)
-        String title = "工时周报待审批: " + buildResourceCode(t.getId(), t.getUserId(), t.getWeekStart());
-        publishAfterCommit(new TimesheetSubmittedEvent(
-                t.getId(),
-                title,
-                buildResourceCode(t.getId(), t.getUserId(), t.getWeekStart()),
-                t.getUserId(),
-                userRepository.findById(t.getUserId()).map(AppUser::getFullName).orElse(""),
-                t.getWeekStart().toString(),
-                t.getWeekEnd().toString(),
-                sumHours(t).doubleValue(),
-                countProjects(t),
-                t.getEntries().size(),
-                Instant.now()
-        ));
+        // WP-M7-04: 启动通用审批流实例 (kind="timesheet")
+        // engine.start 会发 ApprovalStepActivatedEvent → BridgeListener 转发 TimesheetSubmittedEvent
+        // 老路径 TimesheetSubmittedEvent 不再 publish (避免双发)
+        try {
+            Long instanceId = approvalAdapter.startTimesheet(t);
+            t.setApprovalInstanceId(instanceId);
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(TimesheetService.class)
+                .error("[Timesheet] 启动通用审批流失败 (但不阻断提交) timesheetId={} err={}",
+                    t.getId(), e.getMessage());
+        }
+
+        // 老路径 TimesheetSubmittedEvent publish 已被 BridgeListener 接管,此处不发
         return toDetailWithNames(t);
     }
 
@@ -199,6 +198,14 @@ public class TimesheetService {
                 .orElseThrow(() -> new BusinessException(404, "工时周报不存在: " + id));
         if (t.getStatus() != TimesheetStatus.SUBMITTED) {
             throw new BusinessException(409, "只有 SUBMITTED 可审批,当前: " + t.getStatus());
+        }
+        // WP-M7-04: 通过通用审批引擎 advance (引擎负责终态判定 + 动作审计)
+        if (t.getApprovalInstanceId() != null) {
+            try {
+                approvalAdapter.approveTimesheet(t.getApprovalInstanceId(), approverId, null);
+            } catch (Exception e) {
+                throw new BusinessException(500, "审批引擎推进失败: " + e.getMessage());
+            }
         }
         t.setStatus(TimesheetStatus.APPROVED);
         t.setApproverId(approverId);
@@ -241,8 +248,16 @@ public class TimesheetService {
         if (req == null || req.getComment() == null || req.getComment().trim().length() < 5) {
             throw new BusinessException(400, "驳回必须填写理由(至少 5 个字符)");
         }
-        // 驳回后回 DRAFT:批准人清空,留 submitterNote 给提交人
         String reason = req.getComment().trim();
+        // WP-M7-04: 通过通用审批引擎 REJECTED (终态)
+        if (t.getApprovalInstanceId() != null) {
+            try {
+                approvalAdapter.rejectTimesheet(t.getApprovalInstanceId(), approverId, reason);
+            } catch (Exception e) {
+                throw new BusinessException(500, "审批引擎驳回失败: " + e.getMessage());
+            }
+        }
+        // 驳回后回 DRAFT:批准人清空,留 submitterNote 给提交人
         t.setStatus(TimesheetStatus.DRAFT);
         t.setApproverId(approverId);                  // 记录谁驳回的,留痕
         t.setApprovedAt(null);
