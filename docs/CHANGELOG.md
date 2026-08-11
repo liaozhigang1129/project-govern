@@ -125,7 +125,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### M7-01 D+7 会议预演 + V7.0 验证报告(2026-08-11)
 
-- **新增** [D+7 会议预演报告](reviews/2026-08-13-wp-m7-01-d7-meeting-dry-run.md):9065 字节
+- **新增** [D+7 会议预��报告](reviews/2026-08-13-wp-m7-01-d7-meeting-dry-run.md):9065 字节
   - **8 项决策讨论时间预估**: 基线 45 min(决策) / 乐观 30 min / 悲观 54 min
   - **3 个高风险拖延决策**:
     - D3 移动 App(70% 拖延概率,6-12 min,3 个 Sponsor 关键问题)
@@ -135,6 +135,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **3 个时间优化建议**: 文档预签 / 异步预审(下次 v5.1)/ 会议录制纪要
   - **7 个风险预案**: Sponsor 不到 / D3 拖延 / D7 强保留 / 2+ 项不通过 / 评审迟到 / 网络故障 / 设备故障
   - **关键 bug 发现**: plan §2.1 写 D+1 ~ D+7 但周末未跳过, 正确日期为 2026-08-10(周一) ~ 2026-08-18(周二)
+- **新增** [D+7 无异议项逐字通过话术](reviews/2026-08-13-wp-m7-01-d7-no-objection-scripts.md):5560 字节
+  - 6 项无异议话术(D1/D2/D4/D5/D6/D8):平均 75 秒/项,总 7.6 min
+  - 关键数字(SLA / 工时 / 阈值):准确,可直接引用
+  - 控时技巧:15 秒沉默规则 / 2 次追问规则 / 3 次挑战规则
+  - 异常情形话术:Sponsor 临时变卦 / 角色挑战 / 信息缺失
+  - 修订时间表:6 项无异议 7.6 min + D3/D7 16 min + 开闭/范围 10 min + buffer 23 min
 - **新增** [V7.0 Flyway 迁移成功报告](reviews/2026-08-11-v7-flyway-migration-success.md):242 行
   - 8 表 + 12 索引 + 6 扩展列 全部就位
   - 后端 ZhiyuApplication 启动成功 11.122s + health 200
