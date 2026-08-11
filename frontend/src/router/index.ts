@@ -213,6 +213,23 @@ const router = createRouter({
       meta: { title: '多维成本看板', roles: ['PMO_ADMIN', 'ADMIN', 'EXEC', 'PM', 'DEPT_LEAD', 'FINANCE'] },
     },
     {
+      // V5.1+ / WP-M5-02: 预警看板 + 列表 (F4 告警模块)
+      path: '/alerts',
+      component: () => import('@/views/AlertList.vue'),
+      meta: {
+        title: '告警列表',
+        roles: ['PMO_ADMIN', 'ADMIN', 'FINANCE', 'EXEC'],
+      },
+    },
+    {
+      path: '/alerts/dashboard',
+      component: () => import('@/views/AlertDashboard.vue'),
+      meta: {
+        title: '告警看板',
+        roles: ['PMO_ADMIN', 'ADMIN', 'FINANCE', 'EXEC'],
+      },
+    },
+    {
       // V5.0 / WP-M4-03: 财务-成本 3-way match 对账 (F3 主验收页)
       path: '/finance/reconciliation',
       component: () => import('@/views/ReconciliationList.vue'),
