@@ -130,7 +130,7 @@ public class InitiationController {
         description = "decision ∈ {APPROVED, REJECTED, SUPPLEMENT}。3 级后自动建项目。")
     public ApiResponse<Map<String, Object>> decide(@PathVariable Long id,
                                                   @AuthenticationPrincipal UserDetails ud,
-                                                  @RequestBody InitiationService.ApprovalDecision d) {
+                                                  @RequestBody InitiationService.InitiationApprovalDecision d) {
         AppUser user = userRepository.findByUsernameAndDeletedFalse(ud.getUsername()).orElseThrow();
         ProjectInitiation i = initiationService.decide(id, user.getId(), d);
         return ApiResponse.ok(Map.of(

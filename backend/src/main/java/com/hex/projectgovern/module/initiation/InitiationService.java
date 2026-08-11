@@ -241,7 +241,10 @@ public class InitiationService {
         // 引擎实例创建后, ApprovalStepActivatedEvent 会被 InitiationApprovalBridgeListener
         // 转发为 InitiationSubmittedEvent (避免重复发邮件)
         try {
-            approvalAdapter.startInitiation(saved);
+            Long instId = approvalAdapter.startInitiation(saved);
+            if (instId != null) {
+                saved.setApprovalInstanceId(instId);
+            }
         } catch (Exception e) {
             log.error("[Initiation] 启动通用审批流失败 (但不阻断提交) initiationId={} code={} err={}",
                 saved.getId(), saved.getCode(), e.getMessage());
@@ -254,12 +257,11 @@ public class InitiationService {
         return saved;
     }
 
-    public record ApprovalDecision(String decision, String comment) {} // APPROVED/REJECTED/SUPPLEMENT
+    public record InitiationApprovalDecision(String decision, String comment) {} // APPROVED/REJECTED/SUPPLEMENT
 
     @Transactional
-    public ProjectInitiation decide(Long initiationId, Long approverId, ApprovalDecision d) {
+    public ProjectInitiation decide(Long initiationId, Long approverId, InitiationApprovalDecision d) {
         ProjectInitiation i = get(initiationId);
-        i.getStatus().getCode();
         if (i.getStatus().isTerminal()) {
             throw new BusinessException("Initiation is already in terminal status: " + i.getStatus().getCode());
         }
@@ -284,50 +286,133 @@ public class InitiationService {
         rec.setComment(d.comment());
         approvalRepo.save(rec);
 
-        // 决定后的状态推进(同时记录推进后状态,用于事件)
+        // WP-M7-06: decide 委托 ApprovalEngine (instanceId != null)
+        // 引擎返回 ApprovalStatus 后,业务根据状态回写 ProjectInitiation
+        // 老数据 (instanceId=null) 走老路径,业务行为不变
         String nextStepCode = null;
         String nextStepName = null;
-        switch (d.decision()) {
-            case "REJECTED" -> {
-                i.setStatus(statusRepo.findAll().stream()
-                        .filter(s -> "REJECTED".equals(s.getCode())).findFirst().orElseThrow());
-                i.setCurrentStep(null);
-                i.setClosedAt(Instant.now());
+        com.hex.projectgovern.module.approval.ApprovalFlowInstance engineInst = null;
+        if (i.getApprovalInstanceId() != null) {
+            try {
+                com.hex.projectgovern.module.approval.ApprovalDecision engineDecision =
+                    com.hex.projectgovern.module.approval.ApprovalDecision.valueOf(d.decision());
+                engineInst = approvalEngine.decide(i.getApprovalInstanceId(), approverId, engineDecision, d.comment());
+            } catch (Exception e) {
+                throw new BusinessException("引擎推进失败: " + e.getMessage());
             }
-            case "SUPPLEMENT" -> {
-                i.setStatus(statusRepo.findAll().stream()
-                        .filter(s -> "SUPPLEMENT".equals(s.getCode())).findFirst().orElseThrow());
-                // 留在当前步骤,等申请人补材料后重新提交
-                nextStepCode = i.getCurrentStep();
-                nextStepName = step.getName();
-            }
-            case "APPROVED" -> {
-                if (idx + 1 >= APPROVAL_FLOW.size()) {
+        } else {
+            log.warn("[Initiation] 立项 {} 缺 approval_instance_id,走老路径", initiationId);
+        }
+
+        if (engineInst != null) {
+            // 引擎 1-based stepNo → 业务 step code (0 表示已终止)
+            String engineStepCode = engineInst.getCurrentStepNo() != null && engineInst.getCurrentStepNo() > 0
+                ? APPROVAL_FLOW.get(Math.min(engineInst.getCurrentStepNo() - 1, APPROVAL_FLOW.size() - 1))
+                : null;
+
+            switch (engineInst.getStatus()) {
+                case APPROVED -> {
+                    // 终态判断: 必须 3 step 都通过才到 EXEC_APPROVED
+                    if ("EXEC".equals(engineStepCode)) {
+                        i.setStatus(statusRepo.findAll().stream()
+                                .filter(s -> "EXEC_APPROVED".equals(s.getCode())).findFirst().orElseThrow());
+                        i.setCurrentStep(null);
+                        i.setClosedAt(Instant.now());
+                        createProjectFromInitiation(i);
+                        applyLatestAiDraft(i.getId(), approverId);
+                    } else {
+                        // 引擎认为 APPROVED 但 currentStep 还在前面 step → 实际是 PENDING
+                        // (理论上不会发生, 因为 advance() 通过后再 approve 才到下一 step)
+                        i.setCurrentStep(engineStepCode);
+                        String nextCode = switch (engineStepCode) {
+                            case "DEPT_LEAD" -> "DEPT_APPROVED";
+                            case "PMO_ADMIN" -> "PMO_APPROVED";
+                            default -> i.getStatus().getCode();
+                        };
+                        i.setStatus(statusRepo.findAll().stream()
+                                .filter(s -> s.getCode().equals(nextCode)).findFirst()
+                                .orElseThrow(() -> new BusinessException("Status not found: " + nextCode)));
+                        nextStepCode = engineStepCode;
+                        nextStepName = step.getName();
+                    }
+                }
+                case REJECTED -> {
                     i.setStatus(statusRepo.findAll().stream()
-                            .filter(s -> "EXEC_APPROVED".equals(s.getCode())).findFirst().orElseThrow());
+                            .filter(s -> "REJECTED".equals(s.getCode())).findFirst().orElseThrow());
                     i.setCurrentStep(null);
                     i.setClosedAt(Instant.now());
-                    createProjectFromInitiation(i);
-                    // EXEC 终审通过:自动 apply 最新一份 AI 草稿 → 写入 wbs_task + milestone
-                    applyLatestAiDraft(i.getId(), approverId);
-                } else {
-                    String next = APPROVAL_FLOW.get(idx + 1);
-                    i.setCurrentStep(next);
-                    String nextCode = switch (next) {
-                        case "DEPT_LEAD" -> "DEPT_APPROVED";
-                        case "PMO_ADMIN" -> "PMO_APPROVED";
-                        default -> i.getStatus().getCode();
-                    };
+                }
+                case SUPPLEMENT -> {
                     i.setStatus(statusRepo.findAll().stream()
-                            .filter(s -> s.getCode().equals(nextCode)).findFirst()
-                            .orElseThrow(() -> new BusinessException("Status not found: " + nextCode)));
-                    nextStepCode = next;
-                    nextStepName = stepRepo.findAll().stream()
-                            .filter(s -> s.getCode().equals(next))
-                            .map(ApprovalStep::getName).findFirst().orElse(next);
+                            .filter(s -> "SUPPLEMENT".equals(s.getCode())).findFirst().orElseThrow());
+                    // 留在当前步骤,等申请人补材料后重新提交
+                    nextStepCode = i.getCurrentStep();
+                    nextStepName = step.getName();
+                }
+                case PENDING -> {
+                    // 推进到下一步
+                    if (engineStepCode != null) {
+                        i.setCurrentStep(engineStepCode);
+                        String nextCode = switch (engineStepCode) {
+                            case "DEPT_LEAD" -> "DEPT_APPROVED";
+                            case "PMO_ADMIN" -> "PMO_APPROVED";
+                            default -> i.getStatus().getCode();
+                        };
+                        i.setStatus(statusRepo.findAll().stream()
+                                .filter(s -> s.getCode().equals(nextCode)).findFirst()
+                                .orElseThrow(() -> new BusinessException("Status not found: " + nextCode)));
+                        nextStepCode = engineStepCode;
+                        nextStepName = stepRepo.findAll().stream()
+                                .filter(s -> s.getCode().equals(engineStepCode))
+                                .map(ApprovalStep::getName).findFirst().orElse(engineStepCode);
+                    }
+                }
+                default -> {
+                    log.warn("[Initiation] 引擎返回未预期状态 {} for initiationId={}", engineInst.getStatus(), initiationId);
                 }
             }
-            default -> throw new BusinessException("Invalid decision: " + d.decision());
+        } else {
+            // 老路径(approvalInstanceId=null):完全保留原始逻辑
+            switch (d.decision()) {
+                case "REJECTED" -> {
+                    i.setStatus(statusRepo.findAll().stream()
+                            .filter(s -> "REJECTED".equals(s.getCode())).findFirst().orElseThrow());
+                    i.setCurrentStep(null);
+                    i.setClosedAt(Instant.now());
+                }
+                case "SUPPLEMENT" -> {
+                    i.setStatus(statusRepo.findAll().stream()
+                            .filter(s -> "SUPPLEMENT".equals(s.getCode())).findFirst().orElseThrow());
+                    nextStepCode = i.getCurrentStep();
+                    nextStepName = step.getName();
+                }
+                case "APPROVED" -> {
+                    if (idx + 1 >= APPROVAL_FLOW.size()) {
+                        i.setStatus(statusRepo.findAll().stream()
+                                .filter(s -> "EXEC_APPROVED".equals(s.getCode())).findFirst().orElseThrow());
+                        i.setCurrentStep(null);
+                        i.setClosedAt(Instant.now());
+                        createProjectFromInitiation(i);
+                        applyLatestAiDraft(i.getId(), approverId);
+                    } else {
+                        String next = APPROVAL_FLOW.get(idx + 1);
+                        i.setCurrentStep(next);
+                        String nextCode = switch (next) {
+                            case "DEPT_LEAD" -> "DEPT_APPROVED";
+                            case "PMO_ADMIN" -> "PMO_APPROVED";
+                            default -> i.getStatus().getCode();
+                        };
+                        i.setStatus(statusRepo.findAll().stream()
+                                .filter(s -> s.getCode().equals(nextCode)).findFirst()
+                                .orElseThrow(() -> new BusinessException("Status not found: " + nextCode)));
+                        nextStepCode = next;
+                        nextStepName = stepRepo.findAll().stream()
+                                .filter(s -> s.getCode().equals(next))
+                                .map(ApprovalStep::getName).findFirst().orElse(next);
+                    }
+                }
+                default -> throw new BusinessException("Invalid decision: " + d.decision());
+            }
         }
 
         // 发布审批决定事件 → 通知申请人 + 下一审批人

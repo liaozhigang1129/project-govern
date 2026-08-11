@@ -95,11 +95,11 @@ class InitiationServiceTest {
         return i;
     }
 
-    private InitiationService.ApprovalDecision approved() {
-        return new InitiationService.ApprovalDecision("APPROVED", "ok");
+    private InitiationService.InitiationApprovalDecision approved() {
+        return new InitiationService.InitiationApprovalDecision("APPROVED", "ok");
     }
-    private InitiationService.ApprovalDecision rejected() {
-        return new InitiationService.ApprovalDecision("REJECTED", "no");
+    private InitiationService.InitiationApprovalDecision rejected() {
+        return new InitiationService.InitiationApprovalDecision("REJECTED", "no");
     }
 
     @Test
@@ -187,7 +187,7 @@ class InitiationServiceTest {
     void decide_invalidDecisionThrows() {
         ProjectInitiation i = initiationService.submit(mkInit("IR-500"));
         assertThatThrownBy(() -> initiationService.decide(i.getId(), 11L,
-                new InitiationService.ApprovalDecision("MAYBE", "?")))
+                new InitiationService.InitiationApprovalDecision("MAYBE", "?")))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Invalid");
     }
@@ -198,7 +198,7 @@ class InitiationServiceTest {
         ProjectInitiation i = initiationService.submit(mkInit("IR-RES-1"));
         // DEPT_LEAD 打回补材料
         initiationService.decide(i.getId(), 11L,
-                new InitiationService.ApprovalDecision("SUPPLEMENT", "请补范围"));
+                new InitiationService.InitiationApprovalDecision("SUPPLEMENT", "请补范围"));
         ProjectInitiation afterSupplement = initiationService.get(i.getId());
         assertThat(afterSupplement.getStatus().getCode()).isEqualTo("SUPPLEMENT");
         assertThat(afterSupplement.getCurrentStep()).isEqualTo("DEPT_LEAD");
@@ -226,7 +226,7 @@ class InitiationServiceTest {
     void resubmit_onlyApplicantCanResubmit() {
         ProjectInitiation i = initiationService.submit(mkInit("IR-RES-3"));
         initiationService.decide(i.getId(), 11L,
-                new InitiationService.ApprovalDecision("SUPPLEMENT", "请补材料"));
+                new InitiationService.InitiationApprovalDecision("SUPPLEMENT", "请补材料"));
         assertThatThrownBy(() -> initiationService.resubmit(i.getId(), 999L))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("applicant");
@@ -237,7 +237,7 @@ class InitiationServiceTest {
     void resubmit_thenApproveFlowsNormally() {
         ProjectInitiation i = initiationService.submit(mkInit("IR-RES-4"));
         initiationService.decide(i.getId(), 11L,
-                new InitiationService.ApprovalDecision("SUPPLEMENT", "补材料"));
+                new InitiationService.InitiationApprovalDecision("SUPPLEMENT", "补材料"));
         initiationService.resubmit(i.getId(), 100L);
         // 申请人重提后,DEPT_LEAD 这次通过
         ProjectInitiation after = initiationService.decide(i.getId(), 11L, approved());
