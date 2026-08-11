@@ -74,41 +74,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.0.0] — 2026-06-13 · 🎯 **V4 大版本:成本 + 财务 + 预警**
 
 > 里程碑已落地,成本引擎上线,财务模块闭环,预警数据层就绪。
+> 
+> 对应老仓库 pmo-pms tag v4.0.0 (commit c45df49) 与 2026-06-13 release notes。
 
 ### ✨ 新增模块 (Highlights)
 
 | 模块 | 版本 | 说明 |
 |------|------|------|
+| **立项三级审批** | V6.0 | DEPT_LEAD → PMO_ADMIN → EXEC 三级审批引擎 |
+| **工时周报** | V2.13 | 周报提交 + 审批 + 14 天锁 + 跨周保留 |
+| **通知中心** | V2.7 | 钉钉/飞书/企微 + SSE 实时推送 + 邮件 + 4 事件 |
+| **钉钉 OA 同步** | V2.13 | 部门/考勤/请假 webhook 对接 (phase1) |
+| **健康度看板** | V2.10 | GREEN/YELLOW/RED 三级, 里程碑加权计算 |
+| **WBS 编辑器** | V3.0 | 任务拖拽 + 依赖 + EVM + 资源分配 |
 | **里程碑** | V3.1 | 七阶段字典 (`INTAKE / ANALYSIS / PROPOSAL / APPROVAL / KICKOFF / EXECUTION / CLOSING`) + 4 端点分析 |
-| **成本引擎** | V4.0 | 工时 × 角色档 → 成本项,P0-A 核心交付 |
+| **成本引擎** | V4.0 | 工时 × 角色档 → 成本项, P0-A 核心交付 |
 | **财务** | V4.2 | 合同/发票/付款/成本项 (3-way match) |
 | **预警** | V4.3 | 预警实体 + 仓库 + 6 种子规则 — 数据层完成 |
+| **风险** | V2.6/V2.7 | 风险矩阵视图 + 历史快照 + 8 项目种 |
+| **AI 辅助** | V3.0 | AI 预测/草稿/合同审查 (影子模式 4 周) |
 
 ### 🔧 功能增强
 
-- **V2.6/V2.7 风险** — 风险矩阵视图 + 历史快照
-- **V2.8/V2.9 组织** — 用户/部门/角色 三类 AdminController 拆分
-- **V2.11-V2.13 工时/甘特/项目** — 工时审批流、资源甘特、项目健康度
-- **V3.0 立项** — 全流程 5 子模块 (预算冻结/风险应对/资源计划/AI-WBS/SOW 文件)
-- **P2 通知** — 多通道 IM (钉钉/飞书/企微) + SSE 实时推送 + 4 事件
-- **P3 WBS** — 任务拆解 + EVM + 网络图 + 任务级甘特 + 资源分配矩阵
+- **立项审批升级 (WP-M7-03~07)** — InitiationService 全量委托 ApprovalEngine, ApprovalRecord 双写兼容
+- **组织** — 用户/部门/角色 三类 AdminController 拆分 (V2.8/V2.9)
+- **工时 + 甘特** — 工时审批流、资源甘特、项目健康度 (V2.11-V2.13)
+- **立项全流程** — 5 子模块 (预算冻结/风险应对/资源计划/AI-WBS/SOW 文件) (V3.0)
+- **通知** — 多通道 IM + SSE 实时推送 + 4 事件 (P2)
+
+### 🐞 Bug Fixes (V4.0~V4.0.x)
+
+- 工时计算 14 天锁 LocalDate.now() 漂移 (P2 #16)
+- InitiationService.decide 引擎 APPROVED 误判终态 (P2 #19/WP-M7-06)
+- MilestoneAiAdvisor scoreOverdue int 除法丢失精度 (P2 #24)
+- H2 测试 schema 缺 MilestoneStatus/InitiationStatus 字典 (P2 #24)
+- PG seed 重跑失败 (MySQL INSERT IGNORE / PG ON CONFLICT) (P2 #17)
+- 项目类型 seed 缺 DELIVERY (P2 #24)
 
 ### 🏗 基础设施
 
-- MySQL 迁移 (H2 测试 → MySQL dev/prod) + admin/dingtalk/tools 通用模块
-- Jwt 鉴权 + RevokedToken 黑名单 + RBAC(22 端点 @RequireRoles)
-- 测试 schema 分离 + 78 个测试类
-- CORS + 全局异常处理 + Swagger/OpenAPI 文档
+- **数据库**: MySQL 8.0 (生产) + PostgreSQL 16 (CI) + H2 (测试)
+- **后端栈**: Spring Boot 2.7 → 3.3, Java 17 → 21, JPA/Hibernate, Flyway 迁移
+- **鉴权**: JWT + RevokedToken 黑名单 + RBAC (22 端点 @RequireRoles)
+- **测试**: 78 个测试类, 集成 + 单元双层, H2 in-memory
+- **其他**: CORS + 全局异常处理 + Swagger/OpenAPI 文档 + Clock bean 注入 (P2 #16)
 
 ### 🎨 前端
 
 - 18 个视图 / 17 个 API 客户端 / 13+ 个可复用组件
+- Vue 3 + Vite + TypeScript + Element Plus + Pinia + ECharts
+- ESLint + Prettier, 354 处 any 待清理 (P2 #27)
 
-### 📚 文档(老仓库口径)
+### 📚 文档
 
 - PRD (成本控制) + 成本引擎设计 + MVP 设计 + 提案 + commit-split 拆批清单
-- 扩展文档 A0-A6(数据字典/API规范/UI原型/数据迁移/上线计划/培训赋能)共 25 份
+- 扩展文档 A0-A6 (数据字典/API规范/UI原型/数据迁移/上线计划/培训赋能) 共 25 份
 - README 完整项目文档 (15KB)
+- CHANGELOG.md (本文件) 重启后从 4.0.0 重新维护
 
 ---
 
