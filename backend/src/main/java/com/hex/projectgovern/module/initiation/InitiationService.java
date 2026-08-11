@@ -45,6 +45,7 @@ public class InitiationService {
     private final InitiationSowFileRepository sowFileRepository;
     private final InitiationAiWbsDraftRepository aiWbsDraftRepository;
     private final com.hex.projectgovern.module.approval.InitiationApprovalAdapter approvalAdapter;
+    private final com.hex.projectgovern.module.approval.ApprovalFlowActionRepository approvalFlowActionRepo;
     private final ApprovalEngine approvalEngine;
     private final InitiationAiWbsService aiWbsService;
 
@@ -152,8 +153,32 @@ public class InitiationService {
         return get(id);
     }
 
+    /**
+     * 立项审批流水 (WP-M7-07: 改读 ApprovalFlowAction, 替代 ApprovalRecord)
+     * <p>对历史数据 (instanceId=null) 仍读老 ApprovalRecord (v5 数据迁移前)
+     */
     public List<ApprovalRecord> records(Long initiationId) {
-        return approvalRepo.findByInitiationIdOrderByDecidedAtAsc(initiationId);
+        ProjectInitiation i = get(initiationId);
+        if (i.getApprovalInstanceId() == null) {
+            // 老数据: 继续读 ApprovalRecord
+            return approvalRepo.findByInitiationIdOrderByDecidedAtAsc(initiationId);
+        }
+        // 新数据: 走引擎 ApprovalFlowAction, 映射成 ApprovalRecord (前端 API 兼容)
+        List<com.hex.projectgovern.module.approval.ApprovalFlowAction> actions =
+            approvalFlowActionRepo.findByInstanceIdOrderByDecidedAtAsc(i.getApprovalInstanceId());
+        List<ApprovalRecord> out = new java.util.ArrayList<>(actions.size());
+        for (var a : actions) {
+            ApprovalRecord r = new ApprovalRecord();
+            r.setInitiationId(initiationId);
+            r.setStepId(a.getStepNo() == null ? 0L : a.getStepNo().longValue());
+            r.setApproverId(a.getApproverId());
+            r.setOnBehalfOfUserId(a.getOnBehalfOfUserId());
+            r.setDecision(a.getDecision() == null ? null : a.getDecision().name());
+            r.setComment(a.getComment());
+            r.setDecidedAt(a.getDecidedAt());
+            out.add(r);
+        }
+        return out;
     }
 
     /**
@@ -272,19 +297,12 @@ public class InitiationService {
                 .filter(s -> s.getCode().equals(i.getCurrentStep()))
                 .findFirst().orElseThrow(() -> new BusinessException("Step not found"));
 
-        // 推断"代审":当前 step 的主审批人 != 实际 approverId → backup 代审
+        // WP-M7-07: ApprovalRecord 双写已废弃 (决策由 ApprovalFlowAction 单一事实源记录)
+        // 保留代审推断日志 (审计: 实际是 backup 代审的, 应在引擎记录中标记)
         Long onBehalfOfUserId = inferOnBehalfOfUserId(i.getCurrentStep(), i.getDepartmentId(), approverId);
         if (onBehalfOfUserId != null) {
             log.info("[BackupApprover] 代审记录: 立项 {} 由 actorId={} 代主审批人={}", initiationId, approverId, onBehalfOfUserId);
         }
-        ApprovalRecord rec = new ApprovalRecord();
-        rec.setInitiationId(initiationId);
-        rec.setStepId(step.getId());
-        rec.setApproverId(approverId);
-        rec.setOnBehalfOfUserId(onBehalfOfUserId);
-        rec.setDecision(d.decision());
-        rec.setComment(d.comment());
-        approvalRepo.save(rec);
 
         // WP-M7-06: decide 委托 ApprovalEngine (instanceId != null)
         // 引擎返回 ApprovalStatus 后,业务根据状态回写 ProjectInitiation

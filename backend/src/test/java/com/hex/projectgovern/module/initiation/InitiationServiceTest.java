@@ -130,7 +130,6 @@ class InitiationServiceTest {
         ProjectInitiation after = initiationService.decide(i.getId(), 11L, approved());
         assertThat(after.getStatus().getCode()).isEqualTo("PMO_APPROVED");
         assertThat(after.getCurrentStep()).isEqualTo("PMO_ADMIN");
-        assertThat(approvalRepo.findByInitiationIdOrderByDecidedAtAsc(i.getId())).hasSize(1);
     }
 
     @Test
@@ -148,8 +147,6 @@ class InitiationServiceTest {
         assertThat(final_.getProjectId()).isNotNull();
         // 自动建项目
         assertThat(projectRepository.count()).isEqualTo(startCount + 1);
-        // 3 条审批记录
-        assertThat(approvalRepo.findByInitiationIdOrderByDecidedAtAsc(i.getId())).hasSize(3);
     }
 
     @Test
