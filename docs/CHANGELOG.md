@@ -86,6 +86,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **修订** [`docs/WBS.md`](WBS.md): WP-M7-03 状态 → 🟡 active,plan 引用
 - **注**: 等 V7.0 Flyway 迁移完成后才能正式启动 API 实现
 
+### M7-04 v5 可视化与 AI 看板(2026-08-11)
+
+- **新增** [WP-M7-04 可视化与 AI 看板 plan](plans/2026-08-11-wp-m7-04-ai-dashboard.md):19113 字节 / 16 步
+  - **3 端 / 14 视图**: 桌面端 9 视图 (8 角色仪表盘 + 数据质量看板) + 移动端 4 视图 (工时/任务/通知/我的) + 共享 1 视图
+  - **1 通用 + 8 角色配置**架构: 1 个 `DashboardView.vue` 避免 8 份重复,8 角色默认配置走 `system_config`
+  - **3 套 Widget 渲染器**: `KpiCardRenderer` / `ChartRenderer`(ECharts 6.1 + 8 chartType) / `TableRenderer`(虚拟列表 el-table-v2)
+  - **数据质量看板**: 3 指标 (完整率/准确率/时效性) + 3 异常检测规则 (超时未更新/孤儿任务/超载人员) + 后端 5 API 复用 Alert 引擎
+  - **移动端 H5**: 4 Tab 路由 + `MobileLayout.vue` + 响应式断点 < 768px
+  - **离线缓存**: IndexedDB (idb 7.x) + 5 周历史 + CRDT 冲突解决 (last-write-wins)
+  - **扫码模块**: ZXing JS + 任务二维码格式 `pmo-task://<taskId>?projectId=<p>`
+  - **Web Vitals 监控**: web-vitals 5.x 上报 (LCP/FID/CLS/INP/TTFB)
+  - **A11y 自动化**: @axe-core/playwright 4.x + CI 集成 (0 critical / 0 serious)
+  - **D8 门禁**: LCP < 2.5s / FID < 100ms / CLS < 0.1 / H5 首屏 < 1s / 60fps 滑动
+- **新增 npm 依赖**: @zxing/browser + @zxing/library + web-vitals 5 + @axe-core/playwright 4 + idb 7
+- **修订** [`docs/WBS.md`](WBS.md): WP-M7-04 状态 → 🟡 active,plan 引用
+- **注**: 等 WP-M7-03 后端 API 落地后才能启动前端消费
+
 ---
 
 ## [4.0.0] — 2026-06-13 · 🎯 **V4 大版本:成本 + 财务 + 预警**

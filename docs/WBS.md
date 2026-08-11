@@ -207,7 +207,7 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 ## M7 — v5 立项:AI · 移动 · 治理(老 P3plus-v2)
 
 > 当前 **🟡 active, WP-M7-01 评审中**(2026-08-07 启动);
-> WP-M7-02/03 已 active (2026-08-11 plan 落地),WP-M7-04 仍 draft,等 WP-M7-01 拍板后启动。
+> WP-M7-02/03/04 已 active (2026-08-11 plan 落地),等 WP-M7-01 D+7 拍板后正式启动实施。
 
 ### WP-M7-01 v5 立项评审
 
@@ -240,10 +240,15 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 
 ### WP-M7-04 v5 可视化与 AI 看板
 
-- **前置依赖**:WP-M7-03
-- **验收标准**:6 智能视图 + 3 预测模型 + 智能报告
-- **Spec**:见 `drafts/扩展文档/P3plus-v2-立项/P3plus-PR-4-可视化与AI.md`
-- **Plan**:—
+- **前置依赖**:WP-M7-03(后端 API)
+- **验收标准**:8 角色仪表盘 + 数据质量看板(3 指标) + 移动端 H5(4 Tab + 扫码 + 离线) + A11y 通过
+- **Spec**:
+  - [`specs/reporting.md`](specs/reporting.md) §1 §5
+  - [`specs/reporting-api.md`](specs/reporting-api.md)
+  - [`specs/mobile-h5.md`](specs/mobile-h5.md) §1-§11
+  - [`specs/frontend.md`](specs/frontend.md)
+- **Plan**:[`plans/2026-08-11-wp-m7-04-ai-dashboard.md`](plans/2026-08-11-wp-m7-04-ai-dashboard.md)(19113 字节 / 16 步)
+- **状态**:🟡 active(2026-08-11 plan 落地,等 WP-M7-03 后端落地后启动前端)
 
 ---
 
