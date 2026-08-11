@@ -83,11 +83,16 @@ requires_status() {
   return 1
 }
 
-# 从 markdown 提取所有相对 .md 链接
+# 从 markdown 提取所有相对 .md 链接(跳过代码块 ```...``` 和行内代码 `...`)
 extract_md_links() {
   local f="$1"
-  # 形式:](xxx.md) 或 [xxx](xxx.md)
-  grep -oE '\]\([^)]+\.md[^)]*\)' "$f" 2>/dev/null | sed -E 's/^\]\(//; s/\)$//; s/#.*$//' | sort -u
+  # 1) 跳过 ``` 围栏代码块
+  # 2) 去掉行内 code `` `xxx` `` (反引号包裹内容)
+  awk '
+    /^```/ { in_code = !in_code; next }
+    in_code { next }
+    { print }
+  ' "$f" 2>/dev/null | sed -E 's/`[^`]*`//g' | grep -oE '\]\([^)]+\.md[^)]*\)' | sed -E 's/^\]\(//; s/\)$//; s/#.*$//' | sort -u
 }
 
 # ---------- 1. 文件头校验 ----------
@@ -206,6 +211,11 @@ _bold "\n→ 校验 decisions/ 编号顺序\n"
 if [[ -d "$DOCS_DIR/decisions" ]]; then
   ADR_FILES=()
   while IFS= read -r line; do
+    # 跳过 README.md / _template.md / 任何下划线开头的索引/模板文件
+    base=$(basename "$line")
+    case "$base" in
+      README.md|_*) continue ;;
+    esac
     ADR_FILES+=("$line")
   done < <(find "$DOCS_DIR/decisions" -maxdepth 1 -type f -name '*.md' | sort)
   prev_num=0
