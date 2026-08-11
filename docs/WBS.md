@@ -206,14 +206,20 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 
 ## M7 — v5 立项:AI · 移动 · 治理(老 P3plus-v2)
 
-> 当前 **⏸ draft, 0%**;立项评审中。
+> 当前 **🟡 active, WP-M7-01 评审中**(2026-08-07 启动);
+> WP-M7-02~04 仍 draft,等 WP-M7-01 拍板后启动。
 
 ### WP-M7-01 v5 立项评审
 
 - **前置依赖**:M4/M5/M6 阶段门禁通过
 - **验收标准**:v5 范围冻结、AI / 移动 / 治理三轴确认
-- **Spec**:见 `drafts/扩展文档/P3plus-v2-立项/P3plus-PR-0-项目索引与总览.md`
-- **Plan**:—
+- **Spec**:见 [`drafts/扩展文档/P3plus-v2-立项/P3plus-PR-0-项目索引与总览.md`](drafts/扩展文档/P3plus-v2-立项/P3plus-PR-0-项目索引与总览.md) + 已激活 spec:
+  - [`specs/reporting.md`](specs/reporting.md) — 报表/BI/导出
+  - [`specs/reporting-api.md`](specs/reporting-api.md) — 报表 API 契约
+  - [`specs/mobile-h5.md`](specs/mobile-h5.md) — 移动端 H5
+- **Plan**:[`plans/2026-08-07-wp-m7-01-v5-scope-freeze.md`](plans/2026-08-07-wp-m7-01-v5-scope-freeze.md)(264 行,8 项决策)
+- **ADR**:[ADR-005 v5 立项范围与关键决策](decisions/005-m7-v5-scope.md)(proposed → 拍板后 accepted)
+- **状态**:🟡 active(2026-08-07 启动评审,D+7 整合会议)
 
 ### WP-M7-02 v5 数据模型增量
 

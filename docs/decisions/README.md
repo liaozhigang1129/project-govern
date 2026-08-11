@@ -12,7 +12,7 @@ summary: 架构决策记录(ADR)目录索引 — 编号机制 + 当前生效清�
 > - `specs/` — 接口契约 / 数据模型
 > - `plans/` — 工作包实现步骤
 
-## 当前生效决策(2026-08-07 共 4 份)
+## 当前生效决策(2026-08-07 共 5 份)
 
 | 编号 | 标题 | 状态 | 影响工作包 |
 |---|---|---|---|
@@ -20,6 +20,7 @@ summary: 架构决策记录(ADR)目录索引 — 编号机制 + 当前生效清�
 | [002](002-mysql-pg-dual-track.md) | 数据库分 MySQL(生产)+ PostgreSQL(CI)双轨 | ✅ accepted | M1-M5 数据持久化 / WP-INFRA-01 测试 schema |
 | [003](003-docs-status-wbs-split.md) | 文档采用 sift 风格 STATUS + WBS 双轨 | ✅ accepted | WP-INFRA-03 文档规范 |
 | [004](004-im-callback-deferred.md) | IM 平台 OAuth + 卡片回调推迟到 v5 立项评估 | ✅ accepted | WP-M6-03 IM 回调 |
+| [005](005-m7-v5-scope.md) | v5 立项范围与 8 项关键决策(AI/移动/治理三轴) | 🟡 proposed | WP-M7-01~04 |
 
 > 编号只追加不修改;被推翻时旧条目标 `superseded` 并指向新条目。
 > 编号顺序由 `scripts/docs-lint.sh` 自动校验(连续或允许间断)。

@@ -1,8 +1,8 @@
 ---
 status: active
 created: 2026-08-07
-updated: 2026-08-07T20:00
-last_head: 11caeb4
+updated: 2026-08-07T22:30
+last_head: 9685257
 summary: 全局项目计划执行情况(里程碑进度、积压、风险、当前快照)
 ---
 
@@ -22,7 +22,7 @@ summary: 全局项目计划执行情况(里程碑进度、积压、风险、当�
 
 ## 1. 当前快照(One-liner)
 
-project-govern 当前处于 **v4.0.0 重启 + 文档治理 + CI 治理**阶段。本次会话已完成基线盘点(M1-M3)、重命名(`pmo-pms` → `project-govern`)、文档骨架(sift 风格 + STATUS/WBS 分轨)、主题化 spec 拆分(10 份 + 索引)、3 个 in-flight 工作包(WP-M4-03 财务对账 / WP-M5-02 预警控制器 / WP-M6-03 IM spike 决策推迟)的实现+实施+决策落地、4 份 ADR(001/002/003/004)、docs-lint 脚本 + CI 集成、ESLint 9 + Prettier 3 前端静态检查 + CI 集成,代码层 0 错误构建通过。下一次门禁 = **M4 阶段门禁**(预期 2026-09-04)。
+project-govern 当前处于 **M7 立项评审启动**阶段。本次会话已完成:ML 模型配置体检与 launchd 修复(4 plist + install.sh + healthcheck.sh 品牌/路径)、3 份 active spec(reporting / reporting-api / mobile-h5)、WP-M7-01 立项评审 plan(8 项关键决策 + 10 周里程碑 + 5 风险 + 5 北极星指标)、ADR-005 v5 范围与关键决策(proposed)、WBS.md / STATUS.md 同步更新。下一次门禁 = **WP-M7-01 D+7 整合会议**(8 项决策 Sponsor 拍板)。
 
 ---
 
@@ -39,9 +39,9 @@ project-govern 当前处于 **v4.0.0 重启 + 文档治理 + CI 治理**阶段�
 | **M4** | 成本引擎 / 财务 3-way match(老 V4.0/V4.2) | 🟡 active | 85% | M4 门禁:财务闭环 + 角色档上线 | 财务-成本对账口径未定 |
 | **M5** | 预警数据层 + 控制器(老 V4.3→V4.4) | 🟡 active | 60% | M5 门禁:6 条规则触发可见 | 预警控制器收尾中 |
 | **M6** | IM 通知多通道(企业微信/钉钉/飞书)(老 P2-A) | 🟡 active | 70% | M6 门禁:3 通道灰度 + 失败隔离 | IM 平台回调接入待评估 |
-| **M7** | v5 立项:AI·移动·治理(老 P3plus-v2) | ⏸ draft | 0% | 立项评审通过 | 范围未冻结 |
+| **M7** | v5 立项:AI·移动·治理(老 P3plus-v2) | 🟡 active | 10% | WP-M7-01 评审通过 → M7 全量 | 范围冻结中(8 项决策 D+7 拍板) |
 
-> **本会话调整**(2026-08-07):M4-M6 三条均启动中,且为本次会议唯一重点在制品(WP-M4-03 / WP-M5-02 / WP-M6-03);M7 仍为草案。
+> **本会话调整**(2026-08-07):M4-M6 三条均启动中,且为本次会议唯一重点在制品(WP-M4-03 / WP-M5-02 / WP-M6-03);**M7 WP-M7-01 评审启动**(plan + ADR-005 + 3 份 active spec 就位,D+7 拍板)。
 
 > 状态图例:✅ done / 🟡 active / ⏸ draft / ⏸ paused / ❌ abandoned / 🔁 superseded
 

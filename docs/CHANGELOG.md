@@ -13,6 +13,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### M7 立项评审启动(2026-08-07)
+
+- **新增** [WP-M7-01 立项评审 plan](plans/2026-08-07-wp-m7-01-v5-scope-freeze.md):264 行,8 项关键决策 + 10 周里程碑 + 5 项风险 + 5 项北极星指标
+- **新增** [ADR-005 v5 范围与关键决策](decisions/005-m7-v5-scope.md):proposed(待 D+7 拍板)
+  - D1 AI 模型形态:**集成第三方**(通义 / 文心)
+  - D2 AI 预测上线:**影子模式 4 周 → 灰度 → 全量**
+  - D3 移动 App 形态:**Web H5 + 响应式**(本期不原生)
+  - D4 报表实现:**后端聚合 + ECharts + 4 格式导出**(PDF/Excel/CSV/PNG)
+  - D5 数据集查询:**预聚合 + 物化**(禁实时跨表 JOIN)
+  - D6 订阅分发:Email + IM + 链接分享(3 通道)
+  - D7 数据安全:导出加密 + 用户水印 + TTL 24h
+  - D8 验收门禁:6 项 v5 专项门禁
+- **激活** 3 份 active spec:
+  - [specs/reporting.md](specs/reporting.md)— 报表 / BI / 导出(123 行)
+  - [specs/reporting-api.md](specs/reporting-api.md)— 报表 API 契约(150 行)
+  - [specs/mobile-h5.md](specs/mobile-h5.md)— 移动端 H5(197 行)
+- **ML 模型配置修复**:4 个 plist(brand `com.pmo.ai.*` → `com.projectgovern.ai.*`)+ install.sh / healthcheck.sh(路径自推断 + 品牌同步)
+- **更新** [WBS.md](WBS.md):WP-M7-01 状态从 draft → active
+- **更新** [STATUS.md](STATUS.md):M7 状态从 draft 0% → active 10%,WP-M7-01 评审中
+
 ### 品牌重命名(2026-08-07)
 
 - **重命名**:系统由 `pmo-pms` (PMO Project Management System) 重命名为 **project-govern** —— 治理视角的项目全生命周期管理平台。
