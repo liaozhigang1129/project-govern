@@ -18,6 +18,8 @@
 
     <properties>
         <java.version>21</java.version>
+        <jacoco.line.minimum>0.40</jacoco.line.minimum>
+        <jacoco.branch.minimum>0.35</jacoco.branch.minimum>
         <lombok.version>1.18.42</lombok.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
@@ -195,7 +197,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <version>0.8.13</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -221,6 +223,41 @@
                             <includes>
                                 <include>com/company/pmo/module/wbs/**</include>
                             </includes>
+                        </configuration>
+                    </execution>
+                    <!-- P2 #28: Jacoco 覆盖率门禁 (verify 阶段) -->
+                    <execution>
+                        <id>check-coverage</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <haltOnFailure>false</haltOnFailure>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <includes>
+                                        <include>com/hex/projectgovern/module/*</include>
+                                    </includes>
+                                    <excludes>
+                                        <!-- 豁免: @Controller / @RestController / dto / config -->
+                                        <exclude>com/hex/projectgovern/*Application</exclude>
+                                    </excludes>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${jacoco.line.minimum}</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${jacoco.branch.minimum}</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
                         </configuration>
                     </execution>
                 </executions>

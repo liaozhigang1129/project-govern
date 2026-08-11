@@ -66,7 +66,8 @@ jobs:
         working-directory: backend
         # 默认走 src/test/resources/application-test.yml (H2 + PostgreSQL 模式)
         # 286/286 单测全绿,无需 MySQL 服务,跑得快
-        run: mvn -B test -DfailIfNoTests=false
+        # P2 #28: 加 jacoco:check (覆盖率门禁 LINE ≥ 40%, BRANCH ≥ 35%)
+        run: mvn -B verify -DfailIfNoTests=false
 
       - name: 📊 Collect Surefire reports
         if: always()
