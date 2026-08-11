@@ -2,6 +2,7 @@
 status: active
 created: 2026-08-07
 updated: 2026-08-07T20:00
+last_head: 8523d53
 summary: 全局项目计划执行情况(里程碑进度、积压、风险、当前快照)
 ---
 
@@ -12,6 +13,10 @@ summary: 全局项目计划执行情况(里程碑进度、积压、风险、当�
 >
 > **更新节奏**:每次里程碑/门禁评审后更新一次(sift 同款节奏)。代码侧任务状态变化**不**写这里;
 > WBS.md 也只登记任务结构、不带 `status` 字段。详细规则见 [README.md](README.md) 与 ADR [003](decisions/003-docs-status-wbs-split.md)。
+>
+> **会话封板指针**:`last_head = 8523d53` (`git log --oneline -20` 查看后续提交)
+> 本字段在每个会话收尾时由最后一条 commit 同步更新。代理在新会话开始时,应先
+> `git fetch` + `git log --oneline -5 origin/main` 与本字段比对,确认从正确基线继续。
 
 ---
 
@@ -110,6 +115,12 @@ project-govern 当前处于 **v4.0.0 重启 + 文档治理 + CI 治理**阶段�
 
 ## 8. 更新日志(本文件)
 
-- **2026-08-07**:首版。基于老仓库 v4.0.0 重启,基线盘点 + M4-M6 进度初始化。落地 STATUS/WBS 双轨决策(003)。
+> 封板指针:`last_head` 表示本节最后一条日志时同步的 git commit hash。
+> 新会话开始时,先 `git log --oneline origin/main | head` 看看后续提交,
+> 然后从本节上一条 `last_head` 之后的工作继续。
+
+- **2026-08-07**(last_head=`8523d53`):WP-M4-03 财务对账(8 步)+ WP-M5-02 预警控制器(6 步)+ WP-M6-03 IM spike 决策推迟 全部落地;前端 prettier/vue 多语句 @event 冲突根治(17 处提取 method);WBS 9 工作包加 ADR 引用 + 末尾决策清单。
+- **2026-08-07**(last_head=`23072ed`):docs-lint CI + ESLint 9 / Prettier 3 / vue-tsc 前端静态检查 + CI 集成。
+- **2026-08-07**(last_head=`85a039f`):首版。基于老仓库 v4.0.0 重启,基线盘点 + M4-M6 进度初始化。落地 STATUS/WBS 双轨决策(003)。
 - **2026-08-07(同日)**:项目重命名 `pmo-pms` → `project-govern`(Java 包 `com.hex.projectgovern`、DB `project_govern`、OpenAPI title 同步);创建 3 份 ADR(001/002/003);创建 10 份主题化 spec + 索引;创建 3 份 in-flight 工作包实现计划(WP-M4-03 / WP-M5-02 / WP-M6-03);落地 docs-lint 脚本 + CI 集成(github action job 5);落地 ESLint 9 + Prettier 3 前端静态检查 + CI 集成(job 6);补全风险登记 R-003/R-004/R-005。
 - **2026-08-07(下午)**:WP-M4-03 财务-成本 3-way match 全量落地(V5.0/V5.1 双轨 Flyway + ReconciliationService + 事件链路 + 告警 COST_DIFF + 通知分发 + REST API + 前端 + smoke 冒烟);WP-M5-02 预警控制器全量落地(AlertController + 规则引擎抽象 + 6 类规则 + 5min 调度 + 前端 + smoke);WP-M6-03 spike 决策落地(ADR 004 推迟 v5 + R-002 关闭 + 新增 R-018/R-019)。

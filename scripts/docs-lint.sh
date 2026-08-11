@@ -226,6 +226,30 @@ if [[ -d "$DOCS_DIR/decisions" ]]; then
   _ok "decisions/ 已扫描 ${#ADR_FILES[@]} 份 ADR"
 fi
 
+# ---------- 6. STATUS.md last_head 校验(增量) ----------
+
+_bold "\n→ 校验 STATUS.md last_head 指针\n"
+
+if [[ -f "$STATUS_FILE" ]]; then
+  fm=$(get_front_matter "$STATUS_FILE")
+  lh=$(fm_field "$fm" last_head)
+  if [[ -z "$lh" ]]; then
+    _warn "STATUS.md: front matter 缺 last_head 字段(建议填本会话封板 commit hash)"
+  elif ! git rev-parse --quiet --verify "${lh}^{commit}" >/dev/null 2>&1; then
+    _err "STATUS.md: last_head='$lh' 不是有效 git commit"
+  else
+    # 提示: 如果 git 命令可用,比对当前 HEAD 与 last_head 差异
+    if command -v git >/dev/null && git rev-parse --git-dir >/dev/null 2>&1; then
+      cur=$(git rev-parse --short HEAD 2>/dev/null || echo "")
+      if [[ -n "$cur" && "$cur" != "$lh" && "$lh" != "${cur:0:7}" ]]; then
+        _warn "STATUS.md: last_head='$lh' 与当前 HEAD='$cur' 不一致(可能未刷新)"
+      fi
+    fi
+    _ok "STATUS.md: last_head='$lh' ✓"
+  fi
+fi
+
+
 # ---------- 汇总 ----------
 
 _bold "\n→ 汇总\n"
