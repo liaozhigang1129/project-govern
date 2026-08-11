@@ -55,6 +55,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **精简** `AGENTS.md`:项目现状段下沉到 STATUS.md,AGENTS.md 只留指针
 - **重组** docs/ 目录结构,按 sift 规范十个子目录落地;老 `pmo-pms-requirements/` 31 个子目录归档到 `drafts/扩展文档/`
 
+### M7-02 v5 数据模型增量(2026-08-11)
+
+- **新增** [WP-M7-02 数据模型 plan](plans/2026-08-11-wp-m7-02-v5-data-model.md):21163 字节 / 10 步 / 8 新表 + 6 表扩展 + 5 状态机 + 12 索引
+  - **8 张新表**(`reporting` 模块):
+    - `dashboard` / `dashboard_widget` / `dataset` / `dataset_field`
+    - `report_template` / `report_export` / `report_snapshot` / `report_subscription`
+  - **6 张已有表扩展**(非破坏性):`project`(`health_score`) / `milestone`(EVM 三字段) / `wbs_task`(`progress_percent`) / `risk`(`heat_score`) / `app_user`(`default_dashboard_id`) / `initiation_ai_wbs_draft`(复合索引)
+  - **5 个状态机 enum**:`DashboardStatus` / `DatasetStatus` / `ReportExportStatus` / `ReportSnapshotStatus` / `SubscriptionStatus`
+  - **12 个索引**(D5 预聚合路径优化)
+  - **1 个 Flyway 迁移**:`V7.0__reporting_schema.sql`(PG + MySQL 双轨,`INFORMATION_SCHEMA` 守卫幂等)
+  - **1 个种子数据**:`V7.1__reporting_seed.sql`(8 角色 dashboard + 9 报表 template + 5 dataset + 8 system_config 映射)
+- **修订** [`docs/WBS.md`](WBS.md):WP-M7-02 状态 → 🟡 active,plan 引用 + 头部 draft 提示
+- **注**: plan 落地后需等 WP-M7-01 D+7 整合会议拍板(ADR-005 proposed → accepted)才能正式启动 V7.0 迁移
+
 ---
 
 ## [4.0.0] — 2026-06-13 · 🎯 **V4 大版本:成本 + 财务 + 预警**

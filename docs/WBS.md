@@ -207,7 +207,7 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 ## M7 — v5 立项:AI · 移动 · 治理(老 P3plus-v2)
 
 > 当前 **🟡 active, WP-M7-01 评审中**(2026-08-07 启动);
-> WP-M7-02~04 仍 draft,等 WP-M7-01 拍板后启动。
+> WP-M7-02 已 active (2026-08-11 plan 落地),WP-M7-03/04 仍 draft,等 WP-M7-01 拍板后启动。
 
 ### WP-M7-01 v5 立项评审
 
@@ -225,8 +225,9 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 
 - **前置依赖**:WP-M7-01
 - **验收标准**:8 新表 + 6 表扩展,5 状态机,12 索引
-- **Spec**:见 `drafts/扩展文档/P3plus-v2-立项/P3plus-PR-2-数据模型.md`
-- **Plan**:—
+- **Spec**:见 [`specs/reporting.md`](specs/reporting.md) + [`specs/reporting-api.md`](specs/reporting-api.md)
+- **Plan**:[`plans/2026-08-11-wp-m7-02-v5-data-model.md`](plans/2026-08-11-wp-m7-02-v5-data-model.md)(21163 字节 / 10 步)
+- **状态**:🟡 active(2026-08-11 启动,等 D+7 拍板后正式执行)
 
 ### WP-M7-03 v5 核心功能(AI 预测 / 智能推荐 / 异常 / 多租户 / 移动)
 
