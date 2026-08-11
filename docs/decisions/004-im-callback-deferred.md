@@ -1,5 +1,7 @@
 ---
 status: accepted
+supersedes: none
+superseded_by: none
 created: 2026-08-07
 updated: 2026-08-07
 summary: IM 平台 OAuth + 卡片回调接入推迟到 v5 立项时评估
@@ -8,6 +10,11 @@ summary: IM 平台 OAuth + 卡片回调接入推迟到 v5 立项时评估
 # ADR 004 · IM 平台回调接入推迟到 v5
 
 > **状态**:accepted(2026-08-07)
+> 📌 决策快照:[STATUS §5](../STATUS.md) 决策快照表
+> 📂 引用关系:见 [decisions/README](README.md) 索引表
+> ⚠️ 本决策可能被未来 ADR 推翻(条件见 §5);当前**未**推翻任何既有 ADR。
+
+
 > **决策驱动**:WP-M6-03 spike 报告
 > **推翻路径**:若 v5 立项重新评估后认为 ROI 高,可启动 ADR 005 推翻本决策
 

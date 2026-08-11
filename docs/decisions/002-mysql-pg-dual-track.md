@@ -1,8 +1,17 @@
+---
+status: accepted
+supersedes: none
+superseded_by: none
+created: 2026-08-07
+updated: 2026-08-07
+summary: 数据库分 MySQL(生产)+ PostgreSQL(CI)双轨
+---
+
 # 002 · 数据库 MySQL(生产)+ PostgreSQL(CI)双轨
 
-- 状态:**accepted**
-- 日期:2026-08-07(回溯立项于 v4.0.0 release 2026-06-13)
-- 决定人:PMO + DBA + 架构组
+> 📌 决策快照:[STATUS §5](../STATUS.md) 决策快照表
+> 📂 引用关系:见 [decisions/README](README.md) 索引表
+
 
 ## 背景
 

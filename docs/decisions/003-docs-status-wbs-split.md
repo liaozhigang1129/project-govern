@@ -1,8 +1,17 @@
+---
+status: accepted
+supersedes: none
+superseded_by: none
+created: 2026-08-07
+updated: 2026-08-07
+summary: 文档采用 sift 风格 STATUS + WBS 双轨
+---
+
 # 003 · 文档规范采用 SIFT 风格 STATUS + WBS 双轨
 
-- 状态:**accepted**
-- 日期:2026-08-07
-- 决定人:PMO(本次会话)
+> 📌 决策快照:[STATUS §5](../STATUS.md) 决策快照表
+> 📂 引用关系:见 [decisions/README](README.md) 索引表
+
 
 ## 背景
 
