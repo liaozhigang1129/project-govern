@@ -2,7 +2,7 @@
 status: active
 created: 2026-08-07
 updated: 2026-08-07T20:00
-last_head: 47c5e17
+last_head: a279384
 summary: 全局项目计划执行情况(里程碑进度、积压、风险、当前快照)
 ---
 
@@ -14,7 +14,7 @@ summary: 全局项目计划执行情况(里程碑进度、积压、风险、当�
 > **更新节奏**:每次里程碑/门禁评审后更新一次(sift 同款节奏)。代码侧任务状态变化**不**写这里;
 > WBS.md 也只登记任务结构、不带 `status` 字段。详细规则见 [README.md](README.md) 与 ADR [003](decisions/003-docs-status-wbs-split.md)。
 >
-> **会话封板指针**:`last_head = 47c5e17` (`git log --oneline -20` 查看后续提交)
+> **会话封板指针**:`last_head = a279384` (`git log --oneline -20` 查看后续提交)
 > 本字段在每个会话收尾时由最后一条 commit 同步更新。代理在新会话开始时,应先
 > `git fetch` + `git log --oneline -5 origin/main` 与本字段比对,确认从正确基线继续。
 
@@ -119,6 +119,7 @@ project-govern 当前处于 **v4.0.0 重启 + 文档治理 + CI 治理**阶段�
 > 新会话开始时,先 `git log --oneline origin/main | head` 看看后续提交,
 > 然后从本节上一条 `last_head` 之后的工作继续。
 
+- **2026-08-07**(last_head=`a279384`):WP-M7-01 通用审批工作流引擎 v1 落地 (V6.0/V6.1 Flyway + ApprovalEngine 接口 + DefaultApprovalEngine + ApproverResolver + SkipConditionEvaluator + InitiationApprovalAdapter 桥接器 + 27 单测);立项审批"start"委托引擎,decide/resubmit 仍走老路径(不破坏现有审批流)。
 - **2026-08-07**(last_head=`47c5e17`):4 份 ADR 顶部加 front-matter (supersedes/superseded_by) + STATUS §5 反链 + 中文 mini 模板;001-003 补齐 front-matter。
 - **2026-08-07**(last_head=`7cc3721`):docs/analysis/README + docs/guides/README 占位 + docs/decisions/README + ADR 模板落地;docs-lint 增强(跳过代码块 + 行内 code + 排除 README/模板)。
 - **2026-08-07**(last_head=`8523d53`):WP-M4-03 财务对账(8 步)+ WP-M5-02 预警控制器(6 步)+ WP-M6-03 IM spike 决策推迟 全部落地;前端 prettier/vue 多语句 @event 冲突根治(17 处提取 method);WBS 9 工作包加 ADR 引用 + 末尾决策清单。
