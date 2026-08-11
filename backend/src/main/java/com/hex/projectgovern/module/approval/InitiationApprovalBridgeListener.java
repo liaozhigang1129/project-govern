@@ -1,27 +1,34 @@
 package com.hex.projectgovern.module.approval;
 
 import com.hex.projectgovern.module.approval.event.ApprovalStepActivatedEvent;
-import com.hex.projectgovern.module.initiation.ApproverResolution;
 import com.hex.projectgovern.module.notification.InitiationSubmittedEvent;
+import com.hex.projectgovern.module.notification.TimesheetSubmittedEvent;
 import com.hex.projectgovern.module.org.AppUser;
 import com.hex.projectgovern.module.org.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 
 /**
- * 桥接监听器: ApprovalStepActivatedEvent (通用引擎事件) → InitiationSubmittedEvent (既有通知事件)
+ * 桥接监听器: ApprovalStepActivatedEvent (通用引擎事件) → 既有通知事件
+ *
+ * <p>kind → 通知事件映射:
+ * <ul>
+ *   <li>"init"       → InitiationSubmittedEvent
+ *   <li>"timesheet"  → TimesheetSubmittedEvent
+ *   <li>"risk"       → RiskEscalatedEvent (预留)
+ * </ul>
  *
  * <p>保证:
  * <ul>
- *   <li>通知中心零改动 (NotificationCenter / Email 监听 InitiationSubmittedEvent 不变)
- *   <li>立项审批流启动后,自动通知当前 step 的审批人
+ *   <li>通知中心零改动 (NotificationCenter 监听既有事件不变)
+ *   <li>审批流启动后,自动通知当前 step 的审批人
+ *   <li>支持 ApprovalStepActivatedEvent ↔ 业务事件的双向链接
  * </ul>
- *
- * <p>注意: 此监听器仅处理 kind="init" 事件,其他 kind 跳过。
  */
 @Slf4j
 @Component
@@ -29,23 +36,27 @@ import java.time.Instant;
 public class InitiationApprovalBridgeListener {
 
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @EventListener
     public void onApprovalStepActivated(ApprovalStepActivatedEvent ev) {
-        if (!"init".equals(ev.kind())) {
-            return;  // 仅处理立项
+        switch (ev.kind()) {
+            case "init" -> forwardToInitiation(ev);
+            case "timesheet" -> forwardToTimesheet(ev);
+            default -> log.debug("[ApprovalBridge] 跳过非桥接 kind: {}", ev.kind());
         }
-        log.info("[InitiationApprovalBridge] 立项审批流 instance={} step {} 激活, 转发为 InitiationSubmittedEvent",
+    }
+
+    private void forwardToInitiation(ApprovalStepActivatedEvent ev) {
+        log.info("[ApprovalBridge] 立项 instance={} step {} 激活 → InitiationSubmittedEvent",
             ev.instanceId(), ev.stepNo());
 
-        // 解析申请人信息 (通知用)
         AppUser applicant = userRepository.findById(ev.applicantId()).orElse(null);
 
-        // 发出既有 InitiationSubmittedEvent 让通知中心处理
         InitiationSubmittedEvent bridgeEvent = new InitiationSubmittedEvent(
             ev.bizId(),
             ev.bizCode(),
-            null,  // title 由通知中心从 DB 重新查 (此处省略避免双向依赖)
+            null,  // title 由通知中心从 DB 查
             applicant == null ? null : applicant.getId(),
             applicant == null ? "Unknown" : applicant.getFullName(),
             applicant == null ? null : applicant.getEmail(),
@@ -53,26 +64,26 @@ public class InitiationApprovalBridgeListener {
             Instant.now()
         );
 
-        // 复用 InitiationSubmittedEvent 但不直接走 publisher 链 (避免死循环)
-        // 改为调用通知中心,但 InitiationSubmittedEvent 是 NotificationEvent,
-        // 由 NotificationEventMulticaster 处理
-        // 简化做法: 直接 publish (通知中心会监听)
-        publishForNotification(bridgeEvent);
-
-        // 同时记录 step activated 日志 (供审计追溯)
-        log.info("[InitiationApprovalBridge] step 激活事件已记录 instance={} role={} approver={}",
-            ev.instanceId(), ev.roleCode(), ev.approverUserId());
+        eventPublisher.publishEvent(bridgeEvent);
     }
 
-    /**
-     * 触发既有通知事件链
-     * 这里直接通过 Spring 事件机制传播
-     */
-    private void publishForNotification(InitiationSubmittedEvent event) {
-        // 简化: 直接 new 事件给 NotificationCenter 处理
-        // 实际代码中可注入 ApplicationEventPublisher
-        // 但 InitiationSubmittedEvent 已有 standard listener, 此处不重复
-        log.debug("[InitiationApprovalBridge] InitiationSubmittedEvent 已构造 bizId={} (通知链由 NotificationCenter 接管)",
-            event.resourceId());
+    private void forwardToTimesheet(ApprovalStepActivatedEvent ev) {
+        log.info("[ApprovalBridge] 工时 instance={} step {} 激活 → TimesheetSubmittedEvent",
+            ev.instanceId(), ev.stepNo());
+
+        AppUser submitter = userRepository.findById(ev.applicantId()).orElse(null);
+
+        // bizCode 格式: T-{userId}-{weekStart} (与 TimesheetService.buildResourceCode 一致)
+        TimesheetSubmittedEvent bridgeEvent = new TimesheetSubmittedEvent(
+            ev.bizId(),
+            "工时周报待审批: " + ev.bizCode(),
+            ev.bizCode(),
+            ev.applicantId(),
+            submitter == null ? "Unknown" : submitter.getFullName(),
+            null, null, null, null, null,
+            Instant.now()
+        );
+
+        eventPublisher.publishEvent(bridgeEvent);
     }
 }
