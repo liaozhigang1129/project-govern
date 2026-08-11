@@ -37,6 +37,7 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 - **验收标准**:项目创建/查询/更新/软删可用,编码唯一性约束生效
 - **Spec**:见 `specs/architecture.md` §2、`specs/architecture.md` §3
 - **Plan**:—
+- **ADR**:[001](decisions/001-spring-boot-vue-baseline.md)(Spring Boot 3.3 + Vue 3.5 基线)、[002](decisions/002-mysql-pg-dual-track.md)(MySQL 生产 + PG CI 双轨)
 
 ### WP-M1-02 立项三级审批状态机
 
@@ -44,6 +45,7 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 - **验收标准**:DEPT_LEAD → PMO → EXEC 三级流转,驳回可回到 PENDING DEPT_LEAD
 - **Spec**:见 [README.md](../README.md) §4.1 + `specs/architecture.md` §3.2
 - **Plan**:—
+- **ADR**:[001](decisions/001-spring-boot-vue-baseline.md)、[002](decisions/002-mysql-pg-dual-track.md)
 
 ### WP-M1-03 里程碑 + 加权进度
 
@@ -71,6 +73,7 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 - **验收标准**:工时提交 → 一级审批 → 入成本池 全链路,审批拒绝可重提
 - **Spec**:见 `drafts/扩展文档/P1.5-收尾/P1.5-收尾一页纸.md` §3.1
 - **Plan**:—
+- **ADR**:[001](decisions/001-spring-boot-vue-baseline.md)、[002](decisions/002-mysql-pg-dual-track.md)
 
 ### WP-M2-02 人员负载矩阵
 
@@ -145,7 +148,9 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 - **前置依赖**:WP-M4-02
 - **验收标准**:合同 ↔ 发票 ↔ 付款 ↔ 成本 3-way match 闭环,差异告警
 - **Spec**:见 `specs/cost-engine.md` §7
-- **Plan**:[`plans/2026-08-07-wp-m4-03-finance-cost-3way-match.md`](plans/2026-08-07-wp-m4-03-finance-cost-3way-match.md) **【当前阻塞:对账口径未对齐,R-001】**
+- **Plan**:[`plans/2026-08-07-wp-m4-03-finance-cost-3way-match.md`](plans/2026-08-07-wp-m4-03-finance-cost-3way-match.md)
+- **ADR**:[001](decisions/001-spring-boot-vue-baseline.md)、[002](decisions/002-mysql-pg-dual-track.md)
+- **阻塞**:对账口径未对齐,R-001(见 STATUS §4)
 
 ---
 
@@ -166,6 +171,7 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 - **验收标准**:`AlertController` 端点齐全,触发器按规则类型可观测
 - **Spec**:见 `specs/cost-control-prd.md` §4
 - **Plan**:[`plans/2026-08-07-wp-m5-02-alert-controller.md`](plans/2026-08-07-wp-m5-02-alert-controller.md)
+- **ADR**:[001](decisions/001-spring-boot-vue-baseline.md)、[002](decisions/002-mysql-pg-dual-track.md)
 
 ---
 
@@ -192,7 +198,9 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 - **前置依赖**:WP-M6-02
 - **验收标准**:spike 报告:OAuth 工作量、卡片回调可行性、是否进 M6 范围
 - **Spec**:—
-- **Plan**:[`plans/2026-08-07-wp-m6-03-im-callback-spike.md`](plans/2026-08-07-wp-m6-03-im-callback-spike.md) **【当前阻塞:评估未启动,R-002】**
+- **Plan**:[`plans/2026-08-07-wp-m6-03-im-callback-spike.md`](plans/2026-08-07-wp-m6-03-im-callback-spike.md)
+- **ADR**:[001](decisions/001-spring-boot-vue-baseline.md)、[004](decisions/004-im-callback-deferred.md)(本期不实现,推迟到 v5)
+- **状态**:spike 完成 → R-002 已关闭,转为 R-018/R-019
 
 ---
 
@@ -238,6 +246,7 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 - **验收标准**:H2 (PG mode) 测试库 + MySQL dev/prod + CI 双轨
 - **Spec**:见 `specs/openapi/openapi.json` + `scripts/dev-up.sh`
 - **Plan**:—
+- **ADR**:[002](decisions/002-mysql-pg-dual-track.md)
 
 ### WP-INFRA-02 CI 4 jobs
 
@@ -245,13 +254,15 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 - **验收标准**:backend-test / frontend-build / api-smoke / docker-build 4 jobs 全绿
 - **Spec**:见 `.github/workflows/ci.yml`
 - **Plan**:—
+- **ADR**:[001](decisions/001-spring-boot-vue-baseline.md)(CI 与基线技术栈对齐)
 
 ### WP-INFRA-03 文档规范(SIFT 风格 STATUS/WBS 双轨)
 
 - **前置依赖**:—
 - **验收标准**:AGENTS.md / docs/README.md / STATUS.md / WBS.md / CHANGELOG.md 五件套就位
 - **Spec**:见 [README.md](README.md)
-- **Plan**:— **【本次会话交付】**
+- **Plan**:—
+- **ADR**:[003](decisions/003-docs-status-wbs-split.md)(STATUS 当前快照 / WBS 任务结构 / CHANGELOG 历史日志 三分无重叠)
 
 ---
 
@@ -264,3 +275,30 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 - **接口契约** → [specs/](specs/)
 - **测试方案** → [testing/](testing/)
 - **评审存档** → [reviews/](reviews/)
+
+---
+
+## 当前生效决策清单(ADR 索引)
+
+> WBS 中各工作包的 **ADR:** 字段指向此表;决策原文详见 [decisions/](decisions/)。
+> 编号只追加不修改;被推翻时旧条目改 `superseded` 并指向新条目。
+
+| 决策 | 编号 | 状态 | 影响工作包 |
+|---|---|---|---|
+| 采用 Spring Boot 3.3 + Vue 3.5 作为 v4+ 基线 | [001](decisions/001-spring-boot-vue-baseline.md) | ✅ accepted | M1-M6 全栈 / WP-INFRA-02 CI |
+| 数据库分 MySQL(生产)+ PostgreSQL(CI)双轨 | [002](decisions/002-mysql-pg-dual-track.md) | ✅ accepted | M1-M5 数据持久化 / WP-INFRA-01 测试 schema |
+| 文档采用 sift 风格 STATUS + WBS 双轨 | [003](decisions/003-docs-status-wbs-split.md) | ✅ accepted | WP-INFRA-03 文档规范 |
+| IM 平台 OAuth + 卡片回调推迟到 v5 立项评估 | [004](decisions/004-im-callback-deferred.md) | ✅ accepted | WP-M6-03 IM 回调 |
+
+### 引用覆盖统计
+
+- **WP-M1-01 / WP-M1-02**:ADR 001 + 002
+- **WP-M2-01**:ADR 001 + 002
+- **WP-M4-03**:ADR 001 + 002
+- **WP-M5-02**:ADR 001 + 002
+- **WP-M6-03**:ADR 001 + 004(核心)
+- **WP-INFRA-01**:ADR 002
+- **WP-INFRA-02**:ADR 001
+- **WP-INFRA-03**:ADR 003
+
+> 未引用 ADR 的工作包继承所属里程碑的技术基线(默认 ADR 001 + 002)。
