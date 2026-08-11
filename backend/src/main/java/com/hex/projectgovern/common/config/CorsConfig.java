@@ -24,3 +24,17 @@ public class CorsConfig {
         return new CorsFilter(source);
     }
 }
+
+/**
+ * 限流拦截器注册 (P2 #29 报表导出限流)
+ */
+@Configuration
+class RateLimitWebConfig implements org.springframework.web.servlet.config.annotation.WebMvcConfigurer {
+    private final com.hex.projectgovern.common.ratelimit.RateLimitInterceptor rateLimitInterceptor;
+    RateLimitWebConfig(com.hex.projectgovern.common.ratelimit.RateLimitInterceptor r) { this.rateLimitInterceptor = r; }
+    @Override
+    public void addInterceptors(org.springframework.web.servlet.config.annotation.InterceptorRegistry registry) {
+        registry.addInterceptor(rateLimitInterceptor)
+            .addPathPatterns("/api/reports/**");
+    }
+}
