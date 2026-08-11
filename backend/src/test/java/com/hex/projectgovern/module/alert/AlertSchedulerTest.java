@@ -15,6 +15,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -34,6 +35,7 @@ class AlertSchedulerTest {
     private AlertRuleRepository ruleRepo;
     private AlertEventRepository eventRepo;
     private AlertNotifier alertNotifier;
+    private com.hex.projectgovern.common.lock.SchedulerLockService lockService;
     private AlertScheduler scheduler;
 
     private com.hex.projectgovern.module.alert.engine.AlertRule ruleA; // 返回 1 个 event
@@ -46,6 +48,7 @@ class AlertSchedulerTest {
         ruleRepo = mock(AlertRuleRepository.class);
         eventRepo = mock(AlertEventRepository.class);
         alertNotifier = mock(AlertNotifier.class);
+        lockService = mock(com.hex.projectgovern.common.lock.SchedulerLockService.class);
 
         ruleA = stubRule("RULE_A", "Rule A", "HIGH", List.of(sampleEvent(100L)));
         ruleB = stubRule("RULE_B", "Rule B", "MEDIUM", List.of(
@@ -69,7 +72,8 @@ class AlertSchedulerTest {
         // 默认通知返回 1
         when(alertNotifier.dispatch(any(), any())).thenReturn(1);
 
-        scheduler = new AlertScheduler(registry, ruleRepo, eventRepo, alertNotifier);
+        when(lockService.tryLock(anyString(), any(java.time.Duration.class))).thenReturn(true);
+        scheduler = new AlertScheduler(registry, ruleRepo, eventRepo, alertNotifier, lockService);
     }
 
     private static <T> T withId(T obj, Long id) {

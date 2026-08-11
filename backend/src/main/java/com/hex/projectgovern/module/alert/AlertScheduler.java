@@ -50,6 +50,7 @@ public class AlertScheduler {
     private final AlertRuleRepository ruleRepo;
     private final AlertEventRepository eventRepo;
     private final AlertNotifier alertNotifier;
+    private final com.hex.projectgovern.common.lock.SchedulerLockService lockService;
 
     /** 内存级去重:key = ruleCode + ":" + projectId → 上次触发时间 epoch ms */
     private final ConcurrentHashMap<String, Long> inMemoryDedup = new ConcurrentHashMap<>();
@@ -61,12 +62,20 @@ public class AlertScheduler {
     @Scheduled(fixedDelayString = "300000", initialDelayString = "60000")
     public void scheduledScan() {
         log.info("[AlertScheduler] scheduled scan triggered");
+        // R-006 多实例调度协调 (V6.4+ scheduler_lock 表)
+        // lockAtMostFor=4m (小于 fixedDelay=5m, 预留防佘)
+        if (!lockService.tryLock("alertScheduler", java.time.Duration.ofMinutes(4))) {
+            log.info("[AlertScheduler] skipped (locked by another pod)");
+            return;
+        }
         try {
             ScanResult r = scan();
             log.info("[AlertScheduler] scan done: rules={} created={} skipped(dedup)={} errors={}",
                     r.rulesScanned, r.eventsCreated, r.eventsDeduped, r.errors);
         } catch (Exception e) {
             log.error("[AlertScheduler] scan failed: {}", e.getMessage(), e);
+        } finally {
+            lockService.release("alertScheduler");
         }
     }
 
