@@ -1,43 +1,44 @@
 #!/bin/bash
-# 安装/卸载 PMO AI 定时任务 (macOS launchd)
+# 安装/卸载 project-govern AI 定时任务 (macOS launchd)
 # 用法: ./install.sh {install|uninstall|status}
 set -e
+
+# 自动推断项目根目录(从脚本位置向上两级)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 LAUNCH_DIR="$HOME/Library/LaunchAgents"
-PMO="/Users/lzg/Documents/pmo-pms"
-SRC="$PMO/scripts/ml/launchd"
-mkdir -p "$LAUNCH_DIR" "$PMO/logs"
+LABEL_PREFIX="com.projectgovern.ai"
+SRC="$SCRIPT_DIR"
+LOGS="$PROJECT_ROOT/logs"
+mkdir -p "$LAUNCH_DIR" "$LOGS"
 
 case "$1" in
     install)
-        echo "[install] loading 4 LaunchAgents..."
-        cp "$SRC/outcome_daily.plist" "$LAUNCH_DIR/com.pmo.ai.outcome-daily.plist"
-        cp "$SRC/train_weekly.plist"  "$LAUNCH_DIR/com.pmo.ai.train-weekly.plist"
-        cp "$SRC/model_switch.plist"  "$LAUNCH_DIR/com.pmo.ai.model-switch.plist"
-        cp "$SRC/healthcheck.plist"  "$LAUNCH_DIR/com.pmo.ai.healthcheck.plist"
-        for f in outcome-daily train-weekly model-switch healthcheck; do
-            launchctl unload "$LAUNCH_DIR/com.pmo.ai.${f}.plist" 2>/dev/null || true
+        echo "[install] loading 4 LaunchAgents from $SRC ..."
+        for f in outcome_daily train_weekly model_switch healthcheck; do
+            launchctl unload "$LAUNCH_DIR/${LABEL_PREFIX}.${f%_*}.plist" 2>/dev/null || true
         done
-        launchctl load "$LAUNCH_DIR/com.pmo.ai.outcome-daily.plist"
-        launchctl load "$LAUNCH_DIR/com.pmo.ai.train-weekly.plist"
-        launchctl load "$LAUNCH_DIR/com.pmo.ai.model-switch.plist"
-        launchctl load "$LAUNCH_DIR/com.pmo.ai.healthcheck.plist"
+        for f in outcome_daily train_weekly model_switch healthcheck; do
+            cp "$SRC/${f}.plist" "$LAUNCH_DIR/${LABEL_PREFIX}.${f%_*}.plist"
+            launchctl load "$LAUNCH_DIR/${LABEL_PREFIX}.${f%_*}.plist"
+        done
         echo "[install] DONE"
-        echo "verify with: ./install.sh status"
+        echo "verify with: $0 status"
         ;;
     uninstall)
         echo "[uninstall] unloading..."
-        for f in outcome-daily train-weekly model-switch healthcheck; do
-            launchctl unload "$LAUNCH_DIR/com.pmo.ai.${f}.plist" 2>/dev/null || true
+        for f in outcome_daily train_weekly model_switch healthcheck; do
+            launchctl unload "$LAUNCH_DIR/${LABEL_PREFIX}.${f%_*}.plist" 2>/dev/null || true
         done
-        rm -f "$LAUNCH_DIR/com.pmo.ai."*.plist
+        rm -f "$LAUNCH_DIR/${LABEL_PREFIX}."*.plist
         echo "[uninstall] DONE"
         ;;
     status)
-        echo "[status] PMO AI jobs:"
-        launchctl list 2>/dev/null | grep "com.pmo.ai" | awk "{printf \"  %-40s pid=%s status=%s\\n\", \$3, \$1, \$2}"
+        echo "[status] project-govern AI jobs:"
+        launchctl list 2>/dev/null | grep "$LABEL_PREFIX" | awk "{printf \"  %-40s pid=%s status=%s\\n\", \$3, \$1, \$2}"
         echo ""
-        echo "[status] recent logs:"
-        ls -lt "$PMO/logs/"*.log 2>/dev/null | head -10 | awk "{printf \"  %s %s %s\\n\", \$6, \$7, \$9}"
+        echo "[status] recent logs (last 10):"
+        ls -lt "$LOGS/"*.log 2>/dev/null | head -10 | awk "{printf \"  %s %s %s\\n\", \$6, \$7, \$9}"
         ;;
     *)
         echo "Usage: $0 {install|uninstall|status}"

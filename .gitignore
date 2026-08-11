@@ -63,3 +63,11 @@ pnpm-debug.log*
 
 # PMO·PMS additions
 项目经营台账/
+
+# project-govern additions
+# 上传文件目录(开发/测试产物)
+backend/uploads/
+# AI 模型(体积大,本地缓存即可,不入库)
+models/*.pkl
+# ML 服务日志
+logs/

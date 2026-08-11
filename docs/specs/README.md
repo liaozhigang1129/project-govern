@@ -27,6 +27,9 @@ summary: specs 索引(架构/数据/API/算法/安全/前端/测试/部署 + 成
 | [deployment.md](deployment.md) | CI/CD 与部署(5 jobs + Docker + 环境变量) | mvp-design §10 |
 | [cost-engine.md](cost-engine.md) | 成本引擎(数据 + 4 级费率 + 12 端点 + CSV) | cost-engine(单一主题) |
 | [cost-control-prd.md](cost-control-prd.md) | 成本控制 PRD(F1-F5 + 验收 + 风险) | PRD-cost-control(单一主题) |
+| [reporting.md](reporting.md) | 报表、仪表盘与数据分析(8 角色 × 9 类报表 + 自助 BI + 数据质量) | drafts/10-报表分析/10-报表与仪表盘.md |
+| [reporting-api.md](reporting-api.md) | 报表域 API 契约(仪表盘 / 数据集 / 报表 / 导出 / 订阅) | drafts/A2-API规范/Part6 |
+| [mobile-h5.md](mobile-h5.md) | 移动端 H5(任务执行人工时填报)— 入口/周视图/扫码/离线/A11y | drafts/A3-UI原型/Part2B §8 |
 
 ---
 
