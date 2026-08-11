@@ -77,7 +77,7 @@ summary: WP-M7-01 v5 立项评审 — AI/移动/治理三轴范围冻结与关�
 
 ### 3.1 AI 轴(WP-M7-03)
 
-- ✅ **里程碑 AI 预测增强**(ML 模型已就位,见 [STATUS.md §1 M7 当前快照](../../STATUS.md))
+- ✅ **里程碑 AI 预测增强**(ML 模型已就位,见 [STATUS.md §1 M7 当前快照](../STATUS.md))
 - 🆕 **自助 BI / 报表 / 导出**(对应 [reporting.md](../specs/reporting.md))
 - � **NLP 智能报告生成**(本期**不实现**,预留接口)
 
