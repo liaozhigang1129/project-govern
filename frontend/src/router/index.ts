@@ -238,6 +238,16 @@ const router = createRouter({
         roles: ['PMO_ADMIN', 'ADMIN', 'FINANCE', 'EXEC'],
       },
     },
+    {
+      path: '/dashboards/role/:roleCode',
+      component: () => import('@/views/RoleDashboard.vue'),
+      meta: { title: '角色仪表盘' },
+    },
+    {
+      path: '/m',
+      component: () => import('@/views/MobileHome.vue'),
+      meta: { title: '移动端' },
+    },
   ],
 })
 
