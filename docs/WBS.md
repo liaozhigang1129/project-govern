@@ -207,7 +207,7 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 ## M7 — v5 立项:AI · 移动 · 治理(老 P3plus-v2)
 
 > 当前 **🟡 active, WP-M7-01 评审中**(2026-08-07 启动);
-> WP-M7-02 已 active (2026-08-11 plan 落地),WP-M7-03/04 仍 draft,等 WP-M7-01 拍板后启动。
+> WP-M7-02/03 已 active (2026-08-11 plan 落地),WP-M7-04 仍 draft,等 WP-M7-01 拍板后启动。
 
 ### WP-M7-01 v5 立项评审
 
@@ -229,12 +229,14 @@ summary: 工作分解结构(里程碑 → 工作包 → 任务),仅登记任务�
 - **Plan**:[`plans/2026-08-11-wp-m7-02-v5-data-model.md`](plans/2026-08-11-wp-m7-02-v5-data-model.md)(21163 字节 / 10 步)
 - **状态**:🟡 active(2026-08-11 启动,等 D+7 拍板后正式执行)
 
-### WP-M7-03 v5 核心功能(AI 预测 / 智能推荐 / 异常 / 多租户 / 移动)
+### WP-M7-03 v5 核心功能(报表后端 + 4 格式导出)
 
-- **前置依赖**:WP-M7-02
-- **验收标准**:5 模块功能详述落地
-- **Spec**:见 `drafts/扩展文档/P3plus-v2-立项/P3plus-PR-3-核心功能.md`
-- **Plan**:—
+- **前置依赖**:WP-M7-02(V7.0 schema)
+- **验收标准**:12 API 端点 + 5 服务 + 4 导出器 + 异步任务 + 调度器 + 订阅分发
+- **Spec**:见 [`specs/reporting.md`](specs/reporting.md) + [`specs/reporting-api.md`](specs/reporting-api.md)
+- **Plan**:[`plans/2026-08-11-wp-m7-03-reporting-export.md`](plans/2026-08-11-wp-m7-03-reporting-export.md)(30403 字节 / 14 步)
+- **状态**:🟡 active(2026-08-11 plan 落地,等 V7.0 schema 落地后正式实施)
+- **说明**:本期聚焦报表后端 + 4 格式导出 + 订阅;AI 预测 / 智能推荐 / 多租户 / 移动端 仍为后续子工作包(WP-M7-04 负责前端+看板)
 
 ### WP-M7-04 v5 可视化与 AI 看板
 

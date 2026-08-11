@@ -69,6 +69,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **修订** [`docs/WBS.md`](WBS.md):WP-M7-02 状态 → 🟡 active,plan 引用 + 头部 draft 提示
 - **注**: plan 落地后需等 WP-M7-01 D+7 整合会议拍板(ADR-005 proposed → accepted)才能正式启动 V7.0 迁移
 
+### M7-03 v5 报表后端 + 4 格式导出(2026-08-11)
+
+- **新增** [WP-M7-03 报表后端 + 导出 plan](plans/2026-08-11-wp-m7-03-reporting-export.md):30403 字节 / 14 步
+  - **5 控制器**: `DashboardController` / `DatasetController` / `ReportController` / `ReportExportController` / `ReportSubscriptionController`
+  - **5 服务**: `DashboardService` / `DatasetService` / `ReportService` / `ReportExportService` / `ReportSubscriptionService`
+  - **4 导出器(策略模式)**: `PdfExporter`(OpenPDF + Thymeleaf) / `ExcelExporter`(POI SXSSF 流式) / `CsvExporter`(Commons CSV + UTF-8 BOM) / `PngExporter`(Playwright + Chromium)
+  - **1 调度器**: `ReportSnapshotScheduler`(@Scheduled cron `0 0 1 * * *` 每天 01:00 物化)
+  - **1 异步任务引擎**: `@Async("reportingTaskExecutor")` + ThreadPoolTaskExecutor(4-16 线程,队列 100)
+  - **12 API 端点**: 仪表盘 CRUD 8 / 数据集查询 2 / 报表运行 2 / 导出 2 / 订阅 1
+  - **D5 决策核心**: `DatasetService` 优先走 `report_snapshot`,回退 `dataset.sql_template`;严查跨表 JOIN
+  - **D6 决策**: Email + IM + 链接分享 3 通道,失败 3 次指数退避(1s/5s/25s)
+  - **D7 决策**: 加密 URL + 用户水印 + TTL 24h(订阅)/ 7d(主动导出)
+  - **D8 门禁**: 同步导出 1000 行 / 5MB 上限,异步 SLA < 60s
+- **新增 Maven 依赖**: OpenPDF 1.3.39 / Commons CSV 1.10.0 / Playwright 1.40.0 / Thymeleaf starter
+- **修订** [`docs/WBS.md`](WBS.md): WP-M7-03 状态 → 🟡 active,plan 引用
+- **注**: 等 V7.0 Flyway 迁移完成后才能正式启动 API 实现
+
 ---
 
 ## [4.0.0] — 2026-06-13 · 🎯 **V4 大版本:成本 + 财务 + 预警**
