@@ -147,6 +147,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **修正 sponsor pre-brief 日期**: D+6 2026-08-13 → D+6 2026-08-17(周一, 跳过周末)
 - **修正 review.md 日期**: D+1(2026-08-08) → D+1(2026-08-10 周一)
 
+### WP-M7-02 V7.1 Flyway 种子数据 + D+7 深度议程 + Sponsor 推送(2026-08-11)
+
+- **新增** [V7.1 PG 种子数据](../backend/src/main/resources/db/migration-pg/V7.1__reporting_seed.sql):172 行
+  - 5 dataset + 41 dataset_field + 8 dashboard + 9 report_template + 12 system_config
+  - 本地验证:dashboard 8 / dataset 5 / dataset_field 41 / report_template 9 / system_config 12 全部就位
+  - 幂等验证:再跑 1 次 INSERT 0 0, 计数不变(ON CONFLICT (code) DO NOTHING ✓)
+- **新增** [V7.1 MySQL 种子数据](../backend/src/main/resources/db/migration-mysql/V7.1__reporting_seed.sql):161 行
+  - 字段与 PG 1:1 对应, 使用 INSERT IGNORE 幂等
+  - 字段类型与 PG 同步 (BIGINT/NUMERIC/INT/DATE/VARCHAR/TEXT/JSON/BOOLEAN/TIMESTAMPTZ)
+- **新增** [D+7 6 项无异议项逐字通过话术](reviews/2026-08-13-wp-m7-01-d7-no-objection-scripts.md):5560 字节
+  - 6 项无异议话术(D1/D2/D4/D5/D6/D8):平均 75 秒/项, 总 7.6 min
+  - 关键数字(SLA / 工时 / 阈值):准确, 可直接引用
+  - 控时技巧:15 秒沉默规则 / 2 次追问规则 / 3 次挑战规则
+  - 异常情形话术:Sponsor 临时变卦 / 角色挑战 / 信息缺失
+  - 修订时间表:6 项无异议 7.6 min + D3/D7 16 min + 开闭/范围 10 min + buffer 23 min
+- **新增** [D+7 D3+D7 深度议程](reviews/2026-08-13-wp-m7-01-d3-d7-deep-scripts.md):7257 字节
+  - D3 移动 App 4 阶段(陈述 + Q1/Q2/Q3 + 反问 + 拍板)
+  - D7 数据安全 4 阶段(陈述 + Q1/Q2/Q3 + 反问 + 拍板)
+  - Q1-Q3 答案:IM 双通道 / 审计 30 天 / KPI 验证
+  - 应急方案(超时 / 强保留 / 反问 3 次)
+  - PMO 控时清单(秒级时间表)
+- **新增** [Sponsor 推送信](reviews/2026-08-14-sponsor-push-letter.md):3834 字节
+  - 800 字, 5 min 读完
+  - 3 项附件(pre-brief + 话术 + 深度议程, 合计 20 min)
+  - 2 项具体动作(标注 8 项决策 + 准时入会)
+  - 标注提交方式:邮件 / 钉钉 / GitHub PR
+  - 截止时间:D+6 2026-08-17 23:59(周一, 已修正周末)
+
 ---
 
 ## [4.0.0] — 2026-06-13 · 🎯 **V4 大版本:成本 + 财务 + 预警**
