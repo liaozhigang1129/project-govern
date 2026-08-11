@@ -2,7 +2,7 @@
  * 重新导出 AxiosResponse,以便调用方用 `as Foo` 解包
  */
 export type { AxiosResponse }
-import axios, { type AxiosError, type AxiosResponse } from 'axios'
+import axios, { type AxiosError, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 
 // 拦截器:统一解 ApiResponse 包装(后端标准响应 {code, message, data})
 // 解包后,后续 get<T>() 应直接返回 T,所以我们要"吞掉" AxiosResponse<T> 包装
@@ -29,7 +29,7 @@ _axios.interceptors.response.use(
     }
     return body
   },
-  (err: AxiosError<any>) => {
+  (err: AxiosError<ApiErrorBody>) => {
     // V4.18 友好错误: 网络/5xx 给 ElMessage 提示 + 自动重试 1 次(幂等 GET)
     const status = err.response?.status
     if (status === 401) {
@@ -64,11 +64,11 @@ _axios.interceptors.response.use(
  * 用法: await api.get<MyType>('/xxx')  // Promise<MyType>
  */
 type Api = {
-  get<T = unknown>(url: string, config?: any): Promise<T>
-  post<T = unknown>(url: string, data?: any, config?: any): Promise<T>
-  put<T = unknown>(url: string, data?: any, config?: any): Promise<T>
-  patch<T = unknown>(url: string, data?: any, config?: any): Promise<T>
-  delete<T = unknown>(url: string, config?: any): Promise<T>
+  get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T>
+  post<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>
+  put<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>
+  patch<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>
+  delete<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T>
 }
 const api = _axios as unknown as Api
 
@@ -77,6 +77,12 @@ export default api
 export const axiosRaw = _axios
 
 // --- 类型定义(从 openapi.json 手抄的精简版) ---
+export interface ApiErrorBody {
+  code?: number
+  message?: string
+  data?: unknown
+}
+
 export interface UserInfo {
   id: number
   username: string

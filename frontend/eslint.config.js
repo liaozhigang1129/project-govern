@@ -72,6 +72,9 @@ export default [
     },
     rules: {
       // TS 推荐规则过严,放宽
+      // P2 #27: 354 处 any 清理中
+      // 当前: warn 阶段 (client.ts + 部分 api/* 已清理)
+      // 目标: 分阶段 (api/ → components/ → views/ → utils/) 提升到 error
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       '@typescript-eslint/no-non-null-assertion': 'off',
