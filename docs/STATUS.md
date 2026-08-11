@@ -1,7 +1,7 @@
 ---
 status: active
 created: 2026-08-07
-updated: 2026-08-07T18:30
+updated: 2026-08-07T20:00
 summary: 全局项目计划执行情况(里程碑进度、积压、风险、当前快照)
 ---
 
@@ -17,7 +17,7 @@ summary: 全局项目计划执行情况(里程碑进度、积压、风险、当�
 
 ## 1. 当前快照(One-liner)
 
-project-govern 当前处于 **v4.0.0 重启 + 文档治理 + CI 治理**阶段。本次会话已完成基线盘点(M1-M3)、重命名(`pmo-pms` → `project-govern`)、文档骨架(sift 风格 + STATUS/WBS 分轨)、主题化 spec 拆分(10 份 + 索引)、3 个 in-flight 工作包(WP-M4-03 / WP-M5-02 / WP-M6-03)的实现计划、3 份 ADR(001/002/003)、docs-lint 脚本 + CI 集成、ESLint 9 + Prettier 3 前端静态检查 + CI 集成,代码层 0 错误构建通过。下一次门禁 = **M4 阶段门禁**(预期 2026-09-04)。
+project-govern 当前处于 **v4.0.0 重启 + 文档治理 + CI 治理**阶段。本次会话已完成基线盘点(M1-M3)、重命名(`pmo-pms` → `project-govern`)、文档骨架(sift 风格 + STATUS/WBS 分轨)、主题化 spec 拆分(10 份 + 索引)、3 个 in-flight 工作包(WP-M4-03 财务对账 / WP-M5-02 预警控制器 / WP-M6-03 IM spike 决策推迟)的实现+实施+决策落地、4 份 ADR(001/002/003/004)、docs-lint 脚本 + CI 集成、ESLint 9 + Prettier 3 前端静态检查 + CI 集成,代码层 0 错误构建通过。下一次门禁 = **M4 阶段门禁**(预期 2026-09-04)。
 
 ---
 
@@ -59,10 +59,12 @@ project-govern 当前处于 **v4.0.0 重启 + 文档治理 + CI 治理**阶段�
 | ID | 风险 | 影响 | 缓解 | 负责人 |
 |---|---|---|---|---|
 | R-001 | 财务-成本对账口径未对齐 | M4 门禁延期 | 8/14 前开一次口径评审会 | PMO |
-| R-002 | IM 平台 OAuth 接入工作量未评估 | M6 范围漂移 | 先做技术 spike(本会话已落地 T-01/T-02 任务),再决定是否进 M6 | 架构组 |
+| R-002 | IM 平台 OAuth 接入工作量未评估 | ~~M6 范围漂移~~ | ✅ 本会话 spike 关闭 → 转为 [ADR 004](decisions/004-im-callback-deferred.md)(推迟 v5) | 架构组 |
 | R-003 | 文档老基线未结构化 | 代理上下文加载混乱 | ✅ 本轮 STATUS/WBS/AGENTS 整改完成;主题 spec 拆分完成;docs-lint CI 护栏已就位 | 代理(本次会话) |
-| R-004 | 前端 `no-explicit-any` 存量 warning(349 处) | 代码质量债 | CI 现以 `--max-warnings 1000` 上限告警,不挡;后续逐文件清理 | 前端 |
+| R-004 | 前端 `no-explicit-any` 存量 warning(352 处) | 代码质量债 | CI 现以 `--max-warnings 1000` 上限告警,不挡;后续逐文件清理 | 前端 |
 | R-005 | 前端 prettier 与 vue 模板多行 `@event=` 属性表达式冲突 | `pnpm format` 会破坏已折叠好的 handler | CI 中 `format:check` 以 `continue-on-error` 运行(仅告警),本地提供 `pnpm format` 手动调 | 前端 |
+| R-018 | v5 立项拖延(本会话决策:卡片回调推迟到 v5) | IM 卡片审批延期 | 季度 review 跟踪,ADR 004 锁定 | PMO |
+| R-019 | 用户反馈"M6 无卡片审批能力" | 用户期望管理 | CHANGELOG / Release Notes 明确说明 v5 路线图 | PMO |
 
 ---
 
@@ -75,6 +77,7 @@ project-govern 当前处于 **v4.0.0 重启 + 文档治理 + CI 治理**阶段�
 | 采用 Spring Boot 3.3 + Vue 3.5 作为 v4+ 基线 | [001](decisions/001-spring-boot-vue-baseline.md) | ✅ accepted |
 | 数据库分 MySQL(生产)+ PostgreSQL(CI)双轨 | [002](decisions/002-mysql-pg-dual-track.md) | ✅ accepted |
 | 文档采用 sift 风格 STATUS + WBS 双轨 | [003](decisions/003-docs-status-wbs-split.md) | ✅ accepted |
+| IM 平台 OAuth + 卡片回调推迟到 v5 立项评估 | [004](decisions/004-im-callback-deferred.md) | ✅ accepted |
 
 > 决策编号从 001 开始,只追加不修改;被推翻时旧条目标 `superseded` 并指向新条目。
 
@@ -109,3 +112,4 @@ project-govern 当前处于 **v4.0.0 重启 + 文档治理 + CI 治理**阶段�
 
 - **2026-08-07**:首版。基于老仓库 v4.0.0 重启,基线盘点 + M4-M6 进度初始化。落地 STATUS/WBS 双轨决策(003)。
 - **2026-08-07(同日)**:项目重命名 `pmo-pms` → `project-govern`(Java 包 `com.hex.projectgovern`、DB `project_govern`、OpenAPI title 同步);创建 3 份 ADR(001/002/003);创建 10 份主题化 spec + 索引;创建 3 份 in-flight 工作包实现计划(WP-M4-03 / WP-M5-02 / WP-M6-03);落地 docs-lint 脚本 + CI 集成(github action job 5);落地 ESLint 9 + Prettier 3 前端静态检查 + CI 集成(job 6);补全风险登记 R-003/R-004/R-005。
+- **2026-08-07(下午)**:WP-M4-03 财务-成本 3-way match 全量落地(V5.0/V5.1 双轨 Flyway + ReconciliationService + 事件链路 + 告警 COST_DIFF + 通知分发 + REST API + 前端 + smoke 冒烟);WP-M5-02 预警控制器全量落地(AlertController + 规则引擎抽象 + 6 类规则 + 5min 调度 + 前端 + smoke);WP-M6-03 spike 决策落地(ADR 004 推迟 v5 + R-002 关闭 + 新增 R-018/R-019)。
