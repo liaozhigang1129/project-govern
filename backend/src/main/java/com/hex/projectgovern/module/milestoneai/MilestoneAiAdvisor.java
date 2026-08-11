@@ -78,7 +78,9 @@ public class MilestoneAiAdvisor {
         if (days <= 0) {
             return new Signal("OVERDUE", new BigDecimal("10.00"), new BigDecimal("0.30"), new BigDecimal("3.00"), "未到计划日期", false);
         }
-        BigDecimal intensity = days >= 30 ? new BigDecimal("100.00") : new BigDecimal(days * 100 / 30).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal intensity = days >= 30
+            ? new BigDecimal("100.00")
+            : BigDecimal.valueOf(days * 100).divide(BigDecimal.valueOf(30), 2, RoundingMode.HALF_UP);
         BigDecimal weight = new BigDecimal("0.30");
         BigDecimal score = intensity.multiply(weight).setScale(2, RoundingMode.HALF_UP);
         return new Signal("OVERDUE", intensity, weight, score, "已逾期 " + days + " 天", false);

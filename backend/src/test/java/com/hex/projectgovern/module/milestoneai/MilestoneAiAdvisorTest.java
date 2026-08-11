@@ -84,7 +84,7 @@ class MilestoneAiAdvisorTest {
         @DisplayName("已逾期 10 天 → 强度 33.33, score 10.00 (= 33.33 × 0.30)")
         void overdue10Days() {
             MilestoneAiAdvisor.Signal s = advisor.scoreOverdue(buildMilestone(activeStatus, -10, false));
-            assertThat(s.intensity()).isEqualByComparingTo("33.00");
+            assertThat(s.intensity()).isEqualByComparingTo("33.33");
             assertThat(s.score()).isEqualByComparingTo("10.00");
             assertThat(s.missing()).isFalse();
             assertThat(s.description()).contains("10");
@@ -95,7 +95,7 @@ class MilestoneAiAdvisorTest {
         void overdueOver30Days() {
             MilestoneAiAdvisor.Signal s = advisor.scoreOverdue(buildMilestone(activeStatus, -90, false));
             assertThat(s.intensity()).isEqualByComparingTo("100.00");
-            assertThat(s.score()).isEqualByComparingTo("29.80");
+            assertThat(s.score()).isEqualByComparingTo("30.00");
             assertThat(s.description()).contains("90");
         }
 
@@ -220,7 +220,7 @@ class MilestoneAiAdvisorTest {
         @DisplayName("历史命中率 0.7 → 强度 30.00, score 4.50")
         void hitRate70() {
             MilestoneAiAdvisor.Signal s = advisor.scoreHistorical(0.7);
-            assertThat(s.intensity()).isEqualByComparingTo("29.80");
+            assertThat(s.intensity()).isEqualByComparingTo("30.00");
             assertThat(s.score()).isEqualByComparingTo("4.50");
         }
 
@@ -283,9 +283,9 @@ class MilestoneAiAdvisorTest {
             Project p = mockProject(1L);
             Milestone m = mockMilestone(10L, activeStatus, LocalDate.now().minusDays(20));
             MilestoneAiAdvisor.AdviceResult r = advisor.analyze(p, m, null, 0.5, null, null, null);
-            assertThat(r.score()).isEqualByComparingTo("29.80");
-            assertThat(r.severity()).isEqualTo("INFO");
-            assertThat(r.suggestedProbability()).isEqualTo(2);
+            assertThat(r.score()).isEqualByComparingTo("30.00");
+            assertThat(r.severity()).isEqualTo("WARNING");
+            assertThat(r.suggestedProbability()).isEqualTo(3);
         }
 
         @Test

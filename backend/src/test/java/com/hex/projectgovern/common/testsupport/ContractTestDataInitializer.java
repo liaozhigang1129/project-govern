@@ -1,12 +1,20 @@
 package com.hex.projectgovern.common.testsupport;
 
 import com.hex.projectgovern.module.dict.HealthLevel;
+import com.hex.projectgovern.module.dict.InitiationStatus;
+import com.hex.projectgovern.module.dict.InitiationStatusRepository;
+import com.hex.projectgovern.module.dict.MilestoneStatus;
+import com.hex.projectgovern.module.dict.MilestoneStatusRepository;
 import com.hex.projectgovern.module.dict.HealthLevelRepository;
 import com.hex.projectgovern.module.dict.ProjectStatus;
 import com.hex.projectgovern.module.dict.ProjectStatusRepository;
 import com.hex.projectgovern.module.dict.ProjectType;
 import com.hex.projectgovern.module.dict.ProjectTypeRepository;
 import com.hex.projectgovern.module.milestone.MilestonePhase;
+import com.hex.projectgovern.module.dict.MilestoneStatus;
+import com.hex.projectgovern.module.dict.MilestoneStatusRepository;
+import com.hex.projectgovern.module.milestone.Milestone;
+import com.hex.projectgovern.module.milestone.MilestoneRepository;
 import com.hex.projectgovern.module.milestone.MilestonePhaseRepository;
 import com.hex.projectgovern.module.org.AppUser;
 import com.hex.projectgovern.module.org.Department;
@@ -57,13 +65,16 @@ public class ContractTestDataInitializer {
         DepartmentRepository deptRepo,
         ProjectTypeRepository typeRepo,
         ProjectStatusRepository statusRepo,
+        InitiationStatusRepository initiationStatusRepo,
+                          MilestoneStatusRepository milestoneStatusRepo,
         HealthLevelRepository healthRepo,
         MilestonePhaseRepository phaseRepo,
         ProjectRepository projectRepo,
+        MilestoneRepository milestoneRepo,
         PasswordEncoder passwordEncoder
     ) {
-        return new SeedRunner(roleRepo, userRepo, deptRepo, typeRepo, statusRepo,
-            healthRepo, phaseRepo, projectRepo, passwordEncoder);
+        return new SeedRunner(roleRepo, userRepo, deptRepo, typeRepo, statusRepo, initiationStatusRepo, milestoneStatusRepo,
+            healthRepo, phaseRepo, projectRepo, milestoneRepo, passwordEncoder);
     }
 
     /**
@@ -76,7 +87,10 @@ public class ContractTestDataInitializer {
         private final DepartmentRepository deptRepo;
         private final ProjectTypeRepository typeRepo;
         private final ProjectStatusRepository statusRepo;
+    private final InitiationStatusRepository initiationStatusRepo;
+        private final MilestoneStatusRepository milestoneStatusRepo;
         private final HealthLevelRepository healthRepo;
+        private final MilestoneRepository milestoneRepo;
         private final MilestonePhaseRepository phaseRepo;
         private final ProjectRepository projectRepo;
         private final PasswordEncoder passwordEncoder;
@@ -85,16 +99,22 @@ public class ContractTestDataInitializer {
                           DepartmentRepository deptRepo,
                           ProjectTypeRepository typeRepo,
                           ProjectStatusRepository statusRepo,
+                          InitiationStatusRepository initiationStatusRepo,
+                          MilestoneStatusRepository milestoneStatusRepo,
                           HealthLevelRepository healthRepo,
                           MilestonePhaseRepository phaseRepo,
                           ProjectRepository projectRepo,
+                          MilestoneRepository milestoneRepo,
                           PasswordEncoder passwordEncoder) {
             this.roleRepo = roleRepo;
             this.userRepo = userRepo;
             this.deptRepo = deptRepo;
             this.typeRepo = typeRepo;
             this.statusRepo = statusRepo;
+            this.initiationStatusRepo = initiationStatusRepo;
+            this.milestoneStatusRepo = milestoneStatusRepo;
             this.healthRepo = healthRepo;
+            this.milestoneRepo = milestoneRepo;
             this.phaseRepo = phaseRepo;
             this.projectRepo = projectRepo;
             this.passwordEncoder = passwordEncoder;
@@ -128,6 +148,48 @@ public class ContractTestDataInitializer {
                 t.setName("内部项目");
                 typeRepo.save(t);
             }
+            if (typeRepo.findAll().stream().noneMatch(t -> "DELIVERY".equals(t.getCode()))) {
+                ProjectType t = new ProjectType();
+                t.setCode("DELIVERY");
+                t.setName("客户交付");
+                typeRepo.save(t);
+            }
+            // MilestoneStatus 字典 (MilestoneService 需要 PENDING)
+            if (milestoneStatusRepo.findAll().isEmpty()) {
+                for (var pair : new String[][]{
+                        {"PENDING", "未开始", "false"},
+                        {"IN_PROGRESS", "进行中", "false"},
+                        {"COMPLETED", "已完成", "true"},
+                        {"DELAYED", "已延期", "false"},
+                }) {
+                    MilestoneStatus x = new MilestoneStatus();
+                    x.setCode(pair[0]);
+                    x.setName(pair[1]);
+                    x.setTerminal(Boolean.parseBoolean(pair[2]));
+                    milestoneStatusRepo.save(x);
+                }
+            }
+
+            // InitiationStatus 字典 (MilestoneCreateRequestContractTest + Initiation tests 需要 PENDING)
+            if (initiationStatusRepo.findAll().isEmpty()) {
+                for (var pair : new String[][]{
+                        {"PENDING", "审批中", "false", "1"},
+                        {"DEPT_APPROVED", "部门通过", "false", "2"},
+                        {"PMO_APPROVED", "PMO通过", "false", "3"},
+                        {"EXEC_APPROVED", "已批准", "true", "4"},
+                        {"REJECTED", "已驳回", "true", "5"},
+                        {"SUPPLEMENT", "需补充", "false", "6"},
+                        {"DRAFT", "草稿", "false", "0"},
+                }) {
+                    InitiationStatus x = new InitiationStatus();
+                    x.setCode(pair[0]);
+                    x.setName(pair[1]);
+                    x.setTerminal(Boolean.parseBoolean(pair[2]));
+                    x.setSortOrder(Integer.parseInt(pair[3]));
+                    initiationStatusRepo.save(x);
+                }
+            }
+
             if (statusRepo.findAll().isEmpty()) {
                 ProjectStatus s = new ProjectStatus();
                 s.setCode("ACTIVE");
@@ -162,13 +224,29 @@ public class ContractTestDataInitializer {
             ensureUser("viewer",   "只读访客",   "viewer@company.com",   "VIEWER",    "审计员");
 
             // 6. Project id=1 (供 milestone contract 测试的 projectId=1 引用)
+            if (milestoneRepo.count() == 0) {
+                Milestone m = new Milestone();
+                m.setProjectId(1L);
+                m.setName("M-CONTRACT-TEST");
+                m.setSequence(1);
+                m.setPhaseId(phaseRepo.findAll().get(0).getId());
+                m.setPlanDate(java.time.LocalDate.now().plusDays(30));
+                m.setWeight(5);
+                m.setOwnerUserId(2L);
+                m.setStatus(milestoneStatusRepo.findAll().stream()
+                    .filter(s -> "PENDING".equals(s.getCode())).findFirst().orElseThrow());
+                milestoneRepo.save(m);
+            }
+
             if (projectRepo.findById(1L).isEmpty()) {
                 Project p = new Project();
                 p.setCode("P-CONTRACT-TEST");
                 p.setName("契约测试项目");
                 p.setCustomer("内部");
                 p.setDescription("contract test 专用最小项目");
-                p.setType(typeRepo.findAll().get(0));
+                p.setType(typeRepo.findAll().stream()
+                    .filter(t -> "DELIVERY".equals(t.getCode())).findFirst()
+                    .orElseGet(() -> typeRepo.findAll().get(0)));
                 p.setStatus(statusRepo.findAll().get(0));
                 p.setHealth(healthRepo.findAll().get(0));
                 p.setDepartmentId(1L);
