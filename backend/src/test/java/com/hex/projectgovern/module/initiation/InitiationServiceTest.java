@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.*;
  */
 @DataJpaTest
 @AutoConfigureTestDatabase
-@Import({InitiationService.class, InitiationAiWbsService.class, InitiationSowFileService.class, com.fasterxml.jackson.databind.ObjectMapper.class})
+@Import({InitiationService.class, InitiationAiWbsService.class, InitiationSowFileService.class, com.hex.projectgovern.module.approval.InitiationApprovalAdapter.class, com.hex.projectgovern.module.approval.DefaultApprovalEngine.class, com.hex.projectgovern.module.approval.DefaultApproverResolver.class, com.hex.projectgovern.module.approval.DefaultSkipConditionEvaluator.class, com.hex.projectgovern.module.risk.RiskRuleCache.class, com.hex.projectgovern.module.risk.RiskRuleController.class, com.fasterxml.jackson.databind.ObjectMapper.class})
 @ActiveProfiles("test")
 class InitiationServiceTest {
 

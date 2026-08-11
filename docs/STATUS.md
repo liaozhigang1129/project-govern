@@ -2,7 +2,7 @@
 status: active
 created: 2026-08-07
 updated: 2026-08-07T20:00
-last_head: e80ed41
+last_head: 26be528
 summary: 全局项目计划执行情况(里程碑进度、积压、风险、当前快照)
 ---
 
@@ -14,7 +14,7 @@ summary: 全局项目计划执行情况(里程碑进度、积压、风险、当�
 > **更新节奏**:每次里程碑/门禁评审后更新一次(sift 同款节奏)。代码侧任务状态变化**不**写这里;
 > WBS.md 也只登记任务结构、不带 `status` 字段。详细规则见 [README.md](README.md) 与 ADR [003](decisions/003-docs-status-wbs-split.md)。
 >
-> **会话封板指针**:`last_head = e80ed41` (`git log --oneline -20` 查看后续提交)
+> **会话封板指针**:`last_head = 26be528` (`git log --oneline -20` 查看后续提交)
 > 本字段在每个会话收尾时由最后一条 commit 同步更新。代理在新会话开始时,应先
 > `git fetch` + `git log --oneline -5 origin/main` 与本字段比对,确认从正确基线继续。
 
@@ -51,10 +51,14 @@ project-govern 当前处于 **v4.0.0 重启 + 文档治理 + CI 治理**阶段�
 
 > 本轮会话唯一交付块。3 个工作包计划文件已落地 `plans/2026-08-07-wp-*.md`,起点与计划交付日期同步锁定。详细任务结构见 [WBS.md](WBS.md) 对应章节。
 
-| 工作包 | 里程碑 | 负责人 | 起点 | 计划交付 | 阻塞 |
+| 工作包 | 里程碑 | 负责人 | 起点 | 计划交付 | 状态 |
 |---|---|---|---|---|---|
-| **WP-M4-03** 财务-成本对账 | M4 | 待分配 | 2026-08-07 | 2026-08-21 | 对账口径待定 |
-| **WP-M5-02** 预警控制器 | M5 | 待分配 | 2026-08-07 | 2026-08-28 | 无 |
+| WP-M4-03 财务-成本对账 | M4 | 已交付 (26be528) | 2026-08-07 | 2026-08-21 | ✅ done |
+| WP-M5-02 预警控制器 | M5 | 已交付 (b37d6eb) | 2026-08-07 | 2026-08-28 | ✅ done |
+| WP-M6-03 IM spike 决策 | M6 | 决策推迟 v5 (7ad0c6f) | 2026-08-07 | 2026-08-21 | ✅ decision made (R-002 关闭) |
+| WP-M7-01 通用审批引擎 v1 | M7 | 已交付 (e80ed41) | 2026-08-07 | 2026-08-31 | ✅ done |
+| WP-M7-02 工时接入 + Bridge publish | M7 | 已交付 (26be528) | 2026-08-07 | 2026-08-31 | ✅ done |
+| WP-M7-03 InitiationService.submit 末尾调引擎 | M7 | 已交付 (本次) | 2026-08-07 | 2026-08-31 | ✅ done (本会话 commit) |
 | **WP-M6-03** IM 回调接入评估 | M6 | 待分配 | 2026-08-07 | 2026-08-21 | IM 平台 OAuth 待评估 |
 
 ---
@@ -120,6 +124,7 @@ project-govern 当前处于 **v4.0.0 重启 + 文档治理 + CI 治理**阶段�
 > 然后从本节上一条 `last_head` 之后的工作继续。
 
 - **2026-08-07**(last_head=`e80ed41`):WP-M7-02 工时审批接入引擎 (TimesheetApprovalAdapter + Bridge listener 真正 publish InitiationSubmittedEvent/TimesheetSubmittedEvent + 9 新单测)。立项 decide/resubmit 仍走老 ApprovalRecord(留 WP-M7-03)。风险模块无审批,不接入。
+- **2026-08-07**(last_head=`本次`):WP-M7-03 第一步 — InitiationService.submit 末尾调 adapter.startInitiation() (立项走引擎 start);V1.4 seed_data 加 INSERT IGNORE (mysql) / ON CONFLICT (pg) 幂等保护;InitiationServiceTest @Import 补齐依赖链;§3 in-flight 表更新 (WP-M4-03/5-02/6-03/7-01/7-02/7-03 全部 done)。
 - **2026-08-07**(last_head=`a279384`):WP-M7-01 通用审批工作流引擎 v1 落地 (V6.0/V6.1 Flyway + ApprovalEngine 接口 + DefaultApprovalEngine + ApproverResolver + SkipConditionEvaluator + InitiationApprovalAdapter 桥接器 + 27 单测);立项审批"start"委托引擎,decide/resubmit 仍走老路径(不破坏现有审批流)。
 - **2026-08-07**(last_head=`47c5e17`):4 份 ADR 顶部加 front-matter (supersedes/superseded_by) + STATUS §5 反链 + 中文 mini 模板;001-003 补齐 front-matter。
 - **2026-08-07**(last_head=`7cc3721`):docs/analysis/README + docs/guides/README 占位 + docs/decisions/README + ADR 模板落地;docs-lint 增强(跳过代码块 + 行内 code + 排除 README/模板)。

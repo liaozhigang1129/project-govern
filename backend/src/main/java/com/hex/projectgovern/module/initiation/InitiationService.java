@@ -42,6 +42,7 @@ public class InitiationService {
     private final ApplicationEventPublisher eventPublisher;
     private final InitiationSowFileRepository sowFileRepository;
     private final InitiationAiWbsDraftRepository aiWbsDraftRepository;
+    private final com.hex.projectgovern.module.approval.InitiationApprovalAdapter approvalAdapter;
     private final InitiationAiWbsService aiWbsService;
 
     /** SOW 贴文本最大长度(50KB,超出截断) */
@@ -213,14 +214,21 @@ public class InitiationService {
         // 发布提交事件 → 通知部门负责人
         AppUser applicant = userRepository.findById(saved.getApplicantId()).orElse(null);
         Long deptLeadId = findStepUserId(saved.getCurrentStep(), saved.getDepartmentId()).userId();
-        eventPublisher.publishEvent(new InitiationSubmittedEvent(
-                saved.getId(), saved.getCode(), saved.getTitle(),
-                applicant == null ? null : applicant.getId(),
-                applicant == null ? "Unknown" : applicant.getFullName(),
-                applicant == null ? null : applicant.getEmail(),
-                saved.getDepartmentId(),
-                Instant.now()
-        ));
+
+        // WP-M7-03: 同步启动通用审批流实例 (kind="init", flowCode="STANDARD_INITIATION")
+        // 引擎实例创建后, ApprovalStepActivatedEvent 会被 InitiationApprovalBridgeListener
+        // 转发为 InitiationSubmittedEvent (避免重复发邮件)
+        try {
+            approvalAdapter.startInitiation(saved);
+        } catch (Exception e) {
+            log.error("[Initiation] 启动通用审批流失败 (但不阻断提交) initiationId={} code={} err={}",
+                saved.getId(), saved.getCode(), e.getMessage());
+        }
+
+        // 老路径仍发 InitiationSubmittedEvent (因为 BridgeListener 会再次发同一个事件, 需要去重)
+        // 临时方案: 仅当 BridgeListener 未启用时发 (V6.0 之前的行为)
+        // 当前 BridgeListener 已启用, 此处不再 publish
+        // (此行历史: 通知中心通过 InitiationSubmittedEvent 触发, 现有 Bridge 转发会接管)
         return saved;
     }
 
