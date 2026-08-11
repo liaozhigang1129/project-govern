@@ -10,13 +10,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -31,7 +36,15 @@ import static org.assertj.core.api.Assertions.*;
 @Rollback
 class TimesheetServiceTest {
 
+    private static final LocalDate TODAY = LocalDate.of(2026, 6, 1); // 任意周一的稳定日期
+
     @Autowired TimesheetService service;
+
+    @TestConfiguration
+    static class TestClockConfig {
+        @Bean @Primary
+        public Clock testClock() { return Clock.fixed(TODAY.atStartOfDay(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault()); }
+    }
 
     private CreateRequest createReq(Long uid, LocalDate monday) {
         var r = new CreateRequest();
@@ -62,7 +75,6 @@ class TimesheetServiceTest {
         return r;
     }
 
-    private static final LocalDate TODAY = LocalDate.of(2026, 6, 1); // 任意周一的稳定日期
     private static final LocalDate THIS_MONDAY = TODAY.minusDays(TODAY.getDayOfWeek().getValue() - DayOfWeek.MONDAY.getValue());
     private LocalDate mondayOf(LocalDate d) {
         return d.minusDays(d.getDayOfWeek().getValue() - DayOfWeek.MONDAY.getValue());

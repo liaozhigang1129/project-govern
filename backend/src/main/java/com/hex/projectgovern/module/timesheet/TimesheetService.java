@@ -24,6 +24,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -43,6 +44,7 @@ public class TimesheetService {
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final com.hex.projectgovern.module.approval.TimesheetApprovalAdapter approvalAdapter;
+    private final java.time.Clock clock;
 
     // ============================================================
     // 1) 创建/查询
@@ -122,7 +124,7 @@ public class TimesheetService {
             throw new BusinessException(409, "只能修改 DRAFT 状态,当前: " + t.getStatus());
         }
         // 14 天锁(超过 2 周前的不可补)
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         if (t.getWeekStart().isBefore(today.minusDays(14))) {
             throw new BusinessException(409, "超过 14 天的周报已锁定,不可补录");
         }
