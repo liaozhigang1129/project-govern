@@ -21,6 +21,8 @@ public class ProjectInitiation extends SoftDeletableEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
     @Column(nullable = false, unique = true, length = 32) private String code;
     @Column(name = "project_id") private Long projectId;
+    /** WP-M7-05: 通用审批引擎 instance.id (kind="init") */
+    @Column(name = "approval_instance_id") private Long approvalInstanceId;
     @Column(nullable = false, length = 256) private String title;
     @Column(name = "applicant_id", nullable = false) private Long applicantId;
     @Column(name = "department_id") private Long departmentId;

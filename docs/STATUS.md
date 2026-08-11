@@ -2,7 +2,7 @@
 status: active
 created: 2026-08-07
 updated: 2026-08-07T20:00
-last_head: 7209c36
+last_head: 11caeb4
 summary: 全局项目计划执行情况(里程碑进度、积压、风险、当前快照)
 ---
 
@@ -14,7 +14,7 @@ summary: 全局项目计划执行情况(里程碑进度、积压、风险、当�
 > **更新节奏**:每次里程碑/门禁评审后更新一次(sift 同款节奏)。代码侧任务状态变化**不**写这里;
 > WBS.md 也只登记任务结构、不带 `status` 字段。详细规则见 [README.md](README.md) 与 ADR [003](decisions/003-docs-status-wbs-split.md)。
 >
-> **会话封板指针**:`last_head = 7209c36` (`git log --oneline -20` 查看后续提交)
+> **会话封板指针**:`last_head = 11caeb4` (`git log --oneline -20` 查看后续提交)
 > 本字段在每个会话收尾时由最后一条 commit 同步更新。代理在新会话开始时,应先
 > `git fetch` + `git log --oneline -5 origin/main` 与本字段比对,确认从正确基线继续。
 
@@ -125,6 +125,7 @@ project-govern 当前处于 **v4.0.0 重启 + 文档治理 + CI 治理**阶段�
 
 - **2026-08-07**(last_head=`e80ed41`):WP-M7-02 工时审批接入引擎 (TimesheetApprovalAdapter + Bridge listener 真正 publish InitiationSubmittedEvent/TimesheetSubmittedEvent + 9 新单测)。立项 decide/resubmit 仍走老 ApprovalRecord(留 WP-M7-03)。风险模块无审批,不接入。
 - **2026-08-07**(last_head=`本次`):WP-M7-04 工时接入完整迁移 — TimesheetService.submit/approve/reject 全部委托引擎 (TimesheetApprovalAdapter.start/approve/rejectTimesheet), timesheet_week.approval_instance_id 列(V6.2 mysql+pg 双轨幂等), 引擎异常 catch 包 BusinessException(不阻断提交/审批)。+ 5 个集成单测 (TimesheetEngineIntegrationTest)。
+- **2026-08-07**(last_head=`本次`):WP-M7-05 立项 decide/resubmit 全量委托 ApprovalEngine — InitiationService.decide 调 engine.decide + 回读 status 回写 ProjectInitiation (APPROVED/REJECTED/SUPPLEMENT/PENDING 4 路转换);InitiationService.resubmit 调 engine.cancel + engine.start (重开实例);V6.3 Flyway project_initiation.approval_instance_id 列 + 索引 (mysql + pg 双轨幂等);ProjectInitiation.approvalInstanceId 字段;InitiationServiceTest 12/12 全过;InitiationService.ApprovalDecision 重命名为 InitiationApprovalDecision (避免与引擎 enum 同名)。
 - **2026-08-07**(last_head=`本次`):WP-M7-03 第一步 — InitiationService.submit 末尾调 adapter.startInitiation() (立项走引擎 start);V1.4 seed_data 加 INSERT IGNORE (mysql) / ON CONFLICT (pg) 幂等保护;InitiationServiceTest @Import 补齐依赖链;§3 in-flight 表更新 (WP-M4-03/5-02/6-03/7-01/7-02/7-03 全部 done)。
 - **2026-08-07**(last_head=`a279384`):WP-M7-01 通用审批工作流引擎 v1 落地 (V6.0/V6.1 Flyway + ApprovalEngine 接口 + DefaultApprovalEngine + ApproverResolver + SkipConditionEvaluator + InitiationApprovalAdapter 桥接器 + 27 单测);立项审批"start"委托引擎,decide/resubmit 仍走老路径(不破坏现有审批流)。
 - **2026-08-07**(last_head=`47c5e17`):4 份 ADR 顶部加 front-matter (supersedes/superseded_by) + STATUS §5 反链 + 中文 mini 模板;001-003 补齐 front-matter。

@@ -12,6 +12,8 @@ import com.hex.projectgovern.module.notification.InitiationResubmittedEvent;
 import com.hex.projectgovern.module.notification.InitiationSubmittedEvent;
 import com.hex.projectgovern.module.org.AppUser;
 import com.hex.projectgovern.module.org.UserRepository;
+import com.hex.projectgovern.module.approval.ApprovalEngine;
+import com.hex.projectgovern.module.approval.ApprovalFlowInstance;
 import com.hex.projectgovern.module.project.Project;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -43,6 +45,7 @@ public class InitiationService {
     private final InitiationSowFileRepository sowFileRepository;
     private final InitiationAiWbsDraftRepository aiWbsDraftRepository;
     private final com.hex.projectgovern.module.approval.InitiationApprovalAdapter approvalAdapter;
+    private final ApprovalEngine approvalEngine;
     private final InitiationAiWbsService aiWbsService;
 
     /** SOW 贴文本最大长度(50KB,超出截断) */
@@ -174,6 +177,25 @@ public class InitiationService {
         if (!java.util.Objects.equals(i.getApplicantId(), applicantId)) {
             throw new BusinessException("Only the applicant can resubmit, current applicantId=" + i.getApplicantId());
         }
+
+        // WP-M7-05: 引擎实例 SUPPLEMENT 后 cancel + 重开一个
+        // 保持业务状态 PENDING + currentStep 不变 (重走同一 step)
+        if (i.getApprovalInstanceId() != null) {
+            try {
+                // 1) 取消旧实例 (仅申请人可 cancel)
+                approvalEngine.cancel(i.getApprovalInstanceId(), applicantId);
+                // 2) 创建新实例 (同 bizId, kind=init, flow=STANDARD_INITIATION)
+                ApprovalFlowInstance newInst = approvalEngine.start(
+                    "init", "STANDARD_INITIATION",
+                    i.getId(), i.getCode(),
+                    i.getApplicantId(), i.getDepartmentId(),
+                    i.getContractAmount() != null ? "{\"amount\":" + i.getContractAmount().toPlainString() + "}" : null);
+                i.setApprovalInstanceId(newInst.getId());
+            } catch (Exception e) {
+                throw new BusinessException("引擎重提失败: " + e.getMessage());
+            }
+        }
+
         i.setStatus(statusRepo.findAll().stream()
                 .filter(s -> "PENDING".equals(s.getCode())).findFirst()
                 .orElseThrow(() -> new BusinessException("Status PENDING not seeded")));
