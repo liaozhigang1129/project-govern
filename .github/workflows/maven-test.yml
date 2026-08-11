@@ -71,7 +71,7 @@ jobs:
 
       - name: 📊 Collect Surefire reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: backend-surefire-reports
           path: |
@@ -118,7 +118,7 @@ jobs:
         run: mvn -B package -DskipTests
 
       - name: ⬆️ Upload JAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: backend-jar
           path: backend/target/*.jar
@@ -166,7 +166,7 @@ jobs:
         run: pnpm build
 
       - name: ⬆️ Upload dist
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-dist
           path: frontend/dist/
@@ -268,7 +268,7 @@ jobs:
 
       - name: 📤 Upload docs-lint report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: docs-lint-output
           path: .docs-lint-cache/
