@@ -2,7 +2,7 @@
 status: active
 created: 2026-08-07
 updated: 2026-08-11T17:00
-last_head: f081a43
+last_head: 2608a03
 summary: 全局项目计划执行情况(里程碑进度、积压、风险、当前快照)
 ---
 
@@ -14,7 +14,7 @@ summary: 全局项目计划执行情况(里程碑进度、积压、风险、当�
 > **更新节奏**:每次里程碑/门禁评审后更新一次(sift 同款节奏)。代码侧任务状态变化**不**写这里;
 > WBS.md 也只登记任务结构、不带 `status` 字段。详细规则见 [README.md](README.md) 与 ADR [003](decisions/003-docs-status-wbs-split.md)。
 >
-> **会话封板指针**:`last_head = c489aa6` (`git log --oneline -20` 查看后续提交)
+> **会话封板指针**:`last_head = 2608a03` (`git log --oneline -20` 查看后续提交)
 > 本字段在每个会话收尾时由最后一条 commit 同步更新。代理在新会话开始时,应先
 > `git fetch` + `git log --oneline -5 origin/main` 与本字段比对,确认从正确基线继续。
 
