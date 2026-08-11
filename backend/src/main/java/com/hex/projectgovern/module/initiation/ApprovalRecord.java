@@ -7,6 +7,22 @@ import lombok.Setter;
 
 import java.time.Instant;
 
+/**
+ * 立项审批动作审计记录 (临时兼容表).
+ *
+ * <p>WP-M7-05 起, 立项审批全部委托 {@link com.hex.projectgovern.module.approval.DefaultApprovalEngine},
+ * 审计动作由 {@link com.hex.projectgovern.module.approval.ApprovalFlowAction} 单一事实源记录。
+ * ApprovalRecord 表保留以便查询历史数据, 新代码不应再写入。
+ *
+ * <p>迁移路径:
+ * <ul>
+ *   <li>旧查询: {@code ApprovalRecordRepository.findByInitiationIdOrderByDecidedAtAsc(initiationId)}</li>
+ *   <li>迁移到: ApprovalFlowActionRepository.findByTargetIdAndTargetTypeOrderByDecidedAtAsc(initiationId, "INITIATION")</li>
+ * </ul>
+ *
+ * @deprecated since WP-M7-05; 数据保留到 v5 数据迁移时清理
+ */
+@Deprecated
 @Entity
 @Table(name = "approval_record")
 @Getter @Setter @NoArgsConstructor
