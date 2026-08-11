@@ -10,6 +10,7 @@
 - 项目状态 → [`docs/STATUS.md`](docs/STATUS.md)
 - 版本演进 → [`docs/CHANGELOG.md`](docs/CHANGELOG.md)
 - 架构决策 → [`docs/decisions/`](docs/decisions/)
+- **v5 路线图** → [`docs/roadmap.md`](docs/roadmap.md)(M7 立项评审 + 4 sub-plan + 10 周里程碑)
 
 ---
 
