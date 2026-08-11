@@ -14,6 +14,7 @@
  */
 
 import { computed, h, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useIsMobile } from '@/composables/useIsMobile'
 import { Calendar, Refresh } from '@element-plus/icons-vue'
 
 export interface GanttMilestone {
@@ -177,6 +178,9 @@ function offsetBadgeStyle(bar: GanttBar, m: GanttMilestone) {
     zIndex: 12,
   }
 }
+
+const isMobile = useIsMobile()
+const items = computed(() => props.data?.bars || [])
 
 // ---------- 里程碑拖拽改期(PATCH /milestones/{id}/plan-date) ----------
 import { milestoneApi } from '@/api/gantt'
@@ -1147,8 +1151,28 @@ const todayX = computed(() => {
                 stroke-width="1.5"
                 stroke-dasharray="3 2"
               />
-            </template>
-          </template>
+              <!-- P2 #30: 移动端按月卡片视图 -->
+  <div v-if="isMobile" class="gantt-month-cards">
+    <div v-for="(item, idx) in items" :key="idx" class="gantt-month-card">
+      <div class="gantt-month-card__title">{{ item.projectName }}</div>
+      <div class="gantt-month-card__meta">
+        <span>{{ item.planStart }} → {{ item.planEnd }}</span>
+        <span :class="['status', 'progress-' + Math.round(item.progressPct / 33)]">{{ item.progressPct }}%</span>
+      </div>
+    </div>
+  </div>
+</template>
+            <!-- P2 #30: 移动端按月卡片视图 -->
+  <div v-if="isMobile" class="gantt-month-cards">
+    <div v-for="(item, idx) in items" :key="idx" class="gantt-month-card">
+      <div class="gantt-month-card__title">{{ item.projectName }}</div>
+      <div class="gantt-month-card__meta">
+        <span>{{ item.planStart }} → {{ item.planEnd }}</span>
+        <span :class="['status', 'progress-' + Math.round(item.progressPct / 33)]">{{ item.progressPct }}%</span>
+      </div>
+    </div>
+  </div>
+</template>
           <!-- 远程协作者的光标(只显示鼠标位置 + 用户名标签) -->
           <template v-for="rc in remoteCursors" :key="rc.userId">
             <g :transform="`translate(${rc.x}, ${rc.y})`">
@@ -1167,7 +1191,17 @@ const todayX = computed(() => {
                 {{ rc.userName }}
               </text>
             </g>
-          </template>
+            <!-- P2 #30: 移动端按月卡片视图 -->
+  <div v-if="isMobile" class="gantt-month-cards">
+    <div v-for="(item, idx) in items" :key="idx" class="gantt-month-card">
+      <div class="gantt-month-card__title">{{ item.projectName }}</div>
+      <div class="gantt-month-card__meta">
+        <span>{{ item.planStart }} → {{ item.planEnd }}</span>
+        <span :class="['status', 'progress-' + Math.round(item.progressPct / 33)]">{{ item.progressPct }}%</span>
+      </div>
+    </div>
+  </div>
+</template>
           <!-- 远程协作者的拖动轨迹 -->
           <template v-for="rt in remoteTrails" :key="'rt-' + rt.userId">
             <line
@@ -1181,7 +1215,17 @@ const todayX = computed(() => {
               opacity="0.4"
               stroke-dasharray="6 3"
             />
-          </template>
+            <!-- P2 #30: 移动端按月卡片视图 -->
+  <div v-if="isMobile" class="gantt-month-cards">
+    <div v-for="(item, idx) in items" :key="idx" class="gantt-month-card">
+      <div class="gantt-month-card__title">{{ item.projectName }}</div>
+      <div class="gantt-month-card__meta">
+        <span>{{ item.planStart }} → {{ item.planEnd }}</span>
+        <span :class="['status', 'progress-' + Math.round(item.progressPct / 33)]">{{ item.progressPct }}%</span>
+      </div>
+    </div>
+  </div>
+</template>
         </svg>
 
         <!-- 头部月份刻度 -->
@@ -1339,6 +1383,16 @@ const todayX = computed(() => {
         模式:{{ props.mode === 'auto' ? '自动' : '手动' }}
         · 菱形色 = 阶段(同色相 4 深浅 = phase 内不同 milestone)
       </span>
+    </div>
+  </div>
+  <!-- P2 #30: 移动端按月卡片视图 -->
+  <div v-if="isMobile" class="gantt-month-cards">
+    <div v-for="(item, idx) in items" :key="idx" class="gantt-month-card">
+      <div class="gantt-month-card__title">{{ item.projectName }}</div>
+      <div class="gantt-month-card__meta">
+        <span>{{ item.planStart }} → {{ item.planEnd }}</span>
+        <span :class="['status', 'progress-' + Math.round(item.progressPct / 33)]">{{ item.progressPct }}%</span>
+      </div>
     </div>
   </div>
 </template>

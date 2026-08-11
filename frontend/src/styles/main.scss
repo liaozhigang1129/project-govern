@@ -60,3 +60,78 @@ a {
     background: linear-gradient(135deg, #cb2d3e, #ef473a);
   }
 }
+
+/* ============================================================
+ * 移动端响应式 (P2 #30)
+ * < 768px: mobile | 768-1024px: tablet | > 1024px: desktop
+ * ============================================================ */
+
+/* 全局: 表格在窄屏 overflow-x */
+.el-table {
+  @media (max-width: 768px) {
+    overflow-x: auto;
+    display: block;
+  }
+}
+
+/* 页面 padding 缩小 */
+@media (max-width: 768px) {
+  .page {
+    padding: 8px 12px;
+  }
+  /* 侧边栏折叠 */
+  .el-aside {
+    width: 60px !important;
+  }
+  /* 弹窗宽度 100% */
+  .el-dialog {
+    width: 95% !important;
+    margin: 0 auto;
+  }
+  /* 卡片堆叠 */
+  .el-card {
+    margin-bottom: 8px;
+  }
+  /* 隐藏次要列 (CSS only, 需要 :class="isMobile ? 'hide-on-mobile' : ''") */
+  .hide-on-mobile {
+    display: none !important;
+  }
+  /* 表格文字缩小 */
+  .el-table th, .el-table td {
+    padding: 4px 0 !important;
+    font-size: 12px;
+  }
+  /* 按钮触屏友好 */
+  .el-button {
+    min-height: 36px;
+  }
+  /* 表单 input 字号, 防止 iOS 自动缩放 */
+  .el-input__inner, .el-textarea__inner {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .page {
+    padding: 12px 16px;
+  }
+}
+
+/* Gantt 移动端: 折叠为按月卡片 */
+@media (max-width: 768px) {
+  .gantt-mobile-only {
+    display: block !important;
+  }
+  .gantt-desktop-only {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .gantt-mobile-only {
+    display: none !important;
+  }
+  .gantt-desktop-only {
+    display: block !important;
+  }
+}
