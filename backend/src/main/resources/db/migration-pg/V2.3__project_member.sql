@@ -38,7 +38,8 @@ INSERT INTO member_role (code, name, description, sort_order) VALUES
   ('BA',       '需求分析师',   '负责需求收集、分析、原型、验收', 40),
   ('DEV',      '开发工程师',   '负责编码、单元测试、技术实现', 50),
   ('QA',       '测试工程师',   '负责测试用例、缺陷跟踪、验收测试', 60),
-  ('CFG',      '配置管理员',   '负责环境/版本/配置/发布管理', 70);
+  ('CFG',      '配置管理员',   '负责环境/版本/配置/发布管理', 70)
+ON CONFLICT (code) DO NOTHING;
 COMMENT ON COLUMN member_role.sort_order IS '前端下拉排序(数字越小越靠前)';
 
 -- 2) 项目组成员
