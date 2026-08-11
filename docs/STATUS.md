@@ -1,8 +1,8 @@
 ---
 status: active
 created: 2026-08-07
-updated: 2026-08-07T22:30
-last_head: c489aa6
+updated: 2026-08-11T17:00
+last_head: 757e096
 summary: 全局项目计划执行情况(里程碑进度、积压、风险、当前快照)
 ---
 
@@ -22,7 +22,7 @@ summary: 全局项目计划执行情况(里程碑进度、积压、风险、当�
 
 ## 1. 当前快照(One-liner)
 
-project-govern 当前处于 **M7 立项评审启动**阶段。本次会话已完成:ML 模型配置体检与 launchd 修复(4 plist + install.sh + healthcheck.sh 品牌/路径)、3 份 active spec(reporting / reporting-api / mobile-h5)、WP-M7-01 立项评审 plan(8 项关键决策 + 10 周里程碑 + 5 风险 + 5 北极星指标)、ADR-005 v5 范围与关键决策(proposed)、WBS.md / STATUS.md 同步更新。下一次门禁 = **WP-M7-01 D+7 整合会议**(8 项决策 Sponsor 拍板)。
+project-govern 当前处于 **M7 立项评审启动 + M7-06 集成测试落地**阶段。本次会话已完成:ML 模型配置体检与 launchd 修复(4 plist + install.sh + healthcheck.sh 品牌/路径)、3 份 active spec(reporting / reporting-api / mobile-h5)、WP-M7-01 立项评审 plan + ADR-005、**WP-M7-06 InitiationEngineIntegrationTest 5 集成单测**(立项 decide/resubmit 全量委托 ApprovalEngine + 业务 status 回写 + 4 路转换 + 老数据兼容)全部通过。下一次门禁 = **WP-M7-01 D+7 整合会议**(8 项决策 Sponsor 拍板)。
 
 ---
 
