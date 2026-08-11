@@ -2,6 +2,7 @@ package com.hex.projectgovern.module.alert.engine;
 
 import com.hex.projectgovern.module.alert.engine.impl.*;
 import com.hex.projectgovern.module.alert.AlertEvent;
+import com.hex.projectgovern.module.finance.CostItemRepository;
 import com.hex.projectgovern.module.finance.ReconciliationService;
 import com.hex.projectgovern.module.project.Project;
 import com.hex.projectgovern.module.project.ProjectRepository;
@@ -10,6 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import static org.mockito.ArgumentMatchers.eq;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,16 +30,17 @@ class AlertRuleRegistryIntegrationTest {
 
     private ProjectRepository projectRepo;
     private ReconciliationService reconciliationService;
+    private CostItemRepository costItemRepo;
     private AlertRuleRegistry registry;
 
     @BeforeEach
     void setUp() {
         projectRepo = mock(ProjectRepository.class);
-        reconciliationService = mock(ReconciliationService.class);
+        costItemRepo = mock(CostItemRepository.class);
         when(projectRepo.findAll()).thenReturn(List.of());
 
         registry = new AlertRuleRegistry(List.of(
-                new CostOverrunAlertRule(projectRepo, reconciliationService),
+                new CostOverrunAlertRule(projectRepo, costItemRepo),
                 new ScheduleDelayAlertRule(projectRepo),
                 new QualityIssueAlertRule(projectRepo),
                 new RiskEscalationAlertRule(projectRepo),
@@ -101,9 +105,8 @@ class AlertRuleRegistryIntegrationTest {
         when(projectRepo.findById(100L)).thenReturn(java.util.Optional.of(p));
 
         // reconciliation.totalDiff = ¥9500 (> 90% of ¥10000)
-        when(reconciliationService.health(100L)).thenReturn(
-                new com.hex.projectgovern.module.finance.dto.FinanceDtos.ReconciliationHealth(
-                        1L, 0L, 1L, 0L, 0L, new BigDecimal("9500.00")));
+        when(costItemRepo.sumByProjectAndDateRange(eq(100L), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(new BigDecimal("9500.00"));
 
         var events = registry.get("BUDGET_EXCEED").get().evaluate();
 
@@ -123,13 +126,11 @@ class AlertRuleRegistryIntegrationTest {
         when(p.getBudgetEstimate()).thenReturn(new BigDecimal("10000.00"));
         when(projectRepo.findAll()).thenReturn(List.of(p));
         when(projectRepo.findById(100L)).thenReturn(java.util.Optional.of(p));
-        // diff = ¥500 (< 90% of ¥10000)
-        when(reconciliationService.health(100L)).thenReturn(
-                new com.hex.projectgovern.module.finance.dto.FinanceDtos.ReconciliationHealth(
-                        1L, 0L, 1L, 0L, 0L, new BigDecimal("500.00")));
+        // ¥500 (< 90% of ¥10000)
+        when(costItemRepo.sumByProjectAndDateRange(eq(100L), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(new BigDecimal("500.00"));
 
         var events = registry.get("BUDGET_EXCEED").get().evaluate();
-
         assertThat(events).isEmpty();
     }
 
@@ -143,7 +144,6 @@ class AlertRuleRegistryIntegrationTest {
         when(projectRepo.findAll()).thenReturn(List.of(p));
 
         var events = registry.get("BUDGET_EXCEED").get().evaluate();
-
         assertThat(events).isEmpty();
     }
 }

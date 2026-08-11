@@ -73,6 +73,9 @@ pmo:
     from: ${PMO_MAIL_FROM:project-govern <zg.liao@goupwith.com>}
     cc-pmo: true
     async: true
+  alert:
+    cost-overrun:
+      threshold: ${PMO_ALERT_COST_OVERRUN_THRESHOLD:0.90}  # 项目预算/本月累计成本 阈值
     approve-step-emails:
       DEPT_LEAD: ${PMO_MAIL_DEPT_LEAD:lead_wu@company.com}
       PMO_ADMIN: ${PMO_MAIL_PMO_ADMIN:admin@company.com}
